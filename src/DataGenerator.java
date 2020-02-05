@@ -241,7 +241,7 @@ public class DataGenerator {
                     operations.add(op);
                     this.consolidatedTasks.put(op.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
                     this.bigTasks.add(op.getNumber()+nStartNodes);
-                    routing.add("Operation: "+String.valueOf(opNumber)+
+                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes-1)+
                             " Precedence: "+String.valueOf(op.getPrecedence())+" Location: "+ String.valueOf(op.getLocation())+
                             " optype: "+String.valueOf(op.getType())+" bigTaskSet: "+String.valueOf(op.getBigTaskSet())+
                             "Sim: "+String.valueOf(op.getSimultaneous())+" Vessels: "+Arrays.toString(op.getVessels())
@@ -253,7 +253,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 1");
                     operations.add(op1);
-                    routing.add("Operation: "+String.valueOf(opNumber)+
+                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes-1)+
                             " Precedence: "+String.valueOf(op1.getPrecedence())+" Location: "+ String.valueOf(op1.getLocation())+
                             " optype: "+String.valueOf(op1.getType())+" bigTaskSet: "+String.valueOf(op1.getBigTaskSet())+
                             "Sim: "+String.valueOf(op1.getSimultaneous())+" Vessels: "+Arrays.toString(op1.getVessels())+" Duration: "+op1.getDuration()+" Task description: "+op1.getName());
@@ -264,7 +264,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 2");
                     operations.add(op2);
-                    routing.add("Operation: "+String.valueOf(opNumber)+
+                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes-1)+
                             " Precedence: "+String.valueOf(op2.getPrecedence())+" Location: "+ String.valueOf(op2.getLocation())+
                             " optype: "+String.valueOf(op2.getType())+" bigTaskSet: "+String.valueOf(op2.getBigTaskSet())+
                             "Sim: "+String.valueOf(op2.getSimultaneous())+" Vessels: "+Arrays.toString(op2.getVessels())+" Duration: "+op2.getDuration()+" Task description: "+op2.getName());
@@ -277,7 +277,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 1 of big task operation");
                     operations.add(opSmall1);
-                    routing.add("Operation: "+String.valueOf(opNumber)+" Vessels: "+
+                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes-1)+" Vessels: "+
                             " Precedence: "+String.valueOf(opSmall1.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall1.getType())+" bigTaskSet: "+String.valueOf(opSmall1.getBigTaskSet())+
                             "Sim: "+String.valueOf(opSmall1.getSimultaneous())+" Vessels: "+Arrays.toString(opSmall1.getVessels())+" Duration: "+opSmall1.getDuration()+" Task description: "+opSmall1.getName());
@@ -286,7 +286,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 2 of big task operation");
                     operations.add(opSmall2);
-                    routing.add("Operation: "+String.valueOf(opNumber)+" Vessels: "+
+                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes-1)+" Vessels: "+
                             " Precedence: "+String.valueOf(opSmall2.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall2.getType())+" bigTaskSet: "+ Arrays.toString(opSmall2.getBigTaskSet()) +
                             " Sim: "+String.valueOf(opSmall2.getSimultaneous())+" Vessels: "+Arrays.toString(opSmall2.getVessels())+" Duration: "+opSmall2.getDuration()+" Task description: "+opSmall2.getName());
@@ -296,7 +296,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Big task operation");
                     operations.add(opBig);
-                    routing.add("Operation: "+String.valueOf(opNumber)+
+                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes-1)+
                             " Precedence: "+String.valueOf(opBig.getPrecedence())+" Location: "+ String.valueOf(opBig.getLocation())+
                             " optype: "+String.valueOf(opBig.getType())+" bigTaskSet: "+ Arrays.toString(opBig.getBigTaskSet()) +
                             "Sim: "+String.valueOf(opBig.getSimultaneous())+" Vessels: "+Arrays.toString(opBig.getVessels())+" Duration: "+opBig.getDuration()+" Task description: "+opBig.getName());
@@ -432,7 +432,13 @@ public class DataGenerator {
             }
         }
         this.timeVesselUseOnOperation=timeOpVessel;
+        /*
         System.out.println("TIME VESSEL USE ON OPERATIONS");
+        for(int v=0;v<nStartNodes;v++){
+            System.out.println("VESSEL "+v);
+            printGrid2(this.timeVesselUseOnOperation[v][0].length,timeVesselUseOnOperation[v].length,this.timeVesselUseOnOperation[v]);
+        }
+        */
         System.out.println(" SailingCostForVessel: "+Arrays.toString(this.sailingCostForVessel));
         System.out.println(" earliestStartingTimes: "+Arrays.toString(this.earliestStartingTimeForVessel));
         System.out.println(" endPenalty: "+Arrays.toString(this.endPenaltyforVessel));

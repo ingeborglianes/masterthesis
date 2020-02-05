@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class ALNS {
@@ -20,9 +21,8 @@ public class ALNS {
     private int[] endNodes;
     private int[] startNodes;
     private double[] endPenaltyforVessel;
-    List<Integer> unroutedTasks =  new ArrayList<Integer>();
+    List<OperationInRoute> unroutedTasks =  new ArrayList<OperationInRoute>();
     List<List<OperationInRoute>> vesselroutes = new ArrayList<List<OperationInRoute>>();
-    private OperationInRoute[] operationRouteObjects;
 
     public ALNS(int [][] OperationsForVessel, int [][] TimeWindowsForOperations, int [][][] Edges, int [][][][] SailingTimes,
                 int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
@@ -76,7 +76,10 @@ public class ALNS {
                 for (int i = nVessels; i < lookUpList.length - nVessels; i++) {
                     if (containsElement(i, OperationsForVessel[n]) && allOperations.contains(i)) {
                         timeOpStart=currentTimeVessel.get(n) +lookUpList[i];
-                        timeOpEnd= timeOpStart+TimeVesselUseOnOperation[n][i][timeOpStart];
+                        if(timeOpStart>=nTimePeriods){
+                            continue;
+                        }
+                        timeOpEnd= timeOpStart+TimeVesselUseOnOperation[n][i-nVessels][timeOpStart];
                         if (lookUpList[i] < min && timeOpEnd <= nTimePeriods) {
                             min = lookUpList[i];
                             index = i;
@@ -86,13 +89,40 @@ public class ALNS {
                 }
                 if(continueAdd) {
                     allOperations.remove(Integer.valueOf(index));
-                    vesselroutes.get(n).add(new OperationInRoute(index, timeOpStart));
+                    if(vesselroutes.get(n) == null){
+                        final int indexCopy =index;
+                        final int timeOpStartCopy=timeOpStart;
+                        vesselroutes.set(n, new ArrayList<>(){{add(new OperationInRoute(indexCopy, timeOpStartCopy));}});
+                    }
+                    else{
+                        vesselroutes.get(n).add(new OperationInRoute(index, timeOpStart));
+                    }
                     currentTimeVessel.set(n, timeOpEnd);
                     lookUpList = this.SailingTimes[n][currentTimeVessel.get(n)][index];
                 }
             }
         }
-        unroutedTasks.addAll(allOperations);
+        for(Integer tasksLeft : allOperations){
+            unroutedTasks.add(new OperationInRoute(tasksLeft,0));
+        }
+
+    }
+
+    public void printInitialSolution(){
+        for (int i=0;i<vesselroutes.size();i++){
+            System.out.println("VESSEL "+i);
+            if (vesselroutes.get(i)!=null) {
+                for (OperationInRoute opInRoute : vesselroutes.get(i)) {
+                    System.out.println(opInRoute.getID());
+                }
+            }
+        }
+        if(!unroutedTasks.isEmpty()){
+            System.out.println("UNROUTED TASKS");
+            for(int n=0;n<unroutedTasks.size();n++) {
+                System.out.println(unroutedTasks.get(n).getID());
+            }
+        }
     }
 
     /*
@@ -114,7 +144,17 @@ public class ALNS {
         return bol;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
+        DataGenerator dg = new DataGenerator(new int[]{1,2,4,5}, 5, new int[]{1,2,3,4},
+                "C:/Users/ingeboml/projects/masterthesis/test_instances/test_instance_15_locations_first_test.txt",
+                "results.txt", "C:/Users/ingeboml/projects/masterthesis/weather_files/weather_normal.txt");
+        dg.generateData();
+        ALNS a = new ALNS(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
+                dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                dg.getSailingCostForVessel(), dg.getPenalty(), dg.getPrecedence(), dg.getSimultaneous(),
+                dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel());
+        a.constructionHeuristic();
+        a.printInitialSolution();
     }
 }
 

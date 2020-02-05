@@ -18,11 +18,21 @@ public class InstanceGenerator {
         this.locations=locations;
         this.days=days;
         this.excludedOperations= new int[]{1,2,8,10};
+    }
+
+    public void OpGen(){
         OperationGenerator og=new OperationGenerator();
         this.operationTypes=og.createOperationTypes();
     }
 
+    public void OpGenTest(){
+        OperationGenerator og=new OperationGenerator();
+        this.operationTypes=og.createOperationTypesTest();
+    }
+
     public void generateInstanceFromDistribution(){
+        //OpGen();
+        OpGenTest();
         int period=this.days*24;
         for (int loc : this.locations) {
             for (OperationType opType : this.operationTypes) {
@@ -118,9 +128,9 @@ public class InstanceGenerator {
     }
 
     public static void main(String[] args) throws IOException {
-        int[] loc = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+        int[] loc = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
         InstanceGenerator ig = new InstanceGenerator(5,loc);
         ig.generateInstanceFromDistribution();
-        ig.writeToFile("test_instance_20_locations.txt");
+        ig.writeToFile("test_instance_15_locations_first_test.txt");
     }
 }
