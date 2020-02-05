@@ -52,7 +52,10 @@ public class ALNS {
     }
 
     public void constructionHeuristic(){
-        List<Integer> currentTimeVessel= new ArrayList<Integer>(Collections.nCopies(nVessels, 0));
+        List<Integer> currentTimeVessel= new ArrayList<Integer>();
+        for (Integer earliestStartTime : EarliestStartingTimeForVessel){
+            currentTimeVessel.add(earliestStartTime);
+        }
         List<Integer> allOperations = new ArrayList<Integer>();
         for (int n = 0; n < nVessels; n++) {
             vesselroutes.add(null);
@@ -62,7 +65,7 @@ public class ALNS {
         }
         for (int n = 0; n < nVessels; n++) {
             //Look up list contains all sailing times fom a vessel's current location to all other nodes
-            int[] lookUpList = this.SailingTimes[n][currentTimeVessel.get(n)][n];
+            int[] lookUpList = this.SailingTimes[n][currentTimeVessel.get(n)][startNodes[n]];
             boolean continueAdd = true;
             while(continueAdd) {
                 int min = 100000;
@@ -89,15 +92,15 @@ public class ALNS {
                 }
             }
         }
-        unroutedTasks=allOperations;
+        unroutedTasks.addAll(allOperations);
     }
 
     /*
     Important to note:
-    1.Sailingtimes[v][i][j][t] is changed to Sailingtimes[v][t][i][j]
-    2.OperationInRoute objects are initialized with an ID equal to the index of the operation in the list, hence if we have two start nodes,
+    1. Sailingtimes[v][i][j][t] is changed to Sailingtimes[v][t][i][j]
+    2. OperationInRoute objects are initialized with an ID equal to the index of the operation in the list, hence if we have two start nodes,
     the first node in the list after the start nodes has index and ID 2
-    3.The current times of vessels are updated with the time they finish their previous operation, i.e when they are
+    3. The current times of vessels are updated with the time they finish their previous operation, i.e when they are
     available for sailing to a new operation. Meanwhile OperationInRoute objects get initialized with their start time.
     */
 
