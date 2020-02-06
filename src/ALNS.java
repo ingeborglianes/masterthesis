@@ -72,6 +72,7 @@ public class ALNS {
                 int index = 0;
                 int timeOpStart=0;
                 int timeOpEnd=0;
+                int addTimeStart=0;
                 continueAdd=false;
                 for (int i = nVessels; i < lookUpList.length - nVessels; i++) {
                     if (containsElement(i, OperationsForVessel[n]) && allOperations.contains(i)) {
@@ -83,7 +84,8 @@ public class ALNS {
                         if (lookUpList[i] < min && timeOpEnd <= nTimePeriods) {
                             min = lookUpList[i];
                             index = i;
-                            continueAdd=true;
+                            continueAdd = true;
+                            addTimeStart=timeOpStart;
                         }
                     }
                 }
@@ -91,11 +93,11 @@ public class ALNS {
                     allOperations.remove(Integer.valueOf(index));
                     if(vesselroutes.get(n) == null){
                         final int indexCopy =index;
-                        final int timeOpStartCopy=timeOpStart;
+                        final int timeOpStartCopy=addTimeStart;
                         vesselroutes.set(n, new ArrayList<>(){{add(new OperationInRoute(indexCopy, timeOpStartCopy));}});
                     }
                     else{
-                        vesselroutes.get(n).add(new OperationInRoute(index, timeOpStart));
+                        vesselroutes.get(n).add(new OperationInRoute(index, addTimeStart));
                     }
                     currentTimeVessel.set(n, timeOpEnd);
                     lookUpList = this.SailingTimes[n][currentTimeVessel.get(n)][index];
@@ -108,9 +110,9 @@ public class ALNS {
 
     }
 
-    public void printInitialSolution(){
+    public void printInitialSolution(int[] vessseltypes){
         for (int i=0;i<vesselroutes.size();i++){
-            System.out.println("VESSEL "+i);
+            System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
             if (vesselroutes.get(i)!=null) {
                 for (OperationInRoute opInRoute : vesselroutes.get(i)) {
                     System.out.println("Operation number: "+opInRoute.getID() +" Time: "+opInRoute.getTimeperiod());
@@ -145,7 +147,9 @@ public class ALNS {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        DataGenerator dg = new DataGenerator(new int[]{1,2,4,5}, 5, new int[]{1,2,3,4},
+        int[] vesseltypes =new int[]{1,2,4,5};
+        int[] startnodes=new int[]{1,2,3,4};
+        DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
                 "test_instances/test_instance_15_locations_first_test.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
@@ -154,7 +158,15 @@ public class ALNS {
                 dg.getSailingCostForVessel(), dg.getPenalty(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel());
         a.constructionHeuristic();
-        a.printInitialSolution();
+        a.printInitialSolution(vesseltypes);
+    }
+
+    public List<OperationInRoute> getUnroutedTasks() {
+        return unroutedTasks;
+    }
+
+    public List<List<OperationInRoute>> getVesselroutes() {
+        return vesselroutes;
     }
 }
 
