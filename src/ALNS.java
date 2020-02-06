@@ -146,8 +146,8 @@ public class ALNS {
 
     public static void main(String[] args) throws FileNotFoundException {
         DataGenerator dg = new DataGenerator(new int[]{1,2,4,5}, 5, new int[]{1,2,3,4},
-                "C:/Users/ingeboml/projects/masterthesis/test_instances/test_instance_15_locations_first_test.txt",
-                "results.txt", "C:/Users/ingeboml/projects/masterthesis/weather_files/weather_normal.txt");
+                "test_instances/test_instance_15_locations_first_test.txt",
+                "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ALNS a = new ALNS(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
