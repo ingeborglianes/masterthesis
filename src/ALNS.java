@@ -113,7 +113,7 @@ public class ALNS {
             System.out.println("VESSEL "+i);
             if (vesselroutes.get(i)!=null) {
                 for (OperationInRoute opInRoute : vesselroutes.get(i)) {
-                    System.out.println(opInRoute.getID());
+                    System.out.println("Operation number: "+opInRoute.getID() +" Time: "+opInRoute.getTimeperiod());
                 }
             }
         }
