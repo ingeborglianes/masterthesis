@@ -90,7 +90,10 @@ public class OperationGenerator {
         int[] op15v1 = new int[]{2, 3, 4, 6};
         OperationType op15 = new OperationType(15, op15v1, null, null,
                 0, 0, 168, 24, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Support working boat");
-        return new OperationType[]{op6, op7, op10, op12, op13, op14, op15};
+        int[] op11v1 = new int[]{2, 3, 4, 6};
+        OperationType op11 = new OperationType(11, op11v1, null, null,
+                0, 0, 720, 100, 4, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 8, "Support wellboat");
+        return new OperationType[]{op6, op7, op10, op11, op12, op13, op14, op15};
     }
 }
 

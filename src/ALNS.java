@@ -74,8 +74,9 @@ public class ALNS {
                 int timeOpEnd=0;
                 int addTimeStart=0;
                 continueAdd=false;
+                //insert time windows
                 for (int i = nVessels; i < lookUpList.length - nVessels; i++) {
-                    if (containsElement(i, OperationsForVessel[n]) && allOperations.contains(i)) {
+                    if (containsElement((i+1), OperationsForVessel[n]) && allOperations.contains(i)) {
                         timeOpStart=currentTimeVessel.get(n) +lookUpList[i];
                         if(timeOpStart>=nTimePeriods){
                             continue;
@@ -91,6 +92,7 @@ public class ALNS {
                 }
                 if(continueAdd) {
                     allOperations.remove(Integer.valueOf(index));
+                    System.out.println("index: "+index+" vessel: "+n);
                     if(vesselroutes.get(n) == null){
                         final int indexCopy =index;
                         final int timeOpStartCopy=addTimeStart;

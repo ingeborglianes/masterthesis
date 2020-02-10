@@ -562,8 +562,8 @@ public class DataGenerator {
         int[] vessels=new int[]{2,3,5};
         int[] locStart = new int[]{1,2,3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
-                "test_instances/test_instance_20_locations.txt",
-                "routing","weather_files/weather_september.txt");
+                "C:/Users/ingeboml/IdeaProjects/masterThesis/test_instance_20_locations.txt",
+                "routing","C:/Users/ingeboml/IdeaProjects/masterThesis/weather_files/weather_september.txt");
         dg.generateData();
 
     }
