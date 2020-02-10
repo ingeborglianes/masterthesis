@@ -344,8 +344,8 @@ public class DataGenerator {
         /*
         System.out.println("PRECEDENCE");
         this.printGrid(this.precedence[0].length,this.precedence);
+        */
 
-         */
 
     }
 
@@ -517,13 +517,13 @@ public class DataGenerator {
         }
         this.sailingTimes=sailingTimes;
         int index=0;
-        /*
+
         for(int[][] vessel:sailingTimes[0]){
-            System.out.println("Vessel"+String.valueOf(index));
+            System.out.println("Vessel 0 in time period: "+String.valueOf(index));
             this.printGrid(this.operations.length+nStartNodes+nEndNodes,vessel);
             index+=1;
         }
-        */
+
     }
 
     public void generateData() throws FileNotFoundException {
@@ -562,8 +562,8 @@ public class DataGenerator {
         int[] vessels=new int[]{2,3,5};
         int[] locStart = new int[]{1,2,3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
-                "C:/Users/ingeboml/IdeaProjects/masterThesis/test_instance_20_locations.txt",
-                "routing","C:/Users/ingeboml/IdeaProjects/masterThesis/weather_files/weather_september.txt");
+                "test_instances/test_instance_20_locations.txt",
+                "routing","weather_files/weather_september.txt");
         dg.generateData();
 
     }
