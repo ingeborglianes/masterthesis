@@ -41,7 +41,7 @@ public class InstanceGenerator {
                 double t = (double) ThreadLocalRandom.current().nextInt(1, mean+1);
                 NormalDistribution nd = new NormalDistribution(mean,sd);
                 double samplePoint=nd.sample();
-                if(samplePoint>=t && samplePoint<=(t+period) && !ExtendedModel.containsElement(opType.getNumber(),excludedOperations)){
+                if(samplePoint>=t && samplePoint<=(t+period) && !DataGenerator.containsElement(opType.getNumber(),excludedOperations)){
                     int time=((int) Math.ceil((samplePoint-t)/2));
                     if(time<10){
                         time=10;
@@ -131,6 +131,6 @@ public class InstanceGenerator {
         int[] loc = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
         InstanceGenerator ig = new InstanceGenerator(5,loc);
         ig.generateInstanceFromDistribution();
-        ig.writeToFile("test_instance_15_locations_first_test.txt");
+        ig.writeToFile("test_instances/test_instance_15_locations.txt");
     }
 }

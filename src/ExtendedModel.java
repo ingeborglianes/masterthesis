@@ -53,17 +53,6 @@ public class ExtendedModel {
         System.out.println(Arrays.toString(this.startNodes));
     }
 
-
-    public static Boolean containsElement(int element, int[] list)   {
-        Boolean bol = false;
-        for (Integer e: list)     {
-            if(element==e){
-                bol=true;
-            }
-        }
-        return bol;
-    }
-
     public List<String> runModel(String filepath) {
         List<String> routing=new ArrayList<>();
         List<Integer> vesselsNotUsed=new ArrayList<>();
@@ -106,7 +95,7 @@ public class ExtendedModel {
             for (int v = 0; v < nVessels; ++v) {
                 for (int i = nVessels; i < nOperations - nVessels; ++i) {
                     for (int t = EarliestStartingTimeForVessel[v]; t < nTimePeriods; ++t) {
-                        if (containsElement( t+ 1, TimeWindowsForOperations[i]) && OperationsForVessel[v][i-nVessels]!=0) {
+                        if (DataGenerator.containsElement( t+ 1, TimeWindowsForOperations[i]) && OperationsForVessel[v][i-nVessels]!=0) {
                             y[v][i][t] = model.addVar(0, 1, 0, GRB.BINARY,
                                     "y" + v + "." + i + "." + t);
                         }
@@ -143,7 +132,7 @@ public class ExtendedModel {
             for (int i = nVessels; i < nOperations - nVessels; ++i) {
                 GRBLinExpr operation_performed = new GRBLinExpr();
                 for (int v = 0; v < nVessels; ++v) {
-                    if (containsElement(i + 1, OperationsForVessel[v])) {
+                    if (DataGenerator.containsElement(i + 1, OperationsForVessel[v])) {
                         for (int t : TimeWindowsForOperations[i]) {
                             if (t > EarliestStartingTimeForVessel[v]) {
                                 operation_performed.addTerm(1.0, y[v][i][t - 1]);
@@ -166,8 +155,8 @@ public class ExtendedModel {
                                 sail.addTerm(1, x[v][t][i][j]);
                             }
                         }
-                        if (containsElement(i + 1, OperationsForVessel[v])){
-                            if(containsElement(t + 1, TimeWindowsForOperations[i])) {
+                        if (DataGenerator.containsElement(i + 1, OperationsForVessel[v])){
+                            if(DataGenerator.containsElement(t + 1, TimeWindowsForOperations[i])) {
                                 sail.addTerm(1, y[v][i][t]);
                             }
                             sail.addTerm(1, w[v][i][t]);
@@ -180,12 +169,12 @@ public class ExtendedModel {
             // Following operation constraint
             for (int v = 0; v < nVessels; ++v) {
                 for (int i = nVessels; i < nOperations; ++i) {
-                    if (containsElement(i + 1, OperationsForVessel[v])) {
+                    if (DataGenerator.containsElement(i + 1, OperationsForVessel[v])) {
                         ArrayList<Integer> control = new ArrayList<Integer>();
                         for (int t = EarliestStartingTimeForVessel[v]; t < nTimePeriods; ++t) {
                             GRBLinExpr operation = new GRBLinExpr();
                             GRBLinExpr next_sail = new GRBLinExpr();
-                            if (containsElement((t-TimeVesselUseOnOperation[v][i - nVessels][t]+1),
+                            if (DataGenerator.containsElement((t-TimeVesselUseOnOperation[v][i - nVessels][t]+1),
                                     TimeWindowsForOperations[i]) & (t-TimeVesselUseOnOperation[v][i - nVessels][t])>EarliestStartingTimeForVessel[v]
                                     && !control.contains(t-TimeVesselUseOnOperation[v][i - nVessels][t])) {
                                 operation.addTerm(1, y[v][i][t-TimeVesselUseOnOperation[v][i - nVessels][t]]);
@@ -211,7 +200,7 @@ public class ExtendedModel {
             // Following sail constraint
             for (int v = 0; v < nVessels; ++v) {
                 for (int i = 0; i < nOperations; ++i) {
-                    if (containsElement(i + 1, OperationsForVessel[v])) {
+                    if (DataGenerator.containsElement(i + 1, OperationsForVessel[v])) {
                         ArrayList<Integer> control = new ArrayList<Integer>();
                         for (int t = EarliestStartingTimeForVessel[v]; t < nTimePeriods; ++t) {
                             //System.out.println(t);
@@ -229,7 +218,7 @@ public class ExtendedModel {
                                 sail.addTerm(1, w[v][i][t - 1]);
                                 //System.out.println("add w with v= " + (v+1) + " operation= " + (i+1) + " timeperiod= " + (t));
                             }
-                            if (containsElement(t+1, TimeWindowsForOperations[i]) && containsElement(i + 1, OperationsForVessel[v])) {
+                            if (DataGenerator.containsElement(t+1, TimeWindowsForOperations[i]) && DataGenerator.containsElement(i + 1, OperationsForVessel[v])) {
                                 following_sail.addTerm(1, y[v][i][t]);
                                 //System.out.println("add y with v= " + (v+1) + " operation= " + (i+1) + " timeperiod= " + (t+1));
                             }
@@ -250,7 +239,7 @@ public class ExtendedModel {
                 GRBLinExpr Time = new GRBLinExpr();
                 for(int t=EarliestStartingTimeForVessel[v];t<nTimePeriods;t++) {
                     for (int j = 0; j < nOperations; ++j) {
-                        if ((containsElement(j + 1, OperationsForVessel[v])||containsElement(j+1,endNodes)) & Edges[v][count][j] == 1) {
+                        if ((DataGenerator.containsElement(j + 1, OperationsForVessel[v])||DataGenerator.containsElement(j+1,endNodes)) & Edges[v][count][j] == 1) {
                             start.addTerm(1, x[v][t][count][j]);
                             //System.out.println("add x with v= " + (v+1) + " sail from operation= " + (count+1) + " sail to operation=  "
                             //        +(j+1) + " timeperiod= " + (EarliestStartingTimeForVessel[v]+1));
@@ -258,7 +247,7 @@ public class ExtendedModel {
                     }
                 }
                 for (int j = 0; j < nOperations; ++j) {
-                    if ((containsElement(j + 1, OperationsForVessel[v])||containsElement(j+1,endNodes)) & Edges[v][count][j] == 1) {
+                    if ((DataGenerator.containsElement(j + 1, OperationsForVessel[v])||DataGenerator.containsElement(j+1,endNodes)) & Edges[v][count][j] == 1) {
                         Time.addTerm(1, x[v][EarliestStartingTimeForVessel[v]][count][j]);
                         //System.out.println("add x with v= " + (v+1) + " sail from operation= " + (count+1) + " sail to operation=  "
                         //        +(j+1) + " timeperiod= " + (EarliestStartingTimeForVessel[v]+1));
@@ -281,7 +270,7 @@ public class ExtendedModel {
                 endPenaltyLeft.addTerm(1, tv[v]);
                 for (int i = 0; i < nOperations; ++i) {
                     for(int t=EarliestStartingTimeForVessel[v];t<nTimePeriods;++t) {
-                        if ((containsElement(i + 1, OperationsForVessel[v])||containsElement(i+1,startNodes)) & Edges[v][i][nOperations - (count2)] == 1) {
+                        if ((DataGenerator.containsElement(i + 1, OperationsForVessel[v])||DataGenerator.containsElement(i+1,startNodes)) & Edges[v][i][nOperations - (count2)] == 1) {
                             end.addTerm(1, x[v][t][i][nOperations - (count2)]);
                             endPenaltyRight.addTerm(t, x[v][t][i][nOperations - (count2)]);
                             //System.out.println("add x for vessel "+(v+1)+", in timeperiod "+(t+1)
@@ -303,20 +292,20 @@ public class ExtendedModel {
                 for (int j = 0; j < nOperations; ++j) {
                     if (Precedence[i][j] == 1) {
                         for (int t = 0; t < nTimePeriods; ++t) {
-                            if (containsElement(t + 1, TimeWindowsForOperations[j])) {
+                            if (DataGenerator.containsElement(t + 1, TimeWindowsForOperations[j])) {
                                 //System.out.println(t);
                                 GRBLinExpr first = new GRBLinExpr();
                                 GRBLinExpr second = new GRBLinExpr();
                                 for (int v = 0; v < nVessels; ++v) {
-                                    if (containsElement(i+1, OperationsForVessel[v])) {
+                                    if (DataGenerator.containsElement(i+1, OperationsForVessel[v])) {
                                         for (int tau = 0; tau < t-TimeVesselUseOnOperation[v][j-nVessels][t]+1; ++tau) {
-                                            if (containsElement(tau + 1, TimeWindowsForOperations[i])) {
+                                            if (DataGenerator.containsElement(tau + 1, TimeWindowsForOperations[i])) {
                                                 first.addTerm(1, y[v][i][tau]);
                                                 //System.out.println("add y1 with v= " + (v + 1) + " perform operation= " + (i + 1) + " in timeperiod= " + (tau + 1));
                                             }
                                         }
                                     }
-                                    if (containsElement(j+1, OperationsForVessel[v])) {
+                                    if (DataGenerator.containsElement(j+1, OperationsForVessel[v])) {
                                         second.addTerm(1, y[v][j][t]);
                                         //System.out.println("add y2 with v= " + (v+1) + " perform operation= " + (j+1) + " in timeperiod= " + (t+1));
                                     }
@@ -335,17 +324,17 @@ public class ExtendedModel {
                 for (int j = nVessels; j < nOperations-nVessels; ++j) {
                     if (Simultaneous[i][j] == 1) {
                         for (int t = 0; t < nTimePeriods; ++t) {
-                            if (containsElement(t+1, TimeWindowsForOperations[i]) &
-                                    containsElement(t+1, TimeWindowsForOperations[j])) {
+                            if (DataGenerator.containsElement(t+1, TimeWindowsForOperations[i]) &
+                                    DataGenerator.containsElement(t+1, TimeWindowsForOperations[j])) {
                                 GRBLinExpr operations = new GRBLinExpr();
                                 //System.out.println(t);
                                 for (int v = 0; v < nVessels; ++v) {
                                     if(t>EarliestStartingTimeForVessel[v]) {
-                                        if (containsElement(i + 1, OperationsForVessel[v])) {
+                                        if (DataGenerator.containsElement(i + 1, OperationsForVessel[v])) {
                                             operations.addTerm(1, y[v][i][t]);
                                             //System.out.println("add y1 with v= " + (v+1) + " perform operation= " + (i+1) + " in timeperiod= " + (t+1));
                                         }
-                                        if (containsElement(j + 1, OperationsForVessel[v])) {
+                                        if (DataGenerator.containsElement(j + 1, OperationsForVessel[v])) {
                                             operations.addTerm(-1, y[v][j][t]);
                                             //System.out.println("add y2 with v= " + (v + 1) + " perform operation= " + (j + 1) + " in timeperiod= " + (t + 1));
                                         }
@@ -368,18 +357,18 @@ public class ExtendedModel {
                 GRBLinExpr left_side = new GRBLinExpr();
                 for (int v = 0; v < nVessels; ++v) {
                     for(int i : ConsolidatedTasks.get(k)){
-                        if (containsElement(i, OperationsForVessel[v])) {
+                        if (DataGenerator.containsElement(i, OperationsForVessel[v])) {
                             for (int t = EarliestStartingTimeForVessel[v]; t < nTimePeriods; ++t) {
-                                if (containsElement(t + 1, TimeWindowsForOperations[i - 1])) {
+                                if (DataGenerator.containsElement(t + 1, TimeWindowsForOperations[i - 1])) {
                                     left_side.addTerm(1, y[v][i - 1][t]);
                                     //System.out.println("add yi with v= " + (v + 1) + " perform operation= " + (i) + " in timeperiod= " + (t + 1));
                                 }
                             }
                         }
                     }
-                    if (containsElement(k, OperationsForVessel[v])) {
+                    if (DataGenerator.containsElement(k, OperationsForVessel[v])) {
                         for (int t = EarliestStartingTimeForVessel[v]; t < nTimePeriods; ++t) {
-                            if (containsElement(t + 1, TimeWindowsForOperations[k - 1])) {
+                            if (DataGenerator.containsElement(t + 1, TimeWindowsForOperations[k - 1])) {
                                 if(nk == 0.0){
                                     left_side.addTerm(1, y[v][k - 1][t]);
                                     //System.out.println("add yk with coef 1 v= " + (v + 1) + " perform operation= " + (k) + " in timeperiod= " + (t + 1));
@@ -488,8 +477,8 @@ public class ExtendedModel {
                                 }
                             }
                         }
-                        if (containsElement(i+1,OperationsForVessel[v])){
-                            if (containsElement(t + 1, TimeWindowsForOperations[i])) {
+                        if (DataGenerator.containsElement(i+1,OperationsForVessel[v])){
+                            if (DataGenerator.containsElement(t + 1, TimeWindowsForOperations[i])) {
                                 if (y[v][i][t].get(GRB.DoubleAttr.X) == 1) {
                                     routing.add("Task " + (i + 1) + " is performed by vessel " + (v + 1) +
                                             " in time period " + (t + 1));
