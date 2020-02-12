@@ -1,5 +1,4 @@
 import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
 import java.util.List;
 
 public class LS_operators {
@@ -16,16 +15,24 @@ public class LS_operators {
         this.TimeVesselUseOnOperation=TimeVesselUseOnOperation;
     }
 
-    public List<List<OperationInRoute>> one_relocate(List<List<OperationInRoute>> vesselroutes, int vessel, int cur_pos, int new_pos, int[] startnodes){
-        if (cur_pos == new_pos){
+    public List<List<OperationInRoute>> one_relocate(List<List<OperationInRoute>> vesselroutes, int vessel, int pos1, int pos2, int[] startnodes){
+        if (pos1 == pos2){
             return vesselroutes;
         }
+
+        int cur_pos = pos1;
+        int new_pos = pos2;
+        if(pos2<pos1){
+            cur_pos = pos2;
+            new_pos = pos1;
+        }
+
         OperationInRoute toMove = vesselroutes.get(vessel).get(cur_pos);
         vesselroutes.get(vessel).remove(cur_pos);
         vesselroutes.get(vessel).add(new_pos, toMove);
 
         // Nå funker oppdatering av tider ved endring med denne metoden. Men TimeVesselUseOnOperation skaper også noen indexproblemer, se linje 36 og 45
-
+/*
         int cum_time= 0;
         for(int i = 0; i < vesselroutes.get(vessel).size(); i++ ) {
 
@@ -34,8 +41,7 @@ public class LS_operators {
                 cum_time = cum_time + sail_time;
                 //Knot med indexer
                 int op_time = TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(i).getID()-startnodes.length+1][cum_time];
-                OperationInRoute op = vesselroutes.get(vessel).get(i);
-                op.setTimeperiod(cum_time);
+                vesselroutes.get(vessel).get(i).setTimeperiod(cum_time);
                 cum_time = cum_time + op_time;
 
             }
@@ -44,12 +50,64 @@ public class LS_operators {
                 cum_time = cum_time + sail_time;
                 //Knot med indexer
                 int op_time = TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(i).getID()-startnodes.length+1][cum_time];
-                OperationInRoute op = vesselroutes.get(vessel).get(i);
-                op.setTimeperiod(cum_time);
+                vesselroutes.get(vessel).get(i).setTimeperiod(cum_time);
                 cum_time = cum_time + op_time;
 
             }
         }
+ */
+        // Nytt forsøk på oppdatering av tid
+
+        // Calculate old time :
+        int old_first_dist;
+        int old_second_dist;
+        int new_first_dist;
+        int new_second_dist;
+        System.out.println(vessel + " vessel");
+        System.out.println(startnodes[vessel] + " startnode");
+        System.out.println(vesselroutes.get(vessel).get(cur_pos).getID() + " ID");
+        System.out.println(SailingTimes[vessel][0][startnodes[vessel]][vesselroutes.get(vessel).get(cur_pos).getID()] + " første seiling");
+        if(cur_pos==0){
+            System.out.println(SailingTimes[vessel][0][startnodes[vessel]][vesselroutes.get(vessel).get(new_pos).getID()]);
+            old_first_dist = SailingTimes[vessel][0][startnodes[vessel]][vesselroutes.get(vessel).get(new_pos).getID()] +
+                    SailingTimes[vessel][vesselroutes.get(vessel).get(cur_pos).getTimeperiod()][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(cur_pos+1).getID()] +
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(cur_pos).getTimeperiod()] ;
+            new_first_dist = SailingTimes[vessel][0][startnodes[vessel]][vesselroutes.get(vessel).get(new_pos).getID()];
+            System.out.println(vesselroutes.get(vessel).get(new_pos).getID() + " her");
+        } else{
+            old_first_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(cur_pos-1).getTimeperiod()][vesselroutes.get(vessel).get(cur_pos-1).getID()][vesselroutes.get(vessel).get(new_pos).getID()] +
+                    SailingTimes[vessel][vesselroutes.get(vessel).get(cur_pos).getTimeperiod()][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(cur_pos+1).getID()] +
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(cur_pos).getTimeperiod()] ;
+            new_first_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(cur_pos-1).getTimeperiod()][vesselroutes.get(vessel).get(cur_pos-1).getID()][vesselroutes.get(vessel).get(new_pos).getID()];
+        }
+
+        if(new_pos == vesselroutes.get(vessel).size()-1){
+            old_second_dist = 0;
+            new_second_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(new_pos-1).getTimeperiod()][vesselroutes.get(vessel).get(new_pos-1).getID()][vesselroutes.get(vessel).get(cur_pos).getID()] +
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(new_pos).getTimeperiod()] ;
+        } else {
+            old_second_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(new_pos).getTimeperiod()][vesselroutes.get(vessel).get(new_pos).getID()][vesselroutes.get(vessel).get(new_pos + 1).getID()];
+            new_second_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(new_pos-1).getTimeperiod()][vesselroutes.get(vessel).get(new_pos-1).getID()][vesselroutes.get(vessel).get(cur_pos).getID()] +
+                    SailingTimes[vessel][vesselroutes.get(vessel).get(new_pos).getTimeperiod()][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(new_pos+1).getID()] +
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(cur_pos).getID()][vesselroutes.get(vessel).get(new_pos).getTimeperiod()] ;
+
+        }
+
+        int fist_delta = (old_first_dist) - (new_first_dist);
+        int second_delta = (old_first_dist+old_second_dist) - (new_first_dist+new_second_dist);
+
+        for(int i = 0; i < vesselroutes.get(vessel).size(); i++ ) {
+            if (i<cur_pos){
+                continue;
+            }
+            else if (i >= cur_pos && i < new_pos){
+                vesselroutes.get(vessel).get(i).setTimeperiod(vesselroutes.get(vessel).get(i).getTimeperiod()+fist_delta);
+            }
+            else{
+                vesselroutes.get(vessel).get(i).setTimeperiod(vesselroutes.get(vessel).get(i).getTimeperiod()+fist_delta+second_delta);
+            }
+        }
+
         return vesselroutes;
     }
 
