@@ -1,21 +1,31 @@
 public class OperationInRoute {
     private int ID;
-    private int timeperiod;
+    private int earliestTime;
+    private int latestTime;
 
-    public OperationInRoute(int ID, int timeperiod) {
+    public OperationInRoute(int ID, int earliestTime,int latestTime) {
         this.ID=ID;
-        this.timeperiod=timeperiod;
+        this.earliestTime=earliestTime;
+        this.latestTime=latestTime;
     }
 
     public int getID() {
         return ID;
     }
 
-    public void setTimeperiod(int timeperiod) {
-        this.timeperiod = timeperiod;
+    public int getEarliestTime() {
+        return earliestTime;
     }
 
-    public int getTimeperiod() {
-        return timeperiod;
+    public void setEarliestTime(int earliestTime) {
+        this.earliestTime = earliestTime;
+    }
+
+    public int getLatestTime() {
+        return latestTime;
+    }
+
+    public void setLatestTime(int latestTime) {
+        this.latestTime = latestTime;
     }
 }

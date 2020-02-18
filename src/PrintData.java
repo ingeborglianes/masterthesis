@@ -59,11 +59,10 @@ public class PrintData {
     //Chosen vessel is the number of the vessel you want to print sailing times for. The number of the chosen vessel is not null
     //indexed, hence the first vessel in the fleet has number 1.
     //print the sailing times for the chosen vessel in each time period, start nodes and end nodes are also included
-    //number of operations do not include start and end nodes
     public static void printSailingTimes(int[][][][] sailingTimes, int chosenVessel, int numberOfOperations, int numberOfVessels){
         int index=1;
         for(int[][] vessel:sailingTimes[chosenVessel-1]) {
-            System.out.println("Vessel 1 in time period: " + String.valueOf(index));
+            System.out.println("Vessel "+chosenVessel+" in time period: " + String.valueOf(index));
             printGrid(numberOfOperations + 2*numberOfVessels, vessel);
             index += 1;
         }
@@ -76,6 +75,43 @@ public class PrintData {
         printGrid2(timeWindows[0].length,timeWindows.length,timeWindows);
     }
 
+    //earliest and and latest time
+    public static void printTimeWindowsIntervals(int[][] twIntervals){
+        System.out.println("TIMEWINDOWS INTERVALS");
+        printGrid2(twIntervals[0].length,twIntervals.length,twIntervals);
+    }
+
+    //Outer list: length is the number of operations, not including start and end nodes
+    //Inner list: first entry is the number of the operation this operation has precedence over, second entry is the number of
+    //the operation that has precedence over this operation. Operation numbers goes from 1 to n.
+    //Tasks without precedence has a null entry
+    public static void printPrecedenceALNS(int[][] precedenceALNS){
+        System.out.println("Precedence ALNS");
+        printGrid2(precedenceALNS[0].length,precedenceALNS.length,precedenceALNS);
+    }
+
+    //Length is the number of operations, not including start and end nodes. Each entry corresponds to one operation and the
+    //value of that entry is the operation that has to be performed simultaneously
+    public static void printSimALNS(int[] simALNS){
+        System.out.println("Simultaneous ALNS");
+        System.out.println(Arrays.toString(simALNS));
+    }
+
+    //Outer list: length is the number of operations, not including start and end nodes
+    //Inner list: first entry is the big task, second and third entry is partial tasks that consolidate the big task.
+    //All operations that are either partial or big has this entry, others has null
+    public static void printBigTasksALNS(int[][] bigTasksALNS, int nOperations){
+        System.out.println("Big tasks ALNS");
+        for (int[] inner: bigTasksALNS){
+            if (inner==null){
+                System.out.println("null");
+            }
+            else{
+                System.out.println(inner[0]+" "+inner[1]+" "+inner[2]);
+            }
+        }
+    }
+
      /*
     Other information about data
 
@@ -84,6 +120,8 @@ public class PrintData {
 
     2. Static functions that are used by several classes are placed in the end of DataGenerator, as for example
     contains element
+
+    3. Sailingtimes[v][i][j][t] is changed to Sailingtimes[v][t][i][j]
      */
 
     public static void printGrid(int dim,int[][] matrix)

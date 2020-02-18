@@ -53,7 +53,6 @@ public class BasicModel {
         System.out.println(Arrays.toString(this.startNodes));
     }
 
-
     public static Boolean containsElement(int element, int[] list)   {
         Boolean bol = false;
         for (Integer e: list)     {
@@ -76,7 +75,6 @@ public class BasicModel {
             GRBModel model = new GRBModel(env);
             model.set(GRB.StringAttr.ModelName, filepath);
             model.set(GRB.DoubleParam.TimeLimit, 3600.0);
-
             // Sailing decision variable, x[vijt]=1 if vessel v sails from i to j in time period t
             GRBVar[][][][] x = new GRBVar[nVessels][nTimePeriods][nOperations][nOperations];
             for (int v = 0; v < nVessels; ++v) {
@@ -87,7 +85,6 @@ public class BasicModel {
                                 x[v][t][i][j] = model.addVar(0, 1, SailingCostForVessel[v] * SailingTimes[v][t][i][j],
                                         GRB.BINARY, "x" + v + "." + t + "." + i + "." + j);
                             }
-
                         }
                     }
                 }
@@ -115,7 +112,6 @@ public class BasicModel {
                             w[v][i][t] = model.addVar(0, 1, 0, GRB.BINARY,
                                     "w" + v + "." + i + "." + t);
                         }
-
                     }
                 }
             }

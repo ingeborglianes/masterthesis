@@ -40,6 +40,10 @@ public class DataGenerator {
     private Double [] weatherPenaltyOperations;
     private int [] weatherPenaltySpeed;
     private String weatherFile;
+    private int[][] twIntervals;
+    private int[][] precedenceALNS;
+    private int[] simultaneousALNS;
+    private int[][] bigTasksALNS;
 
     public DataGenerator(int[] vessels, int days, int[] locationsStartNodes, String filePath, String fileNameRouting, String weatherFile){
         this.vesselsInput=vessels;
@@ -52,6 +56,11 @@ public class DataGenerator {
         this.weatherFile=weatherFile;
         this.weatherPenaltyOperations=new Double[days*12];
         this.weatherPenaltySpeed=new int[days*12];
+        twIntervals=new int[60][2];
+        for (int[] operation: twIntervals){
+            operation[0]=0;
+            operation[1]=days*12;
+        }
     }
 
     public void importWeather() throws FileNotFoundException {
@@ -215,6 +224,9 @@ public class DataGenerator {
     }
 
     public void generateOperations(){
+        List<int[]> precedenceALNSTemp= new ArrayList<>();
+        List<Integer> simultaneousALNSTemp= new ArrayList<>();
+        List<int[]> bigTasksALNSTemp= new ArrayList<>();
         List<Operation> operations=new ArrayList<Operation>();
         int opNumber=1;
         int[] tw= IntStream.rangeClosed(1, this.days*12).toArray();
@@ -233,11 +245,16 @@ public class DataGenerator {
                         }
                         int[] tw11= new int[this.days*12];
                         tw11[t-1]=t;
+                        twIntervals[opNumber-1][0]=t;
+                        twIntervals[opNumber-1][1]=t;
                         op = new Operation(opNumber, opType.getVessel1(), location, 0, null,
                                 opType.getPrecedenceOver(), tw11, opType.getDuration(),
                                 opType.getNumber(), opType.getPenalty(), opType.getName());
                     }
                     operations.add(op);
+                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
+                    simultaneousALNSTemp.add(0);
+                    bigTasksALNSTemp.add(null);
                     this.consolidatedTasks.put(op.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
                     this.bigTasks.add(op.getNumber()+nStartNodes);
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
@@ -252,6 +269,9 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 1");
                     operations.add(op1);
+                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
+                    simultaneousALNSTemp.add(opNumber+1);
+                    bigTasksALNSTemp.add(null);
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(op1.getPrecedence())+" Location: "+ String.valueOf(op1.getLocation())+
                             " optype: "+String.valueOf(op1.getType())+" bigTaskSet: "+String.valueOf(op1.getBigTaskSet())+
@@ -263,6 +283,9 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 2");
                     operations.add(op2);
+                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
+                    simultaneousALNSTemp.add(opNumber-1);
+                    bigTasksALNSTemp.add(null);
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(op2.getPrecedence())+" Location: "+ String.valueOf(op2.getLocation())+
                             " optype: "+String.valueOf(op2.getType())+" bigTaskSet: "+String.valueOf(op2.getBigTaskSet())+
@@ -276,6 +299,9 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 1 of big task operation");
                     operations.add(opSmall1);
+                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
+                    simultaneousALNSTemp.add(opNumber+1);
+                    bigTasksALNSTemp.add(new int[]{opNumber+2,opNumber,opNumber+1});
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opSmall1.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall1.getType())+" bigTaskSet: "+String.valueOf(opSmall1.getBigTaskSet())+
@@ -285,6 +311,9 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 2 of big task operation");
                     operations.add(opSmall2);
+                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
+                    simultaneousALNSTemp.add(opNumber-1);
+                    bigTasksALNSTemp.add(new int[]{opNumber+1,opNumber,opNumber-1});
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opSmall2.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall2.getType())+" bigTaskSet: "+ Arrays.toString(opSmall2.getBigTaskSet()) +
@@ -295,6 +324,9 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Big task operation");
                     operations.add(opBig);
+                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
+                    simultaneousALNSTemp.add(0);
+                    bigTasksALNSTemp.add(new int[]{opNumber,opNumber-1,opNumber-2});
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opBig.getPrecedence())+" Location: "+ String.valueOf(opBig.getLocation())+
                             " optype: "+String.valueOf(opBig.getType())+" bigTaskSet: "+ Arrays.toString(opBig.getBigTaskSet()) +
@@ -306,6 +338,23 @@ public class DataGenerator {
             }
         }
         Operation[] operations2=new Operation[operations.size()];
+        precedenceALNS=new int[precedenceALNSTemp.size()][2];
+        simultaneousALNS=new int[simultaneousALNSTemp.size()];
+        bigTasksALNS=new int[bigTasksALNSTemp.size()][3];
+        for (int p=0;p<precedenceALNSTemp.size();p++){
+            precedenceALNS[p]=new int[]{precedenceALNSTemp.get(p)[0],precedenceALNSTemp.get(p)[1]};
+        }
+        for (int s=0;s<simultaneousALNSTemp.size();s++){
+            simultaneousALNS[s]=simultaneousALNSTemp.get(s);
+        }
+        for (int b=0;b<bigTasksALNSTemp.size();b++){
+            if(bigTasksALNSTemp.get(b)!=null) {
+                bigTasksALNS[b] = new int[]{bigTasksALNSTemp.get(b)[0], bigTasksALNSTemp.get(b)[1], bigTasksALNSTemp.get(b)[2]};
+            }
+            else{
+                bigTasksALNS[b] =null;
+            }
+        }
         int addIndex=0;
         for (Operation op : operations){
             operations2[addIndex]=op;
@@ -525,9 +574,9 @@ public class DataGenerator {
     }
 
     public void printAllData(){
-        //PrintData.printPrecedence(this.precedence);
-        //PrintData.printSimultaneous(this.simultaneous);
-        //PrintData.printOperationpenalty(this.penalty);
+        PrintData.printPrecedence(this.precedence);
+        PrintData.printSimultaneous(this.simultaneous);
+        PrintData.printOperationpenalty(this.penalty);
         //PrintData.timeVesselUseOnOperations(this.timeVesselUseOnOperation, this.nStartNodes);
         PrintData.printSailingCostForVessel(this.sailingCostForVessel);
         PrintData.printEarliestStartingTimes(this.earliestStartingTimeForVessel);
@@ -535,6 +584,10 @@ public class DataGenerator {
         PrintData.printOperationsForVessel (this.operationsForVessel);
         //PrintData.printSailingTimes(this.sailingTimes, 1, this.operations.length, nStartNodes);
         PrintData.printTimeWindows(this.timeWindowsForOperations);
+        PrintData.printTimeWindowsIntervals(this.twIntervals);
+        PrintData.printPrecedenceALNS(this.precedenceALNS);
+        PrintData.printSimALNS(this.simultaneousALNS);
+        PrintData.printBigTasksALNS(this.bigTasksALNS,operations.length);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -549,6 +602,9 @@ public class DataGenerator {
 
     }
 
+    public int[][] getTwIntervals() {
+        return twIntervals;
+    }
 
     public int[][][][] getSailingTimes() {
         return sailingTimes;
@@ -618,6 +674,18 @@ public class DataGenerator {
         return startNodes;
     }
 
+    public int[][] getPrecedenceALNS() {
+        return precedenceALNS;
+    }
+
+    public int[] getSimultaneousALNS() {
+        return simultaneousALNS;
+    }
+
+    public int[][] getBigTasksALNS() {
+        return bigTasksALNS;
+    }
+
     public static String removeSpace(String str)
     {
         // Count leading zeros
@@ -642,7 +710,7 @@ public class DataGenerator {
         Boolean bol = false;
         for (Integer e: list)     {
             if(element==e){
-                bol=true;
+                return true;
             }
         }
         return bol;
