@@ -138,14 +138,11 @@ public class ALNS {
                                 }
                             }
                             else if (n==vesselroutes.get(v).size()){
-                                
-                            }
-                            else{
                                 int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]]
-                                        [vesselroutes.get(v).get(vesselroutes.get(v).size()).getID()-1][o - 1];
-                                int earliestTemp=Math.max(vesselroutes.get(v).get(vesselroutes.get(v).size()).getEarliestTime()+
+                                        [vesselroutes.get(v).get(n).getID()-1][o - 1];
+                                int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
                                         SailingTimes[v][EarliestStartingTimeForVessel[v]]
-                                                [vesselroutes.get(v).get(vesselroutes.get(v).size()).getID()-1][o - 1],twIntervals[o-startNodes.length][0]);
+                                                [vesselroutes.get(v).get(n).getID()-1][o - 1],twIntervals[o-startNodes.length][0]);
                                 int latestTemp=twIntervals[o-startNodes.length][1];
                                 if (cost < costAdded & earliestTemp<=latestTemp) {
                                     costAdded = cost;
@@ -154,6 +151,9 @@ public class ALNS {
                                     earliest = earliestTemp;
                                     latest = latestTemp;
                                 }
+                            }
+                            else{
+
                             }
                         }
                     }
