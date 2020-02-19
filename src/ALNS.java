@@ -127,7 +127,8 @@ public class ALNS {
                                         +SailingTimes[v][EarliestStartingTimeForVessel[v]][o-1][vesselroutes.get(v).get(0).getID()-1]
                                 - SailingTimes[v][EarliestStartingTimeForVessel[v]][v][vesselroutes.get(v).get(0).getID()-1]);
                                 int earliestTemp=Math.max(EarliestStartingTimeForVessel[v],twIntervals[o-startNodes.length][0]);
-                                int latestTemp=Math.min(vesselroutes.get(v).get(0).getLatestTime(),twIntervals[o-startNodes.length][1]);
+                                int latestTemp=Math.min(vesselroutes.get(v).get(0).getLatestTime()-SailingTimes[v][EarliestStartingTimeForVessel[v]][o-1]
+                                        [vesselroutes.get(v).get(0).getID()-1],twIntervals[o-startNodes.length][1]);
                                 if (cost < costAdded & earliestTemp<=latestTemp) {
                                     costAdded = cost;
                                     routeIndex = v;
