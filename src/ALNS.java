@@ -134,7 +134,7 @@ public class ALNS {
                                     latest = latestTemp;
                                 }
                             }
-                            else if (n==vesselroutes.get(v).size()){
+                            else if (n==vesselroutes.get(v).size()-1){
                                 int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]]
                                         [vesselroutes.get(v).get(n).getID()-1][o - 1];
                                 int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
@@ -144,20 +144,39 @@ public class ALNS {
                                 if (cost < costAdded & earliestTemp<=latestTemp) {
                                     costAdded = cost;
                                     routeIndex = v;
-                                    indexInRoute = 0;
+                                    indexInRoute = n+1;
                                     earliest = earliestTemp;
                                     latest = latestTemp;
                                 }
                             }
                             else{
-
+                                int cost =  SailingCostForVessel[v] * (SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][o - 1]
+                                        +SailingTimes[v][EarliestStartingTimeForVessel[v]][o-1][vesselroutes.get(v).get(n+1).getID()-1]
+                                        - SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][vesselroutes.get(v).get(n+1).getID()-1]);
+                                int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
+                                        SailingTimes[v][EarliestStartingTimeForVessel[v]]
+                                                [vesselroutes.get(v).get(n).getID()-1][o - 1],twIntervals[o-startNodes.length][0]);
+                                int latestTemp=Math.min(vesselroutes.get(v).get(n+1).getLatestTime()-
+                                        SailingTimes[v][EarliestStartingTimeForVessel[v]]
+                                                [o - 1][vesselroutes.get(v).get(n+1).getID()-1],twIntervals[o-startNodes.length][1]);
+                                if (cost < costAdded & earliestTemp <= latestTemp) {
+                                    costAdded = cost;
+                                    routeIndex = v;
+                                    indexInRoute = n+1;
+                                    earliest = earliestTemp;
+                                    latest = latestTemp;
+                                }
                             }
                         }
                     }
                 }
             }
             //After iterating through all possible insertion places, we here add the operation at the best insertion place
+            vesselroutes.get(routeIndex).add(indexInRoute,new OperationInRoute(o,earliest,latest));
+            
+            //updates all earliest and latest starting times before and after
         }
+        //After all operations are added, create unrouted list (= all operations starting after time 60)
     }
 
 
