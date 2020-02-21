@@ -405,14 +405,15 @@ public class ALNS {
 
     public void printInitialSolution(int[] vessseltypes){
         //PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
-        //PrintData.printSailingTimes(SailingTimes,2,nOperations-2*startNodes.length,startNodes.length);
+        //PrintData.printSailingTimes(SailingTimes,1,nOperations-2*startNodes.length,startNodes.length);
         //PrintData.printOperationsForVessel(OperationsForVessel);
         for (int i=0;i<vesselroutes.size();i++){
             int totalTime=0;
             System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
             if (vesselroutes.get(i)!=null) {
                 for (int o=0;o<vesselroutes.get(i).size();o++) {
-                    System.out.println("Operation number: "+vesselroutes.get(i).get(o).getID());
+                    System.out.println("Operation number: "+vesselroutes.get(i).get(o).getID() + " Earliest start time: "+
+                            vesselroutes.get(i).get(o).getEarliestTime()+ " Latest Start time: "+ vesselroutes.get(i).get(o).getLatestTime());
                     if (o==0){
                         totalTime+=SailingTimes[i][0][i][vesselroutes.get(i).get(o).getID()-1];
                         totalTime+=TimeVesselUseOnOperation[i][vesselroutes.get(i).get(o).getID()-startNodes.length-1][0];
@@ -423,10 +424,9 @@ public class ALNS {
                             totalTime += TimeVesselUseOnOperation[i][vesselroutes.get(i).get(o).getID() - startNodes.length - 1][0];
                         }
                     }
-                    System.out.println(totalTime);
                 }
             }
-            System.out.println("END VALUE"+totalTime);
+            System.out.println("TOTAL DURATION FOR ROUTE: "+totalTime);
         }
         if(!unroutedTasks.isEmpty()){
             System.out.println("UNROUTED TASKS");
