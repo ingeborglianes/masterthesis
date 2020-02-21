@@ -107,6 +107,7 @@ public class ALNS {
             for (int v = 0; v < nVessels; v++) {
                 if (DataGenerator.containsElement(o, OperationsForVessel[v])) {
                     if (vesselroutes.get(v) == null) {
+                        //insertion into empty route
                         int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                         int earliestTemp=Math.max(EarliestStartingTimeForVessel[v]+SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1]+1,twIntervals[o-startNodes.length-1][0]);
                         int latestTemp=Math.min(nTimePeriods,twIntervals[o-startNodes.length-1][1]);
@@ -120,6 +121,8 @@ public class ALNS {
                     }
                     else{
                         for(int n=0;n<vesselroutes.get(v).size();n++){
+                            //If the route only have one element from before, check insertion both before this operation
+                            //and after this operation
                             if (n==0 && vesselroutes.get(v).size()==1){
                                 int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]]
                                         [vesselroutes.get(v).get(n).getID()-1][o - 1];
@@ -152,6 +155,7 @@ public class ALNS {
                                 }
                             }
                             else if(n==0) {
+                                //check insertion in first position
                                 int cost = SailingCostForVessel[v] * (SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1]
                                         + SailingTimes[v][EarliestStartingTimeForVessel[v]][o - 1][vesselroutes.get(v).get(0).getID() - 1]
                                         - SailingTimes[v][EarliestStartingTimeForVessel[v]][v][vesselroutes.get(v).get(0).getID() - 1]);
@@ -169,6 +173,7 @@ public class ALNS {
                                 }
                             }
                             else if (n==vesselroutes.get(v).size()-1 && vesselroutes.get(v).size()>1){
+                                //check insertion in last position
                                 int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]]
                                         [vesselroutes.get(v).get(n).getID()-1][o - 1];
                                 int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
@@ -187,6 +192,7 @@ public class ALNS {
                                 }
                             }
                             else{
+                                //check insertion for all other positions in the route
                                 int cost =  SailingCostForVessel[v] * (SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][o - 1]
                                         +SailingTimes[v][EarliestStartingTimeForVessel[v]][o-1][vesselroutes.get(v).get(n+1).getID()-1]
                                         - SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][vesselroutes.get(v).get(n+1).getID()-1]);
@@ -466,7 +472,7 @@ public class ALNS {
         int[] vesseltypes =new int[]{1,2,4,5};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_instance_15_locations_first_test.txt",
+                "test_instances/test_instance_15_locations_TWtest.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ALNS a = new ALNS(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
