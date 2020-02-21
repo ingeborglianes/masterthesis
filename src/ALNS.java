@@ -215,46 +215,47 @@ public class ALNS {
                     vesselroutes.get(routeIndex).add(indexInRoute,new OperationInRoute(o, earliest,latest));
                 }
                 allOperations.remove(Integer.valueOf(o));
+                //Update all earliest starting times forward
+                int lastEarliest=earliest;
+                for(int f=indexInRoute+1;f<vesselroutes.get(routeIndex).size();f++){
+                    int newTime=Math.max(twIntervals[vesselroutes.get(routeIndex).get(f).getID()-startNodes.length-1][0],lastEarliest+
+                            SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(f-1).getID()-1]
+                                    [vesselroutes.get(routeIndex).get(f).getID()-1]
+                            +TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f-1).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
+                    if (newTime==vesselroutes.get(routeIndex).get(f).getEarliestTime()){
+                        break;
+                    }
+                    else{
+                        vesselroutes.get(routeIndex).get(f).setEarliestTime(newTime);
+                        lastEarliest=newTime;
+                    }
+                }
+                //Update all latest starting times backward
+                int lastLatest=latest;
+                for(int k=indexInRoute-1;k>-1;k--){
+                    int newTime=Math.min(twIntervals[vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][1],lastLatest-
+                            SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(k).getID()-1]
+                                    [vesselroutes.get(routeIndex).get(k+1).getID()-1]
+                            -TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
+                    if (newTime==vesselroutes.get(routeIndex).get(k).getLatestTime()){
+                        break;
+                    }
+                    else{
+                        vesselroutes.get(routeIndex).get(k).setLatestTime(newTime);
+                        lastLatest=newTime;
+                    }
+                }
+                System.out.println("VESSEL "+routeIndex);
+                for(int n=0;n<vesselroutes.get(routeIndex).size();n++){
+                    System.out.println("Number in order: "+n);
+                    System.out.println("ID "+vesselroutes.get(routeIndex).get(n).getID());
+                    System.out.println("Earliest starting time "+vesselroutes.get(routeIndex).get(n).getEarliestTime());
+                    System.out.println("latest starting time "+vesselroutes.get(routeIndex).get(n).getLatestTime());
+                    System.out.println(" ");
+                }
             }
 
-            //Update all earliest starting times forward
-            int lastEarliest=earliest;
-            for(int f=indexInRoute+1;f<vesselroutes.get(routeIndex).size();f++){
-                int newTime=Math.max(twIntervals[vesselroutes.get(routeIndex).get(f).getID()-startNodes.length-1][0],lastEarliest+
-                        SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(f-1).getID()-1]
-                                [vesselroutes.get(routeIndex).get(f).getID()-1]
-                        +TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f-1).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
-                if (newTime==vesselroutes.get(routeIndex).get(f).getEarliestTime()){
-                    break;
-                }
-                else{
-                    vesselroutes.get(routeIndex).get(f).setEarliestTime(newTime);
-                    lastEarliest=newTime;
-                }
-            }
-            //Update all latest starting times backward
-            int lastLatest=latest;
-            for(int k=indexInRoute-1;k>-1;k--){
-                int newTime=Math.min(twIntervals[vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][1],lastLatest-
-                        SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(k).getID()-1]
-                                [vesselroutes.get(routeIndex).get(k+1).getID()-1]
-                        -TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
-                if (newTime==vesselroutes.get(routeIndex).get(k).getLatestTime()){
-                    break;
-                }
-                else{
-                    vesselroutes.get(routeIndex).get(k).setLatestTime(newTime);
-                    lastLatest=newTime;
-                }
-            }
-            System.out.println("VESSEL "+routeIndex);
-            for(int n=0;n<vesselroutes.get(routeIndex).size();n++){
-                System.out.println("Number in order: "+n);
-                System.out.println("ID "+vesselroutes.get(routeIndex).get(n).getID());
-                System.out.println("Earliest starting time "+vesselroutes.get(routeIndex).get(n).getEarliestTime());
-                System.out.println("latest starting time "+vesselroutes.get(routeIndex).get(n).getLatestTime());
-                System.out.println(" ");
-            }
+
         }
         for(Integer tasksLeft : allOperations){
             unroutedTasks.add(new OperationInRoute(tasksLeft,0,nTimePeriods));
