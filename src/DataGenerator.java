@@ -252,7 +252,6 @@ public class DataGenerator {
                                 opType.getNumber(), opType.getPenalty(), opType.getName());
                     }
                     operations.add(op);
-                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
                     simultaneousALNSTemp.add(0);
                     bigTasksALNSTemp.add(null);
                     this.consolidatedTasks.put(op.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
@@ -269,8 +268,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 1");
                     operations.add(op1);
-                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
-                    simultaneousALNSTemp.add(opNumber+1);
+                    simultaneousALNSTemp.add(opNumber+nStartNodes+1);
                     bigTasksALNSTemp.add(null);
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(op1.getPrecedence())+" Location: "+ String.valueOf(op1.getLocation())+
@@ -283,8 +281,7 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 2");
                     operations.add(op2);
-                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
-                    simultaneousALNSTemp.add(opNumber-1);
+                    simultaneousALNSTemp.add(opNumber+nStartNodes-1);
                     bigTasksALNSTemp.add(null);
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(op2.getPrecedence())+" Location: "+ String.valueOf(op2.getLocation())+
@@ -299,9 +296,8 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 1 of big task operation");
                     operations.add(opSmall1);
-                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
-                    simultaneousALNSTemp.add(opNumber+1);
-                    bigTasksALNSTemp.add(new int[]{opNumber+2,opNumber,opNumber+1});
+                    simultaneousALNSTemp.add(opNumber+nStartNodes+1);
+                    bigTasksALNSTemp.add(new int[]{opNumber+nStartNodes+2,opNumber+nStartNodes,opNumber+nStartNodes+1});
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opSmall1.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall1.getType())+" bigTaskSet: "+String.valueOf(opSmall1.getBigTaskSet())+
@@ -311,9 +307,8 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Part 2 of big task operation");
                     operations.add(opSmall2);
-                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
-                    simultaneousALNSTemp.add(opNumber-1);
-                    bigTasksALNSTemp.add(new int[]{opNumber+1,opNumber,opNumber-1});
+                    simultaneousALNSTemp.add(opNumber+nStartNodes-1);
+                    bigTasksALNSTemp.add(new int[]{opNumber+1+nStartNodes,opNumber+nStartNodes,opNumber-1+nStartNodes});
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opSmall2.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall2.getType())+" bigTaskSet: "+ Arrays.toString(opSmall2.getBigTaskSet()) +
@@ -324,9 +319,8 @@ public class DataGenerator {
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
                             opType.getNumber(),opType.getPenalty(),opType.getName()+" Big task operation");
                     operations.add(opBig);
-                    precedenceALNSTemp.add(new int[]{opType.getPrecedenceOver(),opType.getPrecedenceOf()});
                     simultaneousALNSTemp.add(0);
-                    bigTasksALNSTemp.add(new int[]{opNumber,opNumber-1,opNumber-2});
+                    bigTasksALNSTemp.add(new int[]{opNumber+nStartNodes,opNumber-1+nStartNodes,opNumber-2+nStartNodes});
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opBig.getPrecedence())+" Location: "+ String.valueOf(opBig.getLocation())+
                             " optype: "+String.valueOf(opBig.getType())+" bigTaskSet: "+ Arrays.toString(opBig.getBigTaskSet()) +
@@ -382,12 +376,15 @@ public class DataGenerator {
         int nOperations=this.operations.length;
         int nVessels=this.vessels.length;
         int[][] precedence=new int[nOperations+2*nVessels][nOperations+2*nVessels];
+        precedenceALNS=new int[nOperations][2];
         for (Operation op1 : this.operations){
             for (Operation op2 : this.operations){
-                if(op1.getPrecedence()==op2.getType() && op1.getLocation()==op2.getLocation()){
-                    int num1=nStartNodes + (int) (op1.getNumber()) - 1;
-                    int num2=nStartNodes + (int)(op2.getNumber()) - 1;
+                if (op1.getPrecedence()==op2.getType() && op1.getLocation()==op2.getLocation()){
+                    int num1 = nStartNodes + (int) (op1.getNumber()) - 1;
+                    int num2 = nStartNodes + (int) (op2.getNumber()) - 1;
                     precedence[num1][num2]=1;
+                    precedenceALNS[op1.getNumber()][0]=num2+1;
+                    precedenceALNS[op2.getNumber()][1]=num1+1;
                     System.out.println("Operation "+num1+" has precedence over operation "+num2);
                 }
             }
