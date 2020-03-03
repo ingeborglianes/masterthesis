@@ -1,6 +1,12 @@
+import javafx.beans.property.IntegerProperty;
+import javafx.util.Pair;
+
 import java.io.FileNotFoundException;
 import java.sql.SQLOutput;
 import java.util.*;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.jar.JarOutputStream;
 
 public class ALNS {
 
@@ -30,10 +36,13 @@ public class ALNS {
     List<List<int[]>> vesselTakenIntervals = new ArrayList<List<int[]>>();
     List<Integer> allOperations =  new ArrayList<Integer>();
     private int[] sortedOperations;
-    int [][] twIntervals;
-    int[][] precedenceALNS;
-    int[] simALNS;
-    int[][] bigTasksALNS;
+    private int [][] twIntervals;
+    private int [][] precedenceALNS;
+    private int [] simALNS;
+    private int [][] bigTasksALNS;
+    private int[] routeSailingCost;
+    //map with the earliest starting time of operations. ID= operation number. Value= earliest starting time.
+    private Map<int[],OperationInRoute[]> precedenceOperations=new HashMap<>();
 
     public ALNS(int [][] OperationsForVessel, int [][] TimeWindowsForOperations, int [][][] Edges, int [][][][] SailingTimes,
                 int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
@@ -64,6 +73,7 @@ public class ALNS {
         this.precedenceALNS=precedenceALNS;
         this.simALNS=simALNS;
         this.bigTasksALNS=bigTasksALNS;
+        this.routeSailingCost=new int[nVessels+1];
         for(int o = startNodes.length+1; o<nOperations-endNodes.length+1;o++){
            allOperations.add(o);
         }
@@ -73,17 +83,16 @@ public class ALNS {
     }
 
     public void createSortedOperations(){
-        TreeMap<Integer,Integer> penaltiesDict = new TreeMap<Integer, Integer>();
+        SortedSet<KeyValuePair> penaltiesDict = new TreeSet<KeyValuePair>();
         for (int p=0;p<this.Penalty.length;p++){
+            System.out.println((p+1+startNodes.length)+" "+Penalty[p]);
             //Key value (= operation number) in penaltiesDict is not null indexed
-            penaltiesDict.put(p+1+startNodes.length,Penalty[p]);
+            penaltiesDict.add(new KeyValuePair(p+1+startNodes.length,Penalty[p]));
         }
-        //System.out.println(Arrays.toString(Penalty));
-        int index=Penalty.length-1;
-        for (Map.Entry<Integer, Integer> entry  : entriesSortedByValues(penaltiesDict)) {
-            System.out.println(entry.getKey()+":"+entry.getValue());
-            sortedOperations[index]=entry.getKey();
-            index-=1;
+        int index=0;
+        for (KeyValuePair keyValuePair : penaltiesDict) {
+            sortedOperations[index]=keyValuePair.key;
+            index+=1;
         }
         System.out.println(Arrays.toString(sortedOperations));
     }
@@ -99,19 +108,29 @@ public class ALNS {
             vesselroutes.add(null);
         }
         for (Integer o : sortedOperations){
+            System.out.println("On operation: "+o);
             int costAdded=100000;
             int indexInRoute=0;
             int routeIndex=0;
             int earliest=0;
             int latest=nTimePeriods;
+            Map<int[],int[]> updatePres = new HashMap<>();
             for (int v = 0; v < nVessels; v++) {
+                List<Pair<Integer, OperationInRoute[]>> precedence= checkPrecedence(v);
+                boolean precedenceFeasible=true;
                 if (DataGenerator.containsElement(o, OperationsForVessel[v])) {
                     if (vesselroutes.get(v) == null) {
                         //insertion into empty route
                         int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                         int earliestTemp=Math.max(EarliestStartingTimeForVessel[v]+SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1]+1,twIntervals[o-startNodes.length-1][0]);
                         int latestTemp=Math.min(nTimePeriods,twIntervals[o-startNodes.length-1][1]);
-                        if (cost < costAdded && earliestTemp<=latestTemp) {
+                        int[] precedenceOfValues=checkprecedenceOf(o,v,earliestTemp,latestTemp);
+                        if (precedenceOfValues[2]==1) {
+                            break;
+                        }
+                        earliestTemp=precedenceOfValues[0];
+                        latestTemp=precedenceOfValues[1];
+                        if(cost < costAdded && earliestTemp<=latestTemp ) {
                             costAdded = cost;
                             routeIndex = v;
                             indexInRoute = 0;
@@ -121,50 +140,25 @@ public class ALNS {
                     }
                     else{
                         for(int n=0;n<vesselroutes.get(v).size();n++){
-                            //If the route only have one element from before, check insertion both before this operation
-                            //and after this operation
-                            if (n==0 && vesselroutes.get(v).size()==1){
-                                int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]]
-                                        [vesselroutes.get(v).get(n).getID()-1][o - 1];
-                                int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
-                                        SailingTimes[v][EarliestStartingTimeForVessel[v]]
-                                        [vesselroutes.get(v).get(n).getID()-1][o - 1]+TimeVesselUseOnOperation[v][vesselroutes.get(v).get(0).getID()-1-startNodes.length]
-                                        [EarliestStartingTimeForVessel[v]],twIntervals[o-startNodes.length-1][0]);
-                                int latestTemp=twIntervals[o-startNodes.length-1][1];
-                                if (cost < costAdded & earliestTemp<=latestTemp) {
-                                    costAdded = cost;
-                                    routeIndex = v;
-                                    indexInRoute = 1;
-                                    earliest = earliestTemp;
-                                    latest = latestTemp;
-                                }
-                                cost = SailingCostForVessel[v] * (SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1]
-                                        + SailingTimes[v][EarliestStartingTimeForVessel[v]][o - 1][vesselroutes.get(v).get(0).getID() - 1]
-                                        - SailingTimes[v][EarliestStartingTimeForVessel[v]][v][vesselroutes.get(v).get(0).getID() - 1]);
-                                earliestTemp = Math.max(EarliestStartingTimeForVessel[v] + SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1] + 1, twIntervals[o - startNodes.length - 1][0]);
-                                latestTemp = Math.min(vesselroutes.get(v).get(0).getLatestTime() - SailingTimes[v][EarliestStartingTimeForVessel[v]][o - 1]
-                                                [vesselroutes.get(v).get(0).getID() - 1]
-                                                - TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]
-                                        , twIntervals[o - startNodes.length - 1][1]);
-                                if (cost < costAdded & earliestTemp <= latestTemp) {
-                                    costAdded = cost;
-                                    routeIndex = v;
-                                    indexInRoute = 0;
-                                    earliest = earliestTemp;
-                                    latest = latestTemp;
-                                }
-                            }
-                            else if(n==0) {
+                            if(n==0) {
                                 //check insertion in first position
-                                int cost = SailingCostForVessel[v] * (SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1]
+                                int timeIncrease=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1]
                                         + SailingTimes[v][EarliestStartingTimeForVessel[v]][o - 1][vesselroutes.get(v).get(0).getID() - 1]
-                                        - SailingTimes[v][EarliestStartingTimeForVessel[v]][v][vesselroutes.get(v).get(0).getID() - 1]);
+                                        - SailingTimes[v][EarliestStartingTimeForVessel[v]][v][vesselroutes.get(v).get(0).getID() - 1];
+                                int cost = SailingCostForVessel[v] * timeIncrease;
                                 int earliestTemp = Math.max(EarliestStartingTimeForVessel[v] + SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1] + 1, twIntervals[o - startNodes.length - 1][0]);
                                 int latestTemp = Math.min(vesselroutes.get(v).get(0).getLatestTime() - SailingTimes[v][EarliestStartingTimeForVessel[v]][o - 1]
                                                 [vesselroutes.get(v).get(0).getID() - 1]
                                                 - TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]
                                         , twIntervals[o - startNodes.length - 1][1]);
-                                if (cost < costAdded & earliestTemp <= latestTemp) {
+                                int[] precedenceOfValues=checkprecedenceOf(o,v,earliestTemp,latestTemp);
+                                if (precedenceOfValues[2]==1) {
+                                    break;
+                                }
+                                earliestTemp=precedenceOfValues[0];
+                                latestTemp=precedenceOfValues[1];
+                                precedenceFeasible= checkPFeasible(v,precedence, o, timeIncrease);
+                                if(cost < costAdded && earliestTemp<=latestTemp && precedenceFeasible) {
                                     costAdded = cost;
                                     routeIndex = v;
                                     indexInRoute = 0;
@@ -172,10 +166,11 @@ public class ALNS {
                                     latest = latestTemp;
                                 }
                             }
-                            else if (n==vesselroutes.get(v).size()-1 && vesselroutes.get(v).size()>1){
+                            if (n==vesselroutes.get(v).size()-1){
                                 //check insertion in last position
-                                int cost = SailingCostForVessel[v] * SailingTimes[v][EarliestStartingTimeForVessel[v]]
+                                int timeIncrease=SailingTimes[v][EarliestStartingTimeForVessel[v]]
                                         [vesselroutes.get(v).get(n).getID()-1][o - 1];
+                                int cost = SailingCostForVessel[v] * timeIncrease;
                                 int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
                                         SailingTimes[v][EarliestStartingTimeForVessel[v]]
                                                 [vesselroutes.get(v).get(n).getID()-1][o - 1]
@@ -183,7 +178,14 @@ public class ALNS {
                                                 [EarliestStartingTimeForVessel[v]]
                                         ,twIntervals[o-startNodes.length-1][0]);
                                 int latestTemp=twIntervals[o-startNodes.length-1][1];
-                                if (cost < costAdded & earliestTemp<=latestTemp) {
+                                int[] precedenceOfValues=checkprecedenceOf(o,v,earliestTemp,latestTemp);
+                                if (precedenceOfValues[2]==1) {
+                                    break;
+                                }
+                                earliestTemp=precedenceOfValues[0];
+                                latestTemp=precedenceOfValues[1];
+                                precedenceFeasible= checkPFeasible(v,precedence, o,timeIncrease);
+                                if(cost < costAdded && earliestTemp<=latestTemp && precedenceFeasible) {
                                     costAdded = cost;
                                     routeIndex = v;
                                     indexInRoute = n+1;
@@ -191,11 +193,12 @@ public class ALNS {
                                     latest = latestTemp;
                                 }
                             }
-                            else{
+                            if(n!=0 && n!=vesselroutes.get(v).size()-1){
                                 //check insertion for all other positions in the route
-                                int cost =  SailingCostForVessel[v] * (SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][o - 1]
+                                int timeIncrease=SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][o - 1]
                                         +SailingTimes[v][EarliestStartingTimeForVessel[v]][o-1][vesselroutes.get(v).get(n+1).getID()-1]
-                                        - SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][vesselroutes.get(v).get(n+1).getID()-1]);
+                                        - SailingTimes[v][EarliestStartingTimeForVessel[v]][vesselroutes.get(v).get(n).getID()-1][vesselroutes.get(v).get(n+1).getID()-1];
+                                int cost =  SailingCostForVessel[v] * timeIncrease;
                                 int earliestTemp=Math.max(vesselroutes.get(v).get(n).getEarliestTime()+
                                         SailingTimes[v][EarliestStartingTimeForVessel[v]]
                                                 [vesselroutes.get(v).get(n).getID()-1][o - 1]
@@ -207,7 +210,14 @@ public class ALNS {
                                                 [o - 1][vesselroutes.get(v).get(n+1).getID()-1]-
                                         TimeVesselUseOnOperation[v][o-startNodes.length-1]
                                                 [EarliestStartingTimeForVessel[v]],twIntervals[o-startNodes.length-1][1]);
-                                if (cost < costAdded & earliestTemp <= latestTemp) {
+                                int[] precedenceOfValues=checkprecedenceOf(o,v,earliestTemp,latestTemp);
+                                if (precedenceOfValues[2]==1) {
+                                        break;
+                                    }
+                                earliestTemp=precedenceOfValues[0];
+                                latestTemp=precedenceOfValues[1];
+                                precedenceFeasible= checkPFeasible(v,precedence, o,timeIncrease);
+                                if(cost < costAdded && earliestTemp <= latestTemp && precedenceFeasible) {
                                     costAdded = cost;
                                     routeIndex = v;
                                     indexInRoute = n+1;
@@ -221,53 +231,49 @@ public class ALNS {
             }
             //After iterating through all possible insertion places, we here add the operation at the best insertion place
             if(costAdded!=100000) {
+                OperationInRoute newOr=new OperationInRoute(o, earliest, latest);
+                int presOver=precedenceALNS[o-1-startNodes.length][0];
+                int presOf=precedenceALNS[o-1-startNodes.length][1];
+                if (presOver!=0){
+                    System.out.println("Pres over added");
+                    Pair<Integer,OperationInRoute> addPair= new Pair<>(0,
+                            newOr);
+                    precedenceOperations.put(new int[]{0,presOver},new OperationInRoute[]{newOr,null});
+                }
+                if (presOf!=0){
+                    for (Map.Entry<int[],OperationInRoute[]> entry : precedenceOperations.entrySet()) {
+                        int[] integerValues = entry.getKey();
+                        OperationInRoute[] orValues = entry.getValue();
+                        if (integerValues[1]==o && integerValues[0]==0){
+                            precedenceOperations.replace(integerValues,new OperationInRoute[]{orValues[0],newOr});
+                            precedenceOperations.put(new int[]{1,presOf},new OperationInRoute[]{newOr,orValues[0]});
+                        }
+                    }
+                }
+                /*
                 System.out.println("NEW ADD: Vessel route "+routeIndex);
                 System.out.println("Operation "+o);
                 System.out.println("Earliest time "+ earliest);
                 System.out.println("Latest time "+ latest);
                 System.out.println("Route index "+indexInRoute);
                 System.out.println(" ");
+                 */
+                routeSailingCost[routeIndex]+=costAdded;
                 if (vesselroutes.get(routeIndex) == null) {
-                    int finalEarliest = earliest;
-                    int finalLatest = latest;
                     int finalIndexInRoute = indexInRoute;
                     vesselroutes.set(routeIndex, new ArrayList<>() {{
-                        add(finalIndexInRoute,new OperationInRoute(o, finalEarliest, finalLatest));
+                        add(finalIndexInRoute, newOr);
                     }});
-                } else {
-                    vesselroutes.get(routeIndex).add(indexInRoute,new OperationInRoute(o, earliest,latest));
+                }
+                else {
+                    vesselroutes.get(routeIndex).add(indexInRoute,newOr);
                 }
                 allOperations.remove(Integer.valueOf(o));
                 //Update all earliest starting times forward
-                int lastEarliest=earliest;
-                for(int f=indexInRoute+1;f<vesselroutes.get(routeIndex).size();f++){
-                    int newTime=Math.max(twIntervals[vesselroutes.get(routeIndex).get(f).getID()-startNodes.length-1][0],lastEarliest+
-                            SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(f-1).getID()-1]
-                                    [vesselroutes.get(routeIndex).get(f).getID()-1]
-                            +TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f-1).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
-                    if (newTime==vesselroutes.get(routeIndex).get(f).getEarliestTime()){
-                        break;
-                    }
-                    else{
-                        vesselroutes.get(routeIndex).get(f).setEarliestTime(newTime);
-                        lastEarliest=newTime;
-                    }
-                }
-                //Update all latest starting times backward
-                int lastLatest=latest;
-                for(int k=indexInRoute-1;k>-1;k--){
-                    int newTime=Math.min(twIntervals[vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][1],lastLatest-
-                            SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(k).getID()-1]
-                                    [vesselroutes.get(routeIndex).get(k+1).getID()-1]
-                            -TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
-                    if (newTime==vesselroutes.get(routeIndex).get(k).getLatestTime()){
-                        break;
-                    }
-                    else{
-                        vesselroutes.get(routeIndex).get(k).setLatestTime(newTime);
-                        lastLatest=newTime;
-                    }
-                }
+                updateEarliest(earliest,indexInRoute,routeIndex);
+                updateLatest(latest,indexInRoute,routeIndex);
+                updatePrecedence(routeIndex, checkPrecedence(routeIndex), o);
+                /*
                 System.out.println("VESSEL "+routeIndex);
                 for(int n=0;n<vesselroutes.get(routeIndex).size();n++){
                     System.out.println("Number in order: "+n);
@@ -277,12 +283,16 @@ public class ALNS {
                     System.out.println(" ");
                 }
 
+                 */
             }
         }
-        for(Integer tasksLeft : allOperations){
-            unroutedTasks.add(new OperationInRoute(tasksLeft,0,nTimePeriods));
+        for(Integer taskLeft : allOperations){
+            unroutedTasks.add(new OperationInRoute(taskLeft,0,nTimePeriods));
+            routeSailingCost[nVessels]+=Penalty[taskLeft-startNodes.length-1];
         }
     }
+
+
 
     /*
     public void constructionHeuristic(){
@@ -409,25 +419,141 @@ public class ALNS {
     // inkluderende på øvre grense i intervallet)
   */
 
-    static <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
-        SortedSet<Map.Entry<K,V>> sortedEntries = new TreeSet<Map.Entry<K,V>>(
-                new Comparator<Map.Entry<K,V>>() {
-                    @Override public int compare(Map.Entry<K,V> e1, Map.Entry<K,V> e2) {
-                        int res = e1.getValue().compareTo(e2.getValue());
-                        return res != 0 ? res : 1; // Special fix to preserve items with equal values
+
+    public List<Pair<Integer,OperationInRoute[]>> checkPrecedence(int v){
+        List<Pair<Integer,OperationInRoute[]>> dependencies= new ArrayList<>();
+        if (vesselroutes.get(v)!=null) {
+            for (OperationInRoute or : vesselroutes.get(v)) {
+                for (int[] orP : precedenceOperations.keySet()) {
+                    if (orP[1] == or.getID()) {
+                        dependencies.add(new Pair<>(orP[0], new OperationInRoute[]{precedenceOperations.get(orP)[0], precedenceOperations.get(orP)[1]}));
                     }
                 }
-        );
-        sortedEntries.addAll(map.entrySet());
-        return sortedEntries;
+            }
+        }
+        return dependencies;
     }
 
+    public void updatePrecedence(int route, List<Pair<Integer,OperationInRoute[]>> precedence,int o) {
+        if (precedence != null) {
+            for (Pair<Integer, OperationInRoute[]> p : precedence) {
+                int pType = p.getKey();
+                OperationInRoute firstOr = p.getValue()[0];
+                OperationInRoute secondOr = p.getValue()[1];
+                //CASE 1
+                if (pType == 0) {
+                    int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][o - startNodes.length - 1]
+                            [EarliestStartingTimeForVessel[route]];
+                    if (secondOr.getEarliestTime() <= newESecondOr) {
+                        secondOr.setEarliestTime(newESecondOr);
+                    }
+                }
+                //CASE 2
+                else{
+                    int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[route][secondOr.getID() - startNodes.length - 1]
+                            [EarliestStartingTimeForVessel[route]];
+                    if (secondOr.getLatestTime() > newLSecondOr) {
+                        secondOr.setLatestTime(newLSecondOr);
+                    }
+                }
+            }
+        }
+    }
 
+    public Boolean checkPFeasible(int route, List<Pair<Integer,OperationInRoute[]>> precedence,int o, int timeIncrease) {
+        boolean precedenceFeasible = true;
+        if (precedence != null) {
+            for (Pair<Integer, OperationInRoute[]> p : precedence) {
+                int pType = p.getKey();
+                OperationInRoute firstOr = p.getValue()[0];
+                OperationInRoute secondOr = p.getValue()[1];
+                //CASE 1
+                if (pType == 0) {
+                    int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][o - startNodes.length - 1]
+                            [EarliestStartingTimeForVessel[route]];
+                    if (secondOr.getEarliestTime() < newESecondOr) {
+                        if (newESecondOr > secondOr.getLatestTime()) {
+                            precedenceFeasible = false;
+                        }
+                    }
+                }
+                //CASE 2
+                else{
+                    int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[route][secondOr.getID() - startNodes.length - 1]
+                            [EarliestStartingTimeForVessel[route]];
+                    if (secondOr.getLatestTime() > newLSecondOr) {
+                        if (newLSecondOr < secondOr.getEarliestTime()) {
+                            precedenceFeasible = false;
+                        }
+                    }
+                }
+            }
+        }
+        return precedenceFeasible;
+    }
+
+    public int[] checkprecedenceOf(int o, int v, int earliestTemp, int latestTemp){
+        int breakValue=0;
+        int precedenceOf=precedenceALNS[o-1-startNodes.length][1];
+        if(precedenceOf!=0) {
+            if (precedenceOperations.get(new int[]{0,precedenceOf}) == null) {
+                breakValue=1;
+            }
+            int earliestPO = precedenceOperations.get(new int[]{0,precedenceOf})[0].getEarliestTime();
+            int latestPO = precedenceOperations.get(new int[]{0,precedenceOf})[0].getLatestTime();
+            earliestTemp = Math.max(earliestTemp, earliestPO + TimeVesselUseOnOperation[v][precedenceOf - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]);
+            latestTemp = Math.min(latestTemp, latestPO + TimeVesselUseOnOperation[v][precedenceOf - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]);
+        }
+        return new int[]{earliestTemp,latestTemp,breakValue};
+    }
+
+    public void updateLatest(int latest, int indexInRoute, int routeIndex){
+        int lastLatest=latest;
+        for(int k=indexInRoute-1;k>-1;k--){
+            int newTime=Math.min(vesselroutes.get(routeIndex).get(k).getLatestTime(),lastLatest-
+                    SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(k).getID()-1]
+                            [vesselroutes.get(routeIndex).get(k+1).getID()-1]
+                    -TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(k).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
+            if(newTime==vesselroutes.get(routeIndex).get(k).getLatestTime()){
+                break;
+            }
+            vesselroutes.get(routeIndex).get(k).setLatestTime(newTime);
+            lastLatest=newTime;
+        }
+    }
+
+    public void updateEarliest(int earliest, int indexInRoute, int routeIndex){
+        int lastEarliest=earliest;
+        for(int f=indexInRoute+1;f<vesselroutes.get(routeIndex).size();f++){
+            int newTime=Math.max(vesselroutes.get(routeIndex).get(f).getEarliestTime(),lastEarliest+
+                    SailingTimes[routeIndex][EarliestStartingTimeForVessel[routeIndex]][vesselroutes.get(routeIndex).get(f-1).getID()-1]
+                            [vesselroutes.get(routeIndex).get(f).getID()-1]
+                    +TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f-1).getID()-startNodes.length-1][EarliestStartingTimeForVessel[routeIndex]]);
+            if(newTime==vesselroutes.get(routeIndex).get(f).getEarliestTime()){
+                 break;
+            }
+            vesselroutes.get(routeIndex).get(f).setEarliestTime(newTime);
+            lastEarliest=newTime;
+
+        }
+    }
+
+    public static Boolean containsElement(int element, int[] list)   {
+        Boolean bol = false;
+        for (Integer e: list)     {
+            if(element == e){
+                bol=true;
+            }
+        }
+        return bol;
+    }
 
     public void printInitialSolution(int[] vessseltypes){
-        //PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
-        PrintData.printSailingTimes(SailingTimes,3,nOperations-2*startNodes.length,startNodes.length);
-        PrintData.printOperationsForVessel(OperationsForVessel);
+        PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
+        //PrintData.printSailingTimes(SailingTimes,2,nOperations-2*startNodes.length,startNodes.length);
+        //PrintData.printOperationsForVessel(OperationsForVessel);
+        //PrintData.printPrecedenceALNS(precedenceALNS);
+        System.out.println(Arrays.toString(routeSailingCost));
         for (int i=0;i<vesselroutes.size();i++){
             int totalTime=0;
             System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
@@ -438,12 +564,14 @@ public class ALNS {
                     if (o==0){
                         totalTime+=SailingTimes[i][0][i][vesselroutes.get(i).get(o).getID()-1];
                         totalTime+=TimeVesselUseOnOperation[i][vesselroutes.get(i).get(o).getID()-startNodes.length-1][0];
+                        //System.out.println("temp total time: "+totalTime);
                     }
                     else{
                         totalTime+=SailingTimes[i][0][vesselroutes.get(i).get(o-1).getID()-1][vesselroutes.get(i).get(o).getID()-1];
                         if(o!=vesselroutes.get(i).size()-1) {
                             totalTime += TimeVesselUseOnOperation[i][vesselroutes.get(i).get(o).getID() - startNodes.length - 1][0];
                         }
+                        //System.out.println("temp total time: "+totalTime);
                     }
                 }
             }
@@ -457,22 +585,11 @@ public class ALNS {
         }
     }
 
-
-    public static Boolean containsElement(int element, int[] list)   {
-        Boolean bol = false;
-        for (Integer e: list)     {
-            if(element == e){
-                bol=true;
-            }
-        }
-        return bol;
-    }
-
     public static void main(String[] args) throws FileNotFoundException {
         int[] vesseltypes =new int[]{1,2,4,5};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_instance_15_locations_TWtest.txt",
+                "test_instances/test_instance_15_locations_PRECEDENCEtest.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ALNS a = new ALNS(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
@@ -492,11 +609,10 @@ public class ALNS {
     public List<List<OperationInRoute>> getVesselroutes() {
         return vesselroutes;
     }
+
+    public int[] getRouteSailingCost() {
+        return routeSailingCost;
+    }
 }
 
-
-
-/*
-1. Iterate over operations and insert to best location
-*/
 
