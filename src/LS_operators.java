@@ -7,13 +7,15 @@ public class LS_operators {
     private int[] vesseltypes;
     private int[][][][] SailingTimes;
     private  int [][][] TimeVesselUseOnOperation;
+    private int [][] twIntervals;
 
 
-    public LS_operators(int [][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes, int [][][] TimeVesselUseOnOperation){
+    public LS_operators(int [][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes, int [][][] TimeVesselUseOnOperation, int [][] twIntervals){
         this.OperationsForVessel = OperationsForVessel;
         this.vesseltypes = vesseltypes;
-        this.SailingTimes=SailingTimes;
-        this.TimeVesselUseOnOperation=TimeVesselUseOnOperation;
+        this.SailingTimes = SailingTimes;
+        this.TimeVesselUseOnOperation = TimeVesselUseOnOperation;
+        this.twIntervals = twIntervals;
     }
 
 
@@ -31,6 +33,7 @@ public class LS_operators {
         }
         return old_vesselroutes;
     }
+
 
     public List<List<OperationInRoute>> one_relocate(List<List<OperationInRoute>> vesselroutes, int vessel, int pos1, int pos2, int[] startnodes){
         if (pos1 == pos2){
@@ -156,7 +159,11 @@ public class LS_operators {
 
         for(int i = 0; i < vesselroutes.get(vessel).size(); i++ ) {
             if (i<pos1 && i<pos2){
-                vesselroutes.get(vessel).get(i).setLatestTime(vesselroutes.get(vessel).get(i).getLatestTime()-(first_delta+second_delta));
+                int new_latesttime = vesselroutes.get(vessel).get(i).getLatestTime()-(first_delta+second_delta);
+                if(new_latesttime > vesselroutes.get(vessel).get(i).getEarliestTime() && new_latesttime <= twIntervals[vesselroutes.get(vessel).get(i).getID()-nStartnodes-1][1]){
+                    vesselroutes.get(vessel).get(i).setLatestTime(new_latesttime );
+                }
+
             }
             else if(i == pos1 || i == pos2){
             }
@@ -545,7 +552,6 @@ public class LS_operators {
     }
 
 
-
     public List<List<OperationInRoute>> two_exchange(List<List<OperationInRoute>> vesselroutes, int vessel1, int vessel2, int pos1, int pos2, int[] startnodes){
 
         if ((vessel1 == vessel2) ||
@@ -753,13 +759,23 @@ public class LS_operators {
 
 
 
-    /*
-    public List<List<OperationInRoute>> insert(List<List<OperationInRoute>> vesselroutes, List<Integer> unroutedTasks, int vessel, int pos1, int pos2){
-        OperationInRoute toMove1 = vesselroutes.get(vessel).get(pos1);
+
+    public void insert(List<List<OperationInRoute>> vesselroutes, OperationInRoute unrouted_operation, int vessel, int pos1) {
+        // Calculate old time
+
+        //Perform change
+
+        //Calculate new time
+
+        //Update times
+
+        //Feasibility
+        return ;
     }
 
 
-     */
+
+
 
     public void printLSOSolution(int[] vesseltypes, List<List<OperationInRoute>> vesselroutes){
         for (int i=0;i<vesselroutes.size();i++){
