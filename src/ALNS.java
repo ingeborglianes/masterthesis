@@ -1,12 +1,9 @@
-import javafx.beans.property.IntegerProperty;
 import javafx.util.Pair;
 
 import java.io.FileNotFoundException;
-import java.sql.SQLOutput;
 import java.util.*;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.jar.JarOutputStream;
 
 public class ALNS {
 
@@ -42,7 +39,7 @@ public class ALNS {
     private int [][] bigTasksALNS;
     private int[] routeSailingCost;
     //map with the earliest starting time of operations. ID= operation number. Value= earliest starting time.
-    private Map<int[],OperationInRoute[]> precedenceOperations=new HashMap<>();
+    private Map<PrecedenceKey,PrecedenceValues> precedenceOperations=new HashMap<>();
 
     public ALNS(int [][] OperationsForVessel, int [][] TimeWindowsForOperations, int [][][] Edges, int [][][][] SailingTimes,
                 int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
@@ -114,9 +111,10 @@ public class ALNS {
             int routeIndex=0;
             int earliest=0;
             int latest=nTimePeriods;
+            List<Pair<PrecedenceKey,PrecedenceValues>> updatePrecedence=null;
             Map<int[],int[]> updatePres = new HashMap<>();
             for (int v = 0; v < nVessels; v++) {
-                List<Pair<Integer, OperationInRoute[]>> precedence= checkPrecedence(v);
+                List<Pair<PrecedenceKey,PrecedenceValues>> precedence= checkPrecedence(v);
                 boolean precedenceFeasible=true;
                 if (DataGenerator.containsElement(o, OperationsForVessel[v])) {
                     if (vesselroutes.get(v) == null) {
@@ -130,12 +128,13 @@ public class ALNS {
                         }
                         earliestTemp=precedenceOfValues[0];
                         latestTemp=precedenceOfValues[1];
-                        if(cost < costAdded && earliestTemp<=latestTemp ) {
+                        if(cost < costAdded && earliestTemp<=latestTemp) {
                             costAdded = cost;
                             routeIndex = v;
                             indexInRoute = 0;
                             earliest = earliestTemp;
                             latest = latestTemp;
+                            updatePrecedence=precedence;
                         }
                     }
                     else{
@@ -157,13 +156,14 @@ public class ALNS {
                                 }
                                 earliestTemp=precedenceOfValues[0];
                                 latestTemp=precedenceOfValues[1];
-                                precedenceFeasible= checkPFeasible(v,precedence, o, timeIncrease);
-                                if(cost < costAdded && earliestTemp<=latestTemp && precedenceFeasible) {
+                                precedenceFeasible= checkPFeasible(v,precedence, o, timeIncrease,0);
+                                if(cost < costAdded && earliestTemp<=latestTemp && precedenceFeasible && earliestTemp<vesselroutes.get(v).get(0).getEarliestTime()) {
                                     costAdded = cost;
                                     routeIndex = v;
                                     indexInRoute = 0;
                                     earliest = earliestTemp;
                                     latest = latestTemp;
+                                    updatePrecedence=precedence;
                                 }
                             }
                             if (n==vesselroutes.get(v).size()-1){
@@ -184,13 +184,14 @@ public class ALNS {
                                 }
                                 earliestTemp=precedenceOfValues[0];
                                 latestTemp=precedenceOfValues[1];
-                                precedenceFeasible= checkPFeasible(v,precedence, o,timeIncrease);
-                                if(cost < costAdded && earliestTemp<=latestTemp && precedenceFeasible) {
+                                precedenceFeasible= checkPFeasible(v,precedence, o,timeIncrease, n+1);
+                                if(cost < costAdded && earliestTemp<=latestTemp && precedenceFeasible&& earliestTemp<vesselroutes.get(v).get(0).getEarliestTime()) {
                                     costAdded = cost;
                                     routeIndex = v;
                                     indexInRoute = n+1;
                                     earliest = earliestTemp;
                                     latest = latestTemp;
+                                    updatePrecedence=precedence;
                                 }
                             }
                             if(n!=0 && n!=vesselroutes.get(v).size()-1){
@@ -216,13 +217,14 @@ public class ALNS {
                                     }
                                 earliestTemp=precedenceOfValues[0];
                                 latestTemp=precedenceOfValues[1];
-                                precedenceFeasible= checkPFeasible(v,precedence, o,timeIncrease);
-                                if(cost < costAdded && earliestTemp <= latestTemp && precedenceFeasible) {
+                                precedenceFeasible= checkPFeasible(v,precedence, o,timeIncrease,n+1);
+                                if(cost < costAdded && earliestTemp <= latestTemp && precedenceFeasible && earliestTemp<vesselroutes.get(v).get(0).getEarliestTime()) {
                                     costAdded = cost;
                                     routeIndex = v;
                                     indexInRoute = n+1;
                                     earliest = earliestTemp;
                                     latest = latestTemp;
+                                    updatePrecedence=precedence;
                                 }
                             }
                         }
@@ -235,29 +237,30 @@ public class ALNS {
                 int presOver=precedenceALNS[o-1-startNodes.length][0];
                 int presOf=precedenceALNS[o-1-startNodes.length][1];
                 if (presOver!=0){
-                    System.out.println("Pres over added");
-                    Pair<Integer,OperationInRoute> addPair= new Pair<>(0,
-                            newOr);
-                    precedenceOperations.put(new int[]{0,presOver},new OperationInRoute[]{newOr,null});
+                    //System.out.println(o+" added in precedence operations dictionary 0 "+presOver);
+                    PrecedenceKey pKey= new PrecedenceKey(0,presOver);
+                    PrecedenceValues pValues= new PrecedenceValues(newOr,null,routeIndex,0);
+                    precedenceOperations.put(pKey,pValues);
                 }
                 if (presOf!=0){
-                    for (Map.Entry<int[],OperationInRoute[]> entry : precedenceOperations.entrySet()) {
-                        int[] integerValues = entry.getKey();
-                        OperationInRoute[] orValues = entry.getValue();
-                        if (integerValues[1]==o && integerValues[0]==0){
-                            precedenceOperations.replace(integerValues,new OperationInRoute[]{orValues[0],newOr});
-                            precedenceOperations.put(new int[]{1,presOf},new OperationInRoute[]{newOr,orValues[0]});
+                    for (Map.Entry<PrecedenceKey,PrecedenceValues> entry : precedenceOperations.entrySet()) {
+                        PrecedenceKey pKey = entry.getKey();
+                        PrecedenceValues pValues = entry.getValue();
+                        if (pKey.getConnectedOp()==o && pKey.getPresType()==0){
+                            precedenceOperations.replace(pKey,pValues,new PrecedenceValues(pValues.getOperation(),newOr,pValues.getRoute(),routeIndex));
+                            precedenceOperations.put(new PrecedenceKey(1,presOf),
+                                    new PrecedenceValues(newOr,pValues.getOperation(),routeIndex,pValues.getRoute()));
                         }
                     }
                 }
-                /*
+
                 System.out.println("NEW ADD: Vessel route "+routeIndex);
                 System.out.println("Operation "+o);
                 System.out.println("Earliest time "+ earliest);
                 System.out.println("Latest time "+ latest);
                 System.out.println("Route index "+indexInRoute);
                 System.out.println(" ");
-                 */
+
                 routeSailingCost[routeIndex]+=costAdded;
                 if (vesselroutes.get(routeIndex) == null) {
                     int finalIndexInRoute = indexInRoute;
@@ -272,9 +275,9 @@ public class ALNS {
                 //Update all earliest starting times forward
                 updateEarliest(earliest,indexInRoute,routeIndex);
                 updateLatest(latest,indexInRoute,routeIndex);
-                updatePrecedence(routeIndex, checkPrecedence(routeIndex), o);
-                /*
+                updatePrecedence(routeIndex, updatePrecedence,indexInRoute);
                 System.out.println("VESSEL "+routeIndex);
+
                 for(int n=0;n<vesselroutes.get(routeIndex).size();n++){
                     System.out.println("Number in order: "+n);
                     System.out.println("ID "+vesselroutes.get(routeIndex).get(n).getID());
@@ -283,7 +286,6 @@ public class ALNS {
                     System.out.println(" ");
                 }
 
-                 */
             }
         }
         for(Integer taskLeft : allOperations){
@@ -291,8 +293,6 @@ public class ALNS {
             routeSailingCost[nVessels]+=Penalty[taskLeft-startNodes.length-1];
         }
     }
-
-
 
     /*
     public void constructionHeuristic(){
@@ -419,14 +419,13 @@ public class ALNS {
     // inkluderende på øvre grense i intervallet)
   */
 
-
-    public List<Pair<Integer,OperationInRoute[]>> checkPrecedence(int v){
-        List<Pair<Integer,OperationInRoute[]>> dependencies= new ArrayList<>();
+    public List<Pair<PrecedenceKey,PrecedenceValues>> checkPrecedence(int v){
+        List<Pair<PrecedenceKey,PrecedenceValues>> dependencies= new ArrayList<>();
         if (vesselroutes.get(v)!=null) {
-            for (OperationInRoute or : vesselroutes.get(v)) {
-                for (int[] orP : precedenceOperations.keySet()) {
-                    if (orP[1] == or.getID()) {
-                        dependencies.add(new Pair<>(orP[0], new OperationInRoute[]{precedenceOperations.get(orP)[0], precedenceOperations.get(orP)[1]}));
+            for (int i=0; i <vesselroutes.get(v).size();i++) {
+                for (PrecedenceKey orP : precedenceOperations.keySet()) {
+                    if (precedenceOperations.get(orP).getOperation().getID() == vesselroutes.get(v).get(i).getID()) {
+                        dependencies.add(new Pair<>(orP,precedenceOperations.get(orP)));
                     }
                 }
             }
@@ -434,56 +433,76 @@ public class ALNS {
         return dependencies;
     }
 
-    public void updatePrecedence(int route, List<Pair<Integer,OperationInRoute[]>> precedence,int o) {
+    public void updatePrecedence(int route, List<Pair<PrecedenceKey,PrecedenceValues>> precedence, int index) {
         if (precedence != null) {
-            for (Pair<Integer, OperationInRoute[]> p : precedence) {
-                int pType = p.getKey();
-                OperationInRoute firstOr = p.getValue()[0];
-                OperationInRoute secondOr = p.getValue()[1];
+            for (Pair<PrecedenceKey,PrecedenceValues> p : precedence) {
+                PrecedenceKey pKey = p.getKey();
+                PrecedenceValues pValues = p.getValue();
+                int pType = pKey.getPresType();
+                OperationInRoute firstOr = pValues.getOperation();
+                OperationInRoute secondOr = pValues.getConnectedOperation();
+                //System.out.println("Ptype: "+pType+" conOpNumber: "+pKey.getConnectedOp()+ " opObj: "+firstOr.getID()+
+                  //      " conOpObj: "+secondOr.getID()+" route: "+pValues.getRoute()+" ConRoute: "+pValues.getConnectedRoute());
                 //CASE 1
                 if (pType == 0) {
-                    int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][o - startNodes.length - 1]
+                    int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
                             [EarliestStartingTimeForVessel[route]];
+                    //System.out.println("new time for connected operation: "+newESecondOr);
                     if (secondOr.getEarliestTime() <= newESecondOr) {
                         secondOr.setEarliestTime(newESecondOr);
+                        System.out.println("Route "+route+", precedence operation: " +firstOr.getID()+", index: "+index);
                     }
                 }
                 //CASE 2
                 else{
-                    int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[route][secondOr.getID() - startNodes.length - 1]
+                    int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1]
                             [EarliestStartingTimeForVessel[route]];
                     if (secondOr.getLatestTime() > newLSecondOr) {
                         secondOr.setLatestTime(newLSecondOr);
+                        System.out.println("Route "+route+", precedence operation: " +firstOr.getID()+", index: "+index);
                     }
                 }
             }
         }
     }
 
-    public Boolean checkPFeasible(int route, List<Pair<Integer,OperationInRoute[]>> precedence,int o, int timeIncrease) {
+    public Boolean checkPFeasible(int route, List<Pair<PrecedenceKey,PrecedenceValues>> precedence, int o, int sailingTime, int index) {
         boolean precedenceFeasible = true;
         if (precedence != null) {
-            for (Pair<Integer, OperationInRoute[]> p : precedence) {
-                int pType = p.getKey();
-                OperationInRoute firstOr = p.getValue()[0];
-                OperationInRoute secondOr = p.getValue()[1];
-                //CASE 1
-                if (pType == 0) {
-                    int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][o - startNodes.length - 1]
-                            [EarliestStartingTimeForVessel[route]];
-                    if (secondOr.getEarliestTime() < newESecondOr) {
-                        if (newESecondOr > secondOr.getLatestTime()) {
-                            precedenceFeasible = false;
+            for (Pair<PrecedenceKey,PrecedenceValues> p : precedence) {
+                PrecedenceKey pKey = p.getKey();
+                PrecedenceValues pValues = p.getValue();
+                int pType = pKey.getPresType();
+                OperationInRoute firstOr = pValues.getOperation();
+                OperationInRoute secondOr = pValues.getConnectedOperation();
+                if (secondOr!=null) {
+                    System.out.println(firstOr.getID());
+                    //System.out.println("pType: " + pType + " conOpNumber: " + pKey.getConnectedOp() + " opObj: " + firstOr.getID() +
+                      //      " route: " + pValues.getRoute() + " ConRoute: " + pValues.getConnectedRoute());
+                    //CASE 1
+                    if (pType == 0) {
+                        int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
+                                [EarliestStartingTimeForVessel[route]]
+                                + sailingTime + TimeVesselUseOnOperation[route][o - startNodes.length - 1][EarliestStartingTimeForVessel[route]];
+                        if (secondOr.getEarliestTime() < newESecondOr) {
+                            if (newESecondOr > secondOr.getLatestTime()) {
+                                precedenceFeasible = false;
+                                System.out.println("Route " + route + ", precedence operation: " + firstOr.getID() + ", index: " + index);
+                                System.out.println("Operation " + o + ", feasible false because precedence over");
+                            }
                         }
                     }
-                }
-                //CASE 2
-                else{
-                    int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[route][secondOr.getID() - startNodes.length - 1]
-                            [EarliestStartingTimeForVessel[route]];
-                    if (secondOr.getLatestTime() > newLSecondOr) {
-                        if (newLSecondOr < secondOr.getEarliestTime()) {
-                            precedenceFeasible = false;
+                    //CASE 2
+                    else {
+                        int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1]
+                                [EarliestStartingTimeForVessel[route]]
+                                - sailingTime - TimeVesselUseOnOperation[route][o - startNodes.length - 1][EarliestStartingTimeForVessel[route]];
+                        if (secondOr.getLatestTime() > newLSecondOr) {
+                            if (newLSecondOr < secondOr.getEarliestTime()) {
+                                precedenceFeasible = false;
+                                System.out.println("Route " + route + ", precedence operation: " + firstOr.getID() + ", index: " + index);
+                                System.out.println("Operation " + o + ", feasible false because precedence of");
+                            }
                         }
                     }
                 }
@@ -495,14 +514,21 @@ public class ALNS {
     public int[] checkprecedenceOf(int o, int v, int earliestTemp, int latestTemp){
         int breakValue=0;
         int precedenceOf=precedenceALNS[o-1-startNodes.length][1];
+        PrecedenceValues pValues=precedenceOperations.get(new PrecedenceKey(0,o));
         if(precedenceOf!=0) {
-            if (precedenceOperations.get(new int[]{0,precedenceOf}) == null) {
+            if (pValues == null) {
                 breakValue=1;
+                //System.out.println("break true");
+                //System.out.println("Tried: 0 "+o);
             }
-            int earliestPO = precedenceOperations.get(new int[]{0,precedenceOf})[0].getEarliestTime();
-            int latestPO = precedenceOperations.get(new int[]{0,precedenceOf})[0].getLatestTime();
-            earliestTemp = Math.max(earliestTemp, earliestPO + TimeVesselUseOnOperation[v][precedenceOf - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]);
-            latestTemp = Math.min(latestTemp, latestPO + TimeVesselUseOnOperation[v][precedenceOf - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]);
+            if(breakValue==0) {
+                int earliestPO = pValues.getOperation().getEarliestTime();
+                int latestPO = pValues.getOperation().getLatestTime();
+                earliestTemp = Math.max(earliestTemp, earliestPO + TimeVesselUseOnOperation[pValues.getRoute()][precedenceOf - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]);
+                //System.out.println("Vessel "+v+" Test earliest temp precedence of, operation "+o+" earliesttemp: "+earliestTemp);
+                latestTemp = Math.min(latestTemp, latestPO + TimeVesselUseOnOperation[pValues.getRoute()][precedenceOf - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]);
+                //System.out.println(latestTemp);
+            }
         }
         return new int[]{earliestTemp,latestTemp,breakValue};
     }
@@ -549,10 +575,11 @@ public class ALNS {
     }
 
     public void printInitialSolution(int[] vessseltypes){
-        PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
-        //PrintData.printSailingTimes(SailingTimes,2,nOperations-2*startNodes.length,startNodes.length);
+        //PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
+        //PrintData.printSailingTimes(SailingTimes,3,nOperations-2*startNodes.length,startNodes.length);
         //PrintData.printOperationsForVessel(OperationsForVessel);
-        //PrintData.printPrecedenceALNS(precedenceALNS);
+        PrintData.printPrecedenceALNS(precedenceALNS);
+
         System.out.println(Arrays.toString(routeSailingCost));
         for (int i=0;i<vesselroutes.size();i++){
             int totalTime=0;
@@ -597,6 +624,7 @@ public class ALNS {
                 dg.getSailingCostForVessel(), dg.getPenalty(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS());
+        PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);

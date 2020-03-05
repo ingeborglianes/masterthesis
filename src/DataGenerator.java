@@ -139,7 +139,9 @@ public class DataGenerator {
 
     public void runOperationGenerator(){
         OperationGenerator og=new OperationGenerator();
-        this.operationTypes=og.createOperationTypes();
+        //REMEMBER TO CHOOSE TEST OR NOT HERE
+        //this.operationTypes=og.createOperationTypes();
+        this.operationTypes=og.createOperationTypesTest();
     }
 
     public void readInstance() throws FileNotFoundException {
@@ -273,7 +275,7 @@ public class DataGenerator {
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(op1.getPrecedence())+" Location: "+ String.valueOf(op1.getLocation())+
                             " optype: "+String.valueOf(op1.getType())+" bigTaskSet: "+String.valueOf(op1.getBigTaskSet())+
-                            "Sim: "+String.valueOf(op1.getSimultaneous())+" Vessels: "+Arrays.toString(op1.getVessels())+" Duration: "+op1.getDuration()+" Task description: "+op1.getName());
+                            "Sim: "+String.valueOf(op1.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(op1.getVessels())+" Duration: "+op1.getDuration()+" Task description: "+op1.getName());
                     this.consolidatedTasks.put(op1.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
                     this.bigTasks.add(op1.getNumber()+nStartNodes);
                     opNumber+=1;
@@ -286,7 +288,7 @@ public class DataGenerator {
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(op2.getPrecedence())+" Location: "+ String.valueOf(op2.getLocation())+
                             " optype: "+String.valueOf(op2.getType())+" bigTaskSet: "+String.valueOf(op2.getBigTaskSet())+
-                            "Sim: "+String.valueOf(op2.getSimultaneous())+" Vessels: "+Arrays.toString(op2.getVessels())+" Duration: "+op2.getDuration()+" Task description: "+op2.getName());
+                            "Sim: "+String.valueOf(op2.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(op2.getVessels())+" Duration: "+op2.getDuration()+" Task description: "+op2.getName());
                     this.consolidatedTasks.put(op2.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
                     this.bigTasks.add(op2.getNumber()+nStartNodes);
                     opNumber+=1;
@@ -301,7 +303,7 @@ public class DataGenerator {
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opSmall1.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall1.getType())+" bigTaskSet: "+String.valueOf(opSmall1.getBigTaskSet())+
-                            "Sim: "+String.valueOf(opSmall1.getSimultaneous())+" Vessels: "+Arrays.toString(opSmall1.getVessels())+" Duration: "+opSmall1.getDuration()+" Task description: "+opSmall1.getName());
+                            "Sim: "+String.valueOf(opSmall1.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(opSmall1.getVessels())+" Duration: "+opSmall1.getDuration()+" Task description: "+opSmall1.getName());
                     opNumber+=1;
                     Operation opSmall2=new Operation(opNumber, opType.getVessel2(), location, opNumber-1, null,
                             opType.getPrecedenceOver(),tw, opType.getDuration(),
@@ -312,7 +314,7 @@ public class DataGenerator {
                     routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
                             " Precedence: "+String.valueOf(opSmall2.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
                             " optype: "+String.valueOf(opSmall2.getType())+" bigTaskSet: "+ Arrays.toString(opSmall2.getBigTaskSet()) +
-                            " Sim: "+String.valueOf(opSmall2.getSimultaneous())+" Vessels: "+Arrays.toString(opSmall2.getVessels())+" Duration: "+opSmall2.getDuration()+" Task description: "+opSmall2.getName());
+                            " Sim: "+String.valueOf(opSmall2.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(opSmall2.getVessels())+" Duration: "+opSmall2.getDuration()+" Task description: "+opSmall2.getName());
                     opNumber+=1;
                     int [] bigTasksArray= new int[]{opSmall1.getNumber(),opSmall2.getNumber()};
                     Operation opBig=new Operation(opNumber, opType.getVesselBigTask(), location, 0, bigTasksArray,
@@ -383,8 +385,8 @@ public class DataGenerator {
                     int num1 = nStartNodes + (int) (op1.getNumber()) - 1;
                     int num2 = nStartNodes + (int) (op2.getNumber()) - 1;
                     precedence[num1][num2]=1;
-                    precedenceALNS[op1.getNumber()][0]=num2+1;
-                    precedenceALNS[op2.getNumber()][1]=num1+1;
+                    precedenceALNS[op1.getNumber()-1][0]=num2+1;
+                    precedenceALNS[op2.getNumber()-1][1]=num1+1;
                     System.out.println("Operation "+num1+" has precedence over operation "+num2);
                 }
             }
