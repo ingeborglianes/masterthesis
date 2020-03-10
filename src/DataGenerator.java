@@ -56,11 +56,6 @@ public class DataGenerator {
         this.weatherFile=weatherFile;
         this.weatherPenaltyOperations=new Double[days*12];
         this.weatherPenaltySpeed=new int[days*12];
-        twIntervals=new int[60][2];
-        for (int[] operation: twIntervals){
-            operation[0]=0;
-            operation[1]=days*12;
-        }
     }
 
     public void importWeather() throws FileNotFoundException {
@@ -247,8 +242,6 @@ public class DataGenerator {
                         }
                         int[] tw11= new int[this.days*12];
                         tw11[t-1]=t;
-                        twIntervals[opNumber-1][0]=t;
-                        twIntervals[opNumber-1][1]=t;
                         op = new Operation(opNumber, opType.getVessel1(), location, 0, null,
                                 opType.getPrecedenceOver(), tw11, opType.getDuration(),
                                 opType.getNumber(), opType.getPenalty(), opType.getName());
@@ -474,10 +467,21 @@ public class DataGenerator {
 
     public void createTimeWindows(){
         int [][] timeWindows= new int[this.operations.length+nStartNodes+nEndNodes][this.days*12];
+        twIntervals = new int[this.operations.length][2];
+        for (int[] operation: twIntervals){
+            operation[0]=0;
+            operation[1]=days*12;
+        }
         for (Operation op:this.operations){
             for(int t=0;t<op.getTimeWindow().length;t++){
                 if(weatherPenaltyOperations[t]!=0.0){
                     timeWindows[op.getNumber()+nStartNodes-1][t]=op.getTimeWindow()[t];
+                    if(t>0 && op.getTimeWindow()[t-1]==0 && op.getTimeWindow()[t]!=0){
+                        twIntervals[op.getNumber()-1][0]=op.getTimeWindow()[t];
+                    }
+                    if(t<op.getTimeWindow().length-1 && op.getTimeWindow()[t]!=0 && op.getTimeWindow()[t+1]==0){
+                        twIntervals[op.getNumber()-1][1]=op.getTimeWindow()[t];
+                    }
                 }
             }
         }

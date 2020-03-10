@@ -211,7 +211,7 @@ public class LS_operators {
 
     public List<List<OperationInRoute>> two_relocate(List<List<OperationInRoute>> vesselroutes, int vessel1, int vessel2, int pos1, int pos2, int[] startnodes){
         if ((vessel1 == vessel2) ||
-                !(ALNS.containsElement (vesselroutes.get(vessel1).get(pos1).getID(), OperationsForVessel[vessel2]))){
+                !(ConstructionHeuristic.containsElement (vesselroutes.get(vessel1).get(pos1).getID(), OperationsForVessel[vessel2]))){
                 return vesselroutes;
             }
 
@@ -555,8 +555,8 @@ public class LS_operators {
     public List<List<OperationInRoute>> two_exchange(List<List<OperationInRoute>> vesselroutes, int vessel1, int vessel2, int pos1, int pos2, int[] startnodes){
 
         if ((vessel1 == vessel2) ||
-                !((ALNS.containsElement (vesselroutes.get(vessel1).get(pos1).getID(), OperationsForVessel[vessel2])) &&
-                        ALNS.containsElement(vesselroutes.get(vessel2).get(pos2).getID(), OperationsForVessel[vessel1]))){
+                !((ConstructionHeuristic.containsElement (vesselroutes.get(vessel1).get(pos1).getID(), OperationsForVessel[vessel2])) &&
+                        ConstructionHeuristic.containsElement(vesselroutes.get(vessel2).get(pos2).getID(), OperationsForVessel[vessel1]))){
             return vesselroutes;
         }
 
@@ -773,10 +773,6 @@ public class LS_operators {
         return ;
     }
 
-
-
-
-
     public void printLSOSolution(int[] vesseltypes, List<List<OperationInRoute>> vesselroutes){
         for (int i=0;i<vesselroutes.size();i++){
             System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vesseltypes[i]);
@@ -808,15 +804,15 @@ public class LS_operators {
         PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
         //PrintData.printSailingTimes(dg.getSailingTimes(),2,23, 4);
         PrintData.printSailingTimes(dg.getSailingTimes(),3,23, 4);
-        ALNS a = new ALNS(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
+        ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getPenalty(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(),dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations());
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
-        LS_operators LSO = new LS_operators(dg.getOperationsForVessel(), vesseltypes, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation());
+        LS_operators LSO = new LS_operators(dg.getOperationsForVessel(), vesseltypes, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),dg.getTwIntervals());
         List<List<OperationInRoute>> new_vesselroutes = LSO.two_relocate(a.getVesselroutes(),1,2,3,1,  startnodes);
         LSO.printLSOSolution(vesseltypes, new_vesselroutes);
     }

@@ -1,30 +1,34 @@
 public class PrecedenceValues {
-    private OperationInRoute operation;
-    private OperationInRoute connectedOperation;
+    private OperationInRoute operationObject;
+    private OperationInRoute connectedOperationObject;
+    private int connectedOperationID;
+    private int index;
     private int connectedRoute;
     private int route;
 
-    PrecedenceValues(OperationInRoute operation, OperationInRoute connectedOperation,int route,  int connectedRoute){
-        this.operation=operation;
-        this.connectedOperation=connectedOperation;
+    PrecedenceValues(OperationInRoute operationObject, OperationInRoute connectedOperationObject,int connectedOperationID,int index, int route,  int connectedRoute){
+        this.operationObject=operationObject;
+        this.connectedOperationObject=connectedOperationObject;
+        this.connectedOperationID=connectedOperationID;
+        this.index=index;
         this.route=route;
         this.connectedRoute=connectedRoute;
     }
 
-    public OperationInRoute getOperation() {
-        return operation;
+    public OperationInRoute getOperationObject() {
+        return operationObject;
     }
 
-    public void setOperation(OperationInRoute operation) {
-        this.operation = operation;
+    public void setOperationObject(OperationInRoute operationObject) {
+        this.operationObject = operationObject;
     }
 
-    public OperationInRoute getConnectedOperation() {
-        return connectedOperation;
+    public OperationInRoute getConnectedOperationObject() {
+        return connectedOperationObject;
     }
 
-    public void setConnectedOperation(OperationInRoute connectedOperation) {
-        this.connectedOperation = connectedOperation;
+    public void setConnectedOperationObject(OperationInRoute connectedOperationObject) {
+        this.connectedOperationObject = connectedOperationObject;
     }
 
     public int getConnectedRoute() {
@@ -37,5 +41,21 @@ public class PrecedenceValues {
 
     public int getRoute() {
         return route;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getConnectedOperationID() {
+        return connectedOperationID;
+    }
+
+    public void setConnectedOperationID(int connectedOperationID) {
+        this.connectedOperationID = connectedOperationID;
     }
 }

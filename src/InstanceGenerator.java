@@ -131,6 +131,6 @@ public class InstanceGenerator {
         int[] loc = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
         InstanceGenerator ig = new InstanceGenerator(5,loc);
         ig.generateInstanceFromDistribution();
-        ig.writeToFile("test_instances/test_instance_15_locations_PRECEDENCEtest.txt");
+        ig.writeToFile("test_instances/test_instance_15_locations_PRECEDENCEtest3.txt");
     }
 }
