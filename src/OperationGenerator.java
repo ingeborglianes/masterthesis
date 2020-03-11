@@ -1,12 +1,3 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
-
 public class OperationGenerator {
 
     public OperationType[] createOperationTypes() {
@@ -90,7 +81,7 @@ public class OperationGenerator {
         int[] op15v1 = new int[]{2, 3, 4, 6};
         OperationType op15 = new OperationType(15, op15v1, null, null,
                 0, 0, 168, 24, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Support working boat");
-        return new OperationType[]{op8, op9, op10, op12, op13, op14,op15};
+        return new OperationType[]{op8, op9, op10, op12, op13, op14};
     }
 }
 

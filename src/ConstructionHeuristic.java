@@ -1,11 +1,5 @@
-import javafx.util.Pair;
-
 import java.io.FileNotFoundException;
-import java.sql.SQLOutput;
 import java.util.*;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.IntStream;
 
 public class ConstructionHeuristic {
     private int [][] OperationsForVessel;
@@ -495,9 +489,10 @@ public class ConstructionHeuristic {
                 if (insertIndex > precedenceIndex) {
                     int change = checkChangeLatest(latest, insertIndex, route, pValues.getIndex(), pValues.getOperationObject().getLatestTime(), o);
                     if (change!=0) {
-                        int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1]
-                                [secondOr.getLatestTime()-1-change]
-                                - change;
+                        System.out.println(firstOr.getLatestTime());
+                        System.out.println(change);
+                        int newLSecondOr = firstOr.getLatestTime() - change - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1]
+                                [secondOr.getLatestTime()-1-change];
                         if (newLSecondOr < secondOr.getEarliestTime()) {
                             System.out.println("NOT PRECEDENCE OF FEASIBLE");
                             return false;
@@ -718,8 +713,8 @@ public class ConstructionHeuristic {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes =new int[]{1,2,3,4,5,4};
-        int[] startnodes=new int[]{1,2,3,4,5,6};
+        int[] vesseltypes =new int[]{1,2,3,4};
+        int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
                 "test_instances/test_instance_15_locations_PRECEDENCEtest3.txt",
                 "results.txt", "weather_files/weather_normal.txt");
