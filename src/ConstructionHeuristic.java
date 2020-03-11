@@ -459,12 +459,20 @@ public class ConstructionHeuristic {
                     if (insertIndex <= precedenceIndex) {
                         int change = checkChangeEarliest(earliest, insertIndex, route, precedenceIndex, pValues.getOperationObject().getEarliestTime(), o);
                         if (change!=0) {
-                            int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
-                                    [firstOr.getEarliestTime()+change-1]
-                                    + change;
-                            if (newESecondOr > secondOr.getLatestTime()) {
+                            if(firstOr.getEarliestTime()+change-1>59) {
                                 System.out.println("NOT PRECEDENCE OVER FEASIBLE");
                                 return false;
+                            }
+                            else{
+                                int newESecondOr=firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
+                                        [firstOr.getEarliestTime()+change-1]
+                                        + change;
+                                if(newESecondOr>secondOr.getEarliestTime()) {
+                                    if (newESecondOr > secondOr.getLatestTime()) {
+                                        System.out.println("NOT PRECEDENCE OVER FEASIBLE");
+                                        return false;
+                                    }
+                                }
                             }
                         }
                     }
@@ -489,13 +497,21 @@ public class ConstructionHeuristic {
                 if (insertIndex > precedenceIndex) {
                     int change = checkChangeLatest(latest, insertIndex, route, pValues.getIndex(), pValues.getOperationObject().getLatestTime(), o);
                     if (change!=0) {
-                        System.out.println(firstOr.getLatestTime());
-                        System.out.println(change);
-                        int newLSecondOr = firstOr.getLatestTime() - change - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1]
-                                [secondOr.getLatestTime()-1-change];
-                        if (newLSecondOr < secondOr.getEarliestTime()) {
+                        //System.out.println("Previous latest time for previous of "+firstOr.getLatestTime());
+                        //System.out.println("change in previous of latest time "+change);
+                        if(secondOr.getLatestTime()-change-1<0){
                             System.out.println("NOT PRECEDENCE OF FEASIBLE");
                             return false;
+                        }
+                        else {
+                            int newLSecondOr = firstOr.getLatestTime() - change - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1][secondOr.getLatestTime() - change - 1];
+                            if (newLSecondOr < secondOr.getLatestTime()) {
+                                //int newLSecondOr = secondOr.getLatestTime() - change;
+                                if (newLSecondOr < secondOr.getEarliestTime()) {
+                                    System.out.println("NOT PRECEDENCE OF FEASIBLE");
+                                    return false;
+                                }
+                            }
                         }
                     }
                 }
