@@ -210,7 +210,7 @@ public class BasicModel {
 
 */
 
-            // Last operation to dummy node constraint
+            // New following operation constraint, updated to allow sailing to the dummy end node after the planning horizon has ended.
             for (int v = 0; v < nVessels; ++v) {
                 for (int i = nVessels; i < nOperations; ++i) {
                     if (containsElement(i + 1, OperationsForVessel[v])) {
@@ -314,7 +314,7 @@ public class BasicModel {
             }
 
 
-            //constraint that ensures that each planning horizon ends at the dummy end nodes
+            //Constraint that ensures that each planning horizon ends at the dummy end nodes
             int count2=1;
             for (int v=0;v<nVessels;++v) {
                 GRBLinExpr end = new GRBLinExpr();
