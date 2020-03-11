@@ -8,14 +8,14 @@ public class OperationType {
     private int sdFrequency;
     private int precedenceOf;
     private int duration;
-    private int penalty;
+    private int operationGain;
     private String name;
 
     //number,vessel1,vessel2,vesselBigTask, presedensOver, presedensAv, mHyppighet, sdHyppighet,
     //varighet, penalty
 
     public OperationType(int number, int[] vessel1, int[] vessel2,int [] vesselBigTask,int precedenceOver,int precedenceOf
-            ,int mFrequency,int sdFrequency,int duration,int penalty, String name){
+            ,int mFrequency,int sdFrequency,int duration,int operationGain, String name){
         this.number=number;
         this.vessel1=vessel1;
         this.vessel2=vessel2;
@@ -25,7 +25,7 @@ public class OperationType {
         this.mFrequency=mFrequency;
         this.sdFrequency=sdFrequency;
         this.duration=duration;
-        this.penalty=penalty;
+        this.operationGain=operationGain;
         this.name=name;
     }
 
@@ -65,8 +65,8 @@ public class OperationType {
         return precedenceOver;
     }
 
-    public int getPenalty() {
-        return penalty;
+    public int getOperationGain() {
+        return operationGain;
     }
 
     public String getName() {
@@ -77,4 +77,3 @@ public class OperationType {
         return this.mFrequency-this.sdFrequency;
     }
 }
-

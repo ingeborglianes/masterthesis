@@ -8,7 +8,7 @@ public class Operation {
     private int[] timeWindow;
     private int duration;
     private int type;
-    private int penalty;
+    private int operationGain;
     private String name;
 
     public Operation(int num, int [] vessels,int location, int simultaneous,
@@ -17,7 +17,7 @@ public class Operation {
                      int []timeWindow,
                      int duration,
                      int type,
-                     int penalty, String name){
+                     int operationGain, String name){
         this.number=num;
         this.vessels=vessels;
         this.location=location;
@@ -27,7 +27,7 @@ public class Operation {
         this.timeWindow=timeWindow;
         this.duration=duration;
         this.type=type;
-        this.penalty=penalty;
+        this.operationGain=operationGain;
         this.name=name;
     }
 
@@ -67,8 +67,8 @@ public class Operation {
         return type;
     }
 
-    public int getPenalty() {
-        return penalty;
+    public int getOperationGain() {
+        return operationGain;
     }
 
     public String getName() {

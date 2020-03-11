@@ -14,10 +14,15 @@ public class PrintData {
         printGrid(simultaneous[0].length,simultaneous);
     }
 
-    //The length of the list is the number of operations, not including start nodes and end nodes
-    public static void printOperationpenalty(int[] operationPenalty){
-        System.out.println("PENALTY");
-        System.out.println(Arrays.toString(operationPenalty));
+    //Three dimensional list, this function prints the gain a vessels receive for starting an operation in each time period
+    // the number of rows is the number of operations, not including start nodes and end nodes, columns represent the time periods.
+    public static void printOperationGain(int[][][] operationGain, int nStartNodes){
+        System.out.println("POperation gain");
+        for(int v=0;v<nStartNodes;v++) {
+            System.out.println("VESSEL "+v);
+            printGrid2(operationGain[v][0].length,operationGain[v].length,
+                    operationGain[v]);
+        }
     }
 
     //3 dimensional list, this function prints the time vessels use on operations in each time period.
