@@ -114,7 +114,6 @@ public class ConstructionHeuristic {
             int earliest=0;
             int latest=nTimePeriods;
             for (int v = 0; v < nVessels; v++) {
-                System.out.println("Try vessel "+v);
                 if(actionTime[v]+TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]>60){
                     continue;
                 }
@@ -123,7 +122,9 @@ public class ConstructionHeuristic {
                 boolean precedenceOverFeasible=true;
                 boolean precedenceOfFeasible=true;
                 if (DataGenerator.containsElement(o, OperationsForVessel[v])) {
+                    System.out.println("Try vessel "+v);
                     if (vesselroutes.get(v) == null) {
+                        System.out.println("Empty route");
                         //insertion into empty route
                         int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                         int timeIncrease=sailingTimeStartNodeToO;
@@ -146,6 +147,7 @@ public class ConstructionHeuristic {
                     }
                     else{
                         for(int n=0;n<vesselroutes.get(v).size();n++){
+                            System.out.println("On index "+n);
                             if(n==0) {
                                 //check insertion in first position
                                 int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
@@ -153,6 +155,7 @@ public class ConstructionHeuristic {
                                 int opTime=TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO];
                                 int[] precedenceOfValuesEarliest=checkprecedenceOfEarliest(o,v,earliestTemp);
                                 if (precedenceOfValuesEarliest[1]==1) {
+                                    System.out.println("BREAK");
                                     break outer;
                                 }
                                 earliestTemp=precedenceOfValuesEarliest[0];
@@ -196,6 +199,7 @@ public class ConstructionHeuristic {
                                 int latestTemp=twIntervals[o-startNodes.length-1][1];
                                 int[] precedenceOfValuesEarliest=checkprecedenceOfEarliest(o,v,earliestTemp);
                                 if (precedenceOfValuesEarliest[1]==1) {
+                                    System.out.println("BREAK");
                                     break outer;
                                 }
                                 latestTemp=checkprecedenceOfLatest(o,v,latestTemp);
@@ -231,6 +235,7 @@ public class ConstructionHeuristic {
                                 int earliestTemp=Math.max(earliestN+ sailingTimePrevToO +operationTimeN,twIntervals[o-startNodes.length-1][0]);
                                 int[] precedenceOfValuesEarliest=checkprecedenceOfEarliest(o,v,earliestTemp);
                                 if (precedenceOfValuesEarliest[1]==1) {
+                                    System.out.println("BREAK");
                                     break outer;
                                 }
                                 earliestTemp=precedenceOfValuesEarliest[0];
@@ -457,7 +462,7 @@ public class ConstructionHeuristic {
                         int change = checkChangeEarliest(earliest, insertIndex, route, precedenceIndex, pValues.getOperationObject().getEarliestTime(), o);
                         if (change!=0) {
                             if(firstOr.getEarliestTime()+change-1>59) {
-                                System.out.println("NOT PRECEDENCE OVER FEASIBLE TIME");
+                                System.out.println("NOT PRECEDENCE OVER FEASIBLE TIME P-OPERATION "+firstOr.getID());
                                 return false;
                             }
                             else{
@@ -466,7 +471,7 @@ public class ConstructionHeuristic {
                                         + change;
                                 if(newESecondOr>secondOr.getEarliestTime()) {
                                     if (newESecondOr > secondOr.getLatestTime()) {
-                                        System.out.println("NOT PRECEDENCE OVER FEASIBLE EARLIEST/LATEST");
+                                        System.out.println("NOT PRECEDENCE OVER FEASIBLE EARLIEST/LATEST P-OPERATION "+firstOr.getID());
                                         return false;
                                     }
                                 }
@@ -497,7 +502,7 @@ public class ConstructionHeuristic {
                         //System.out.println("Previous latest time for previous of "+firstOr.getLatestTime());
                         //System.out.println("change in previous of latest time "+change);
                         if(secondOr.getLatestTime()-change-1<0){
-                            System.out.println("NOT PRECEDENCE OF FEASIBLE TIME");
+                            System.out.println("NOT PRECEDENCE OF FEASIBLE TIME P-OPERATION "+firstOr.getID());
                             return false;
                         }
                         else {
@@ -505,7 +510,7 @@ public class ConstructionHeuristic {
                             if (newLSecondOr < secondOr.getLatestTime()) {
                                 //int newLSecondOr = secondOr.getLatestTime() - change;
                                 if (newLSecondOr < secondOr.getEarliestTime()) {
-                                    System.out.println("NOT PRECEDENCE OF FEASIBLE EARLIEST/LATEST");
+                                    System.out.println("NOT PRECEDENCE OF FEASIBLE EARLIEST/LATEST P-OPERATION "+firstOr.getID());
                                     return false;
                                 }
                             }
