@@ -245,11 +245,13 @@ public class ConstructionHeuristic {
                                 int timeIncrease=sailingTimePrevToO +sailingTimeOToNext - sailingTimePrevToNext;
                                 precedenceOverFeasible= checkPOverFeasible(precedenceOver, o, timeIncrease,n+1,earliestTemp);
                                 precedenceOfFeasible= checkPOfFeasible(precedenceOf, o, timeIncrease,n+1,latestTemp);
+                                /*
                                 System.out.println("P over feasible: "+precedenceOverFeasible);
                                 System.out.println("P of feasible: "+precedenceOfFeasible);
                                 System.out.println("TimeIncrease: "+timeIncrease+" less than Time added "+timeAdded);
                                 System.out.println("Earliest temp "+ earliestTemp+ " less than or equal to latest temp "+latestTemp);
                                 System.out.println("Earliest temp "+ earliestTemp+ " less than next earliest "+vesselroutes.get(v).get(n+1).getEarliestTime());
+                                 */
                                 if(timeIncrease < timeAdded && earliestTemp<=latestTemp && precedenceOverFeasible && precedenceOfFeasible && earliestTemp<vesselroutes.get(v).get(n+1).getEarliestTime()) {
                                     OperationInRoute lastOperation=vesselroutes.get(v).get(vesselroutes.get(v).size()-1);
                                     int earliestTimeLastOperationInRoute=lastOperation.getEarliestTime();
@@ -297,12 +299,15 @@ public class ConstructionHeuristic {
                         }
                     }
                 }
+                /*
                 System.out.println("NEW ADD: Vessel route "+routeIndex);
                 System.out.println("Operation "+o);
                 System.out.println("Earliest time "+ earliest);
                 System.out.println("Latest time "+ latest);
                 System.out.println("Route index "+indexInRoute);
                 System.out.println(" ");
+
+                 */
                 if (vesselroutes.get(routeIndex) == null) {
                     int finalIndexInRoute = indexInRoute;
                     vesselroutes.set(routeIndex, new ArrayList<>() {{
@@ -318,6 +323,7 @@ public class ConstructionHeuristic {
                 updateLatest(latest,indexInRoute,routeIndex);
                 updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
                 updatePrecedenceOf(checkPrecedence(routeIndex,1),indexInRoute);
+                /*
                 System.out.println("VESSEL "+routeIndex);
                 for(int n=0;n<vesselroutes.get(routeIndex).size();n++){
                     System.out.println("Number in order: "+n);
@@ -326,6 +332,8 @@ public class ConstructionHeuristic {
                     System.out.println("latest starting time "+vesselroutes.get(routeIndex).get(n).getLatestTime());
                     System.out.println(" ");
                 }
+
+                 */
             }
         }
         for(Integer taskLeft : allOperations){
