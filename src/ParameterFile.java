@@ -10,7 +10,7 @@ public class ParameterFile {
     public static String weatherFile= "weather_files/weather_normal.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
-    public static String testInstance ="test_instances/test_instance_15_locations.txt";
+    public static String testInstance ="test_instances/test_instance_15_locations_PRECEDENCEtest4.txt";
 
     // Insert the name of your result-routing-file. In this file the different variables are printed for the results
     // for each test instance you run on one of the models
