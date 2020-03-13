@@ -115,6 +115,7 @@ public class ConstructionHeuristic {
             int latest=nTimePeriods;
             for (int v = 0; v < nVessels; v++) {
                 if(actionTime[v]+TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]]>60){
+                    System.out.println("Break because of actiontime");
                     continue;
                 }
                 List<PrecedenceValues> precedenceOver= checkPrecedence(v,0);
@@ -135,7 +136,6 @@ public class ConstructionHeuristic {
                             System.out.println("BREAK");
                             break outer;
                         }
-                        latestTemp=checkprecedenceOfLatest(o,v,latestTemp);
                         earliestTemp=precedenceOfValuesEarliest[0];
                         if(timeIncrease < timeAdded && earliestTemp<=latestTemp) {
                             timeAdded = timeIncrease;
@@ -163,7 +163,6 @@ public class ConstructionHeuristic {
                                 int latestTemp = Math.min(vesselroutes.get(v).get(0).getLatestTime() - sailingTimeOToNext
                                                 - opTime
                                         , twIntervals[o - startNodes.length - 1][1]);
-                                latestTemp=checkprecedenceOfLatest(o,v,latestTemp);
                                 int timeIncrease=sailingTimeStartNodeToO + sailingTimeOToNext
                                         - SailingTimes[v][EarliestStartingTimeForVessel[v]][v][vesselroutes.get(v).get(0).getID() - 1];
                                 precedenceOverFeasible= checkPOverFeasible(precedenceOver, o, timeIncrease,0, earliestTemp);
@@ -202,7 +201,6 @@ public class ConstructionHeuristic {
                                     System.out.println("BREAK");
                                     break outer;
                                 }
-                                latestTemp=checkprecedenceOfLatest(o,v,latestTemp);
                                 earliestTemp=precedenceOfValuesEarliest[0];
                                 int timeIncrease=sailingTimePrevToO;
                                 precedenceOverFeasible= checkPOverFeasible(precedenceOver, o, timeIncrease,n+1,earliestTemp);
@@ -226,7 +224,7 @@ public class ConstructionHeuristic {
                                     latest = latestTemp;
                                 }
                             }
-                            if(n!=0 && n!=vesselroutes.get(v).size()-1){
+                            if(n<vesselroutes.get(v).size()-1){
                                 //check insertion for all other positions in the route
                                 int earliestN=vesselroutes.get(v).get(n).getEarliestTime();
                                 int operationTimeN=TimeVesselUseOnOperation[v][vesselroutes.get(v).get(n).getID()-1-startNodes.length][earliestN-1];
@@ -244,10 +242,14 @@ public class ConstructionHeuristic {
                                 int sailingTimePrevToNext=SailingTimes[v][startTimeSailingTimePrevToO-1][vesselroutes.get(v).get(n).getID()-1][vesselroutes.get(v).get(n+1).getID()-1];
                                 int latestTemp=Math.min(vesselroutes.get(v).get(n+1).getLatestTime()-
                                         sailingTimeOToNext- opTime,twIntervals[o-startNodes.length-1][1]);
-                                latestTemp=checkprecedenceOfLatest(o,v,latestTemp);
                                 int timeIncrease=sailingTimePrevToO +sailingTimeOToNext - sailingTimePrevToNext;
                                 precedenceOverFeasible= checkPOverFeasible(precedenceOver, o, timeIncrease,n+1,earliestTemp);
                                 precedenceOfFeasible= checkPOfFeasible(precedenceOf, o, timeIncrease,n+1,latestTemp);
+                                System.out.println("P over feasible: "+precedenceOverFeasible);
+                                System.out.println("P of feasible: "+precedenceOfFeasible);
+                                System.out.println("TimeIncrease: "+timeIncrease+" less than Time added "+timeAdded);
+                                System.out.println("Earliest temp "+ earliestTemp+ " less than or equal to latest temp "+latestTemp);
+                                System.out.println("Earliest temp "+ earliestTemp+ " less than next earliest "+vesselroutes.get(v).get(n+1).getEarliestTime());
                                 if(timeIncrease < timeAdded && earliestTemp<=latestTemp && precedenceOverFeasible && precedenceOfFeasible && earliestTemp<vesselroutes.get(v).get(n+1).getEarliestTime()) {
                                     OperationInRoute lastOperation=vesselroutes.get(v).get(vesselroutes.get(v).size()-1);
                                     int earliestTimeLastOperationInRoute=lastOperation.getEarliestTime();
@@ -265,6 +267,7 @@ public class ConstructionHeuristic {
                                     indexInRoute = n+1;
                                     earliest = earliestTemp;
                                     latest = latestTemp;
+                                    System.out.println("FEASIBLE");
                                 }
                             }
                         }
@@ -286,7 +289,6 @@ public class ConstructionHeuristic {
                     for (Map.Entry<Integer,PrecedenceValues> entry : precedenceOverOperations.entrySet()) {
                         int pKey = entry.getKey();
                         PrecedenceValues pValues = entry.getValue();
-                        System.out.println(pValues.getConnectedOperationObject());
                         if (pValues.getConnectedOperationID()==o){
                             precedenceOverOperations.replace(pKey,pValues,new PrecedenceValues(pValues.getOperationObject(),
                                     newOr,pValues.getConnectedOperationID(),pValues.getIndex(),pValues.getRoute(),routeIndex));
@@ -461,21 +463,20 @@ public class ConstructionHeuristic {
                     if (insertIndex <= precedenceIndex) {
                         int change = checkChangeEarliest(earliest, insertIndex, route, precedenceIndex, pValues.getOperationObject().getEarliestTime(), o);
                         if (change!=0) {
-                            if(firstOr.getEarliestTime()+change-1>59) {
-                                System.out.println("NOT PRECEDENCE OVER FEASIBLE TIME P-OPERATION "+firstOr.getID());
-                                return false;
+                            int t= firstOr.getEarliestTime()+change-1;
+                            if(t>59){
+                                t=59;
                             }
-                            else{
-                                int newESecondOr=firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
-                                        [firstOr.getEarliestTime()+change-1]
-                                        + change;
-                                if(newESecondOr>secondOr.getEarliestTime()) {
-                                    if (newESecondOr > secondOr.getLatestTime()) {
-                                        System.out.println("NOT PRECEDENCE OVER FEASIBLE EARLIEST/LATEST P-OPERATION "+firstOr.getID());
-                                        return false;
-                                    }
+                            int newESecondOr=firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
+                                    [t]
+                                    + change;
+                            if(newESecondOr>secondOr.getEarliestTime()) {
+                                if (newESecondOr > secondOr.getLatestTime()) {
+                                    System.out.println("NOT PRECEDENCE OVER FEASIBLE EARLIEST/LATEST P-OPERATION "+firstOr.getID());
+                                    return false;
                                 }
                             }
+
                         }
                     }
                 }
@@ -501,18 +502,16 @@ public class ConstructionHeuristic {
                     if (change!=0) {
                         //System.out.println("Previous latest time for previous of "+firstOr.getLatestTime());
                         //System.out.println("change in previous of latest time "+change);
-                        if(secondOr.getLatestTime()-change-1<0){
-                            System.out.println("NOT PRECEDENCE OF FEASIBLE TIME P-OPERATION "+firstOr.getID());
-                            return false;
+                        int t =secondOr.getLatestTime()-change-1;
+                        if(t<0){
+                            t=0;
                         }
-                        else {
-                            int newLSecondOr = firstOr.getLatestTime() - change - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1][secondOr.getLatestTime() - change - 1];
-                            if (newLSecondOr < secondOr.getLatestTime()) {
-                                //int newLSecondOr = secondOr.getLatestTime() - change;
-                                if (newLSecondOr < secondOr.getEarliestTime()) {
-                                    System.out.println("NOT PRECEDENCE OF FEASIBLE EARLIEST/LATEST P-OPERATION "+firstOr.getID());
-                                    return false;
-                                }
+                        int newLSecondOr = firstOr.getLatestTime() - change - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1][t];
+                        if (newLSecondOr < secondOr.getLatestTime()) {
+                            //int newLSecondOr = secondOr.getLatestTime() - change;
+                            if (newLSecondOr < secondOr.getEarliestTime()) {
+                                System.out.println("NOT PRECEDENCE OF FEASIBLE EARLIEST/LATEST P-OPERATION "+firstOr.getID());
+                                return false;
                             }
                         }
                     }
@@ -536,16 +535,6 @@ public class ConstructionHeuristic {
             }
         }
         return new int[]{earliestTemp,breakValue};
-    }
-
-    public int checkprecedenceOfLatest(int o, int v, int latestTemp){
-        int precedenceOf=precedenceALNS[o-1-startNodes.length][1];
-        if(precedenceOf!=0) {
-            PrecedenceValues pValues=precedenceOverOperations.get(precedenceOf);
-            int latestPO = pValues.getOperationObject().getLatestTime();
-            latestTemp = Math.min(latestTemp, latestPO + TimeVesselUseOnOperation[pValues.getRoute()][precedenceOf - 1 - startNodes.length][latestPO-1]);
-        }
-        return latestTemp;
     }
 
     public void updateLatest(int latest, int indexInRoute, int routeIndex){
@@ -624,7 +613,9 @@ public class ConstructionHeuristic {
         return lastEarliest-earliestPrecedenceOperation;
     }
 
-    public Integer checkChangeLatest(int latestInsertionOperation, int indexInRoute, int routeIndex, int precedenceIndex, int latestPrecedenceOperation, int o){
+    public Integer checkChangeLatest(int latestInsertionOperation, int indexInRoute, int routeIndex,
+                                     int precedenceIndex, int latestPrecedenceOperation, int o){
+        int returnValue=0;
         int lastLatest=latestInsertionOperation;
         int sailingTime;
         for(int k=indexInRoute-1;k>-1;k--){
@@ -641,14 +632,15 @@ public class ConstructionHeuristic {
             int newTime=Math.min(kObject.getLatestTime(),lastLatest- sailingTime
                     -timeOperationK);
             if(newTime==kObject.getLatestTime()){
-                return 0;
+                break;
             }
             lastLatest=newTime;
             if(k==precedenceIndex) {
+                returnValue=latestPrecedenceOperation-lastLatest;
                 break;
             }
         }
-        return latestPrecedenceOperation-lastLatest;
+        return returnValue;
     }
 
     public Integer checkChangeEarliestLastOperation(int earliestInsertionOperation, int earliestLastOperation, int indexInRoute, int routeIndex,int o){
