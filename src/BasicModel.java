@@ -630,7 +630,7 @@ public class BasicModel {
             locStart = new int[]{1, 2, 3};
         }
         else if (loc == 15) {
-            vessels = new int[]{1,2,4,5};
+            vessels = new int[]{1,2,3,4};
             locStart = new int[]{1, 2, 3,4};
         }
         DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);

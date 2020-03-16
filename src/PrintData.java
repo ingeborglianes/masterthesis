@@ -97,9 +97,9 @@ public class PrintData {
 
     //Length is the number of operations, not including start and end nodes. Each entry corresponds to one operation and the
     //value of that entry is the operation that has to be performed simultaneously
-    public static void printSimALNS(int[] simALNS){
+    public static void printSimALNS(int[][] simALNS){
         System.out.println("Simultaneous ALNS");
-        System.out.println(Arrays.toString(simALNS));
+        printGrid2(simALNS[0].length,simALNS.length,simALNS);
     }
 
     //Outer list: length is the number of operations, not including start and end nodes
