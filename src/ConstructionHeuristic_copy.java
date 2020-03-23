@@ -128,7 +128,7 @@ public class ConstructionHeuristic_copy {
                     isActionTime = true;
                     continue;
                 }
-                
+
                  */
                 List<PrecedenceValues> precedenceOver= checkPrecedence(v,0);
                 List<PrecedenceValues> precedenceOf= checkPrecedence(v,1);
@@ -223,9 +223,13 @@ public class ConstructionHeuristic_copy {
                             }
                             if (n==vesselroutes.get(v).size()-1){
                                 //check insertion in last position
+                                System.out.println("Checking this position");
                                 int earliestN=vesselroutes.get(v).get(n).getEarliestTime();
                                 int operationTimeN=TimeVesselUseOnOperation[v][vesselroutes.get(v).get(n).getID()-1-startNodes.length][earliestN-1];
                                 int startTimeSailingTimePrevToO=earliestN+operationTimeN;
+                                if(startTimeSailingTimePrevToO >= nTimePeriods){
+                                    continue;
+                                }
                                 int sailingTimePrevToO=SailingTimes[v][startTimeSailingTimePrevToO-1]
                                         [vesselroutes.get(v).get(n).getID()-1][o - 1];
                                 int earliestTemp=Math.max(earliestN + operationTimeN + sailingTimePrevToO
@@ -245,7 +249,6 @@ public class ConstructionHeuristic_copy {
                                 }
                                 earliestTemp=simultaneousTimesValues[0];
                                 latestTemp=simultaneousTimesValues[1];
-
 
                                 int timeIncrease=sailingTimePrevToO;
                                 if(timeIncrease < timeAdded && earliestTemp<=latestTemp) {
@@ -928,7 +931,7 @@ public class ConstructionHeuristic_copy {
                 ArrayList<ArrayList<Integer>> earliest_change = checkChangeEarliestSim(earliestTemp,insertIndex,v,o,op.getOperationObject().getID());
                 if (!earliest_change.isEmpty()) {
                     for (ArrayList<Integer> connectedTimes : earliest_change) {
-                        System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " earliest change");
+                        //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " earliest change");
                         if (connectedTimes.get(0) > connectedTimes.get(1)) {
                             return false;
                         }
@@ -937,7 +940,7 @@ public class ConstructionHeuristic_copy {
                 ArrayList<ArrayList<Integer>> latest_change = checkChangeLatestSim(latestTemp,insertIndex,v,o,op.getOperationObject().getID());
                 if(!latest_change.isEmpty()){
                     for(ArrayList<Integer> connectedTimes : latest_change){
-                        System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " latest change");
+                        //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " latest change");
                         if(connectedTimes.get(0) > connectedTimes.get(1)){
                             return false;
                         }
@@ -977,10 +980,17 @@ public class ConstructionHeuristic_copy {
                 break;
             }
         }
+        if(indexInRoute == vesselroutes.get(routeIndex).size()){
+            OperationInRoute op = simultaneousOp.get(simID).getConnectedOperationObject();
+            int new_earliest = op.getEarliestTime();
+            int latest = op.getLatestTime();
+            sim_earliests.add(new ArrayList<>(Arrays.asList(new_earliest,latest)));
+            return sim_earliests;
+        }
         OperationInRoute op = simultaneousOp.get(simID).getConnectedOperationObject();
-        System.out.println(op);
         int new_earliest = Math.max(lastEarliest, op.getEarliestTime());
         int latest = op.getLatestTime();
+        System.out.println(op.getLatestTime() + " , " + op.getID());
         sim_earliests.add(new ArrayList<>(Arrays.asList(new_earliest,latest)));
         return sim_earliests;
     }
@@ -1160,8 +1170,8 @@ public class ConstructionHeuristic_copy {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes =new int[]{1,2,3};
-        int[] startnodes=new int[]{1,2,3};
+        int[] vesseltypes =new int[]{1,2,3,4};
+        int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
                 "test_instances/test_instance_15_locations_SIMtest1.txt",
                 "results.txt", "weather_files/weather_normal.txt");
@@ -1172,8 +1182,9 @@ public class ConstructionHeuristic_copy {
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
-        PrintData.printSailingTimes(dg.getSailingTimes(),2,17,3);
-        PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),3);
+        PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
+        //PrintData.printSailingTimes(dg.getSailingTimes(),4,17,4);
+        //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),4);
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);

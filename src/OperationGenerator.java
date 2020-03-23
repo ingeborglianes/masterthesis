@@ -60,7 +60,14 @@ public class OperationGenerator {
         int[] op8v1 = new int[]{2, 3, 4, 6};
         int[] op8v2 = new int[]{2, 3, 4, 6};
         OperationType op8 = new OperationType(8, op8v1, op8v2, null,
-                0, 0, 600, 30, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Small installation facility");
+                0, 9, 2000, 160, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Small installation facility");
+        int[] op9v1 = new int[]{2, 3, 4, 6};
+        OperationType op9 = new OperationType(9, op9v1, null, null,
+                8, 0, 2000, 160, 6, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Easy transport of equipment to facility");
+        //int[] op8v1 = new int[]{2, 3, 4, 6};
+        //int[] op8v2 = new int[]{2, 3, 4, 6};
+        //OperationType op8 = new OperationType(8, op8v1, op8v2, null,
+        //        0, 0, 600, 30, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Small installation facility");
         int[] op10v1 = new int[]{2, 3, 4, 6};
         OperationType op10 = new OperationType(10, op10v1, null, null,
                 0, 0, 700, 100, 2, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Remove dead fish");
@@ -79,7 +86,7 @@ public class OperationGenerator {
         int[] op15v1 = new int[]{2, 3, 4, 6};
         OperationType op15 = new OperationType(15, op15v1, null, null,
                 0, 0, 700, 24, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Support working boat");
-        return new OperationType[]{op8,op12,op13,op14,op11,op15};
+        return new OperationType[]{op9,op8,op12,op13,op14,op11,op15};
     }
 }
 
