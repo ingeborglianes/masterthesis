@@ -94,7 +94,15 @@ public class ConstructionHeuristic_copy {
         }
         int index=0;
         for (KeyValuePair keyValuePair : penaltiesDict) {
-            sortedOperations[index]=keyValuePair.key;
+            if(!DataGenerator.containsElement(keyValuePair.key,sortedOperations)){
+                sortedOperations[index] = keyValuePair.key;
+            }
+            if(bigTasksALNS[keyValuePair.key-startNodes.length-1][0]==keyValuePair.key){
+                for (int i=1;i<bigTasksALNS[keyValuePair.key-startNodes.length-1].length;i++){
+                    index+=1;
+                    sortedOperations[index]=bigTasksALNS[keyValuePair.key-startNodes.length-1][i];
+                }
+            }
             index+=1;
         }
         System.out.println(Arrays.toString(sortedOperations));

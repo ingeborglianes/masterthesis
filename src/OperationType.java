@@ -10,12 +10,13 @@ public class OperationType {
     private int duration;
     private int operationGain;
     private String name;
+    private int timewindowInterval;
 
     //number,vessel1,vessel2,vesselBigTask, presedensOver, presedensAv, mHyppighet, sdHyppighet,
     //varighet, penalty
 
     public OperationType(int number, int[] vessel1, int[] vessel2,int [] vesselBigTask,int precedenceOver,int precedenceOf
-            ,int mFrequency,int sdFrequency,int duration,int operationGain, String name){
+            ,int mFrequency,int sdFrequency,int duration,int operationGain, int timewindowInterval, String name){
         this.number=number;
         this.vessel1=vessel1;
         this.vessel2=vessel2;
@@ -27,6 +28,11 @@ public class OperationType {
         this.duration=duration;
         this.operationGain=operationGain;
         this.name=name;
+        this.timewindowInterval=timewindowInterval;
+    }
+
+    public int getTimewindowInterval() {
+        return timewindowInterval;
     }
 
     public int getNumber() {

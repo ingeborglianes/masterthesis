@@ -1173,7 +1173,7 @@ public class ConstructionHeuristic {
         int[] vesseltypes =new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_instance_15_locations_SIMtest1.txt",
+                "test_instances/test_instance_15_locations_Consolidated_TW.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ConstructionHeuristic_copy a = new ConstructionHeuristic_copy(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
