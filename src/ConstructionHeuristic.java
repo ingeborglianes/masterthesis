@@ -1218,4 +1218,33 @@ public class ConstructionHeuristic {
     public int[] getRouteSailingCost() {
         return routeSailingCost;
     }
+
+    public int getObjValue() {
+        return objValue;
+    }
+
+    public Map<Integer, PrecedenceValues> getPrecedenceOverOperations() {
+        return precedenceOverOperations;
+    }
+
+    public Map<Integer, PrecedenceValues> getPrecedenceOfOperations() {
+        return precedenceOfOperations;
+    }
+
+    public Map<Integer, ConnectedValues> getSimultaneousOp() {
+        return simultaneousOp;
+    }
+
+    public List<Map<Integer, ConnectedValues>> getSimOpRoutes() {
+        return simOpRoutes;
+    }
+
+    public List<Map<Integer, PrecedenceValues>> getPrecedenceOfRoutes() {
+        return precedenceOfRoutes;
+    }
+
+    public List<Map<Integer, PrecedenceValues>> getPrecedenceOverRoutes() {
+        return precedenceOverRoutes;
+    }
+
 }
