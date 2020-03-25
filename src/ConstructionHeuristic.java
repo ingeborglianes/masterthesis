@@ -94,8 +94,20 @@ public class ConstructionHeuristic {
         }
         int index=0;
         for (KeyValuePair keyValuePair : penaltiesDict) {
-            sortedOperations[index]=keyValuePair.key;
+            if(!DataGenerator.containsElement(keyValuePair.key,sortedOperations)){
+                sortedOperations[index] = keyValuePair.key;
+            }
+            if(bigTasksALNS[keyValuePair.key-startNodes.length-1]!= null && bigTasksALNS[keyValuePair.key- startNodes.length-1][0]==keyValuePair.key){
+                for (int i=1;i<bigTasksALNS[keyValuePair.key-startNodes.length-1].length;i++){
+                    index+=1;
+                    sortedOperations[index]=bigTasksALNS[keyValuePair.key-startNodes.length-1][i];
+                }
+            }
             index+=1;
+        }
+        PrintData.printBigTasksALNS(bigTasksALNS,nOperations);
+        for(Integer op : sortedOperations){
+            System.out.println("Operation "+op+" Gain: "+operationGain[0][op-1-startNodes.length][0]);
         }
         System.out.println(Arrays.toString(sortedOperations));
     }
@@ -714,6 +726,8 @@ public class ConstructionHeuristic {
             OperationInRoute objectF=vesselroutes.get(routeIndex).get(f);
             int opTimeFMinus1=TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1]
                     [objectFMinus1.getLatestTime()-1];
+            System.out.println("size "+vesselroutes.get(routeIndex).size());
+            System.out.println("index "+f);
             int newTime=Math.max(vesselroutes.get(routeIndex).get(f).getEarliestTime(),lastEarliest+
                     SailingTimes[routeIndex][objectFMinus1.getEarliestTime()+opTimeFMinus1-1][objectFMinus1.getID()-1]
                             [objectF.getID()-1]
@@ -1173,10 +1187,10 @@ public class ConstructionHeuristic {
         int[] vesseltypes =new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_instance_15_locations_Consolidated_TW.txt",
+                "test_instances/test_instance_15_locations_Sim_Pres.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
-        ConstructionHeuristic_copy a = new ConstructionHeuristic_copy(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
+        ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(), dg.getTwIntervals(),

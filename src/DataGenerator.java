@@ -605,7 +605,7 @@ public class DataGenerator {
         PrintData.printTimeWindowsIntervals(this.twIntervals);
         //PrintData.printPrecedenceALNS(this.precedenceALNS);
         //PrintData.printSimALNS(this.simultaneousALNS);
-        //PrintData.printBigTasksALNS(this.bigTasksALNS,operations.length);
+        PrintData.printBigTasksALNS(this.bigTasksALNS,operations.length);
         //PrintData.printEarliestStartingTimes(earliestStartingTimeForVessel);
     }
 
