@@ -6,7 +6,8 @@ public class ConnectedValues {
     private int connectedRoute;
     private int route;
 
-    ConnectedValues(OperationInRoute operationObject, OperationInRoute connectedOperationObject, int connectedOperationID, int index, int route, int connectedRoute){
+    ConnectedValues(OperationInRoute operationObject, OperationInRoute connectedOperationObject, int connectedOperationID,
+                    int index, int route, int connectedRoute){
         this.operationObject=operationObject;
         this.connectedOperationObject=connectedOperationObject;
         this.connectedOperationID=connectedOperationID;

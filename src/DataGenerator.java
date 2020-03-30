@@ -44,7 +44,8 @@ public class DataGenerator {
     private int[][] precedenceALNS;
     private int[][] simultaneousALNS;
     private int[][] bigTasksALNS;
-
+    private int simNumber;
+    private int presNumber;
     public DataGenerator(int[] vessels, int days, int[] locationsStartNodes, String filePath, String fileNameRouting, String weatherFile){
         this.vesselsInput=vessels;
         this.days=days;
@@ -56,6 +57,8 @@ public class DataGenerator {
         this.weatherFile=weatherFile;
         this.weatherPenaltyOperations=new Double[days*12];
         this.weatherPenaltySpeed=new int[days*12];
+        this.simNumber=0;
+        this.presNumber=0;
     }
 
     public void importWeather() throws FileNotFoundException {
@@ -380,9 +383,14 @@ public class DataGenerator {
                     int num1 = nStartNodes + (int) (op1.getNumber()) - 1;
                     int num2 = nStartNodes + (int) (op2.getNumber()) - 1;
                     precedence[num1][num2]=1;
+                    if(precedenceALNS[op1.getNumber()-1][0]==0 && precedenceALNS[op1.getNumber()-1][1]==0){
+                        presNumber+=1;
+                    }
+                    if(precedenceALNS[op2.getNumber()-1][0]==0 && precedenceALNS[op2.getNumber()-1][1]==0){
+                        presNumber+=1;
+                    }
                     precedenceALNS[op1.getNumber()-1][0]=num2+1;
                     precedenceALNS[op2.getNumber()-1][1]=num1+1;
-                    System.out.println("Operation "+num1+" has precedence over operation "+num2);
                 }
             }
         }
@@ -400,11 +408,16 @@ public class DataGenerator {
                     int num1=nStartNodes + (int) (op1.getNumber()) - 1;
                     int num2=nStartNodes + (int)(op2.getNumber()) - 1;
                     sim[num1][num2]=1;
+                    if(simultaneousALNS[op1.getNumber()-1][0]==0 && simultaneousALNS[op1.getNumber()-1][1]==0){
+                        simNumber+=1;
+                    }
+                    if(simultaneousALNS[op2.getNumber()-1][0]==0 && simultaneousALNS[op2.getNumber()-1][1]==0){
+                        simNumber+=1;
+                    }
                     if(op1.getNumber() < op2.getNumber()){
                         simultaneousALNS[op1.getNumber()-1][0]=num2+1;
                         simultaneousALNS[op2.getNumber()-1][1]=num1+1;
                     }
-                    System.out.println("Operation "+num1+" is simultaneous with operation "+num2);
                 }
             }
         }
@@ -619,6 +632,14 @@ public class DataGenerator {
         dg.generateData();
         dg.printAllData();
 
+    }
+
+    public int getSimNumber() {
+        return simNumber;
+    }
+
+    public int getPresNumber() {
+        return presNumber;
     }
 
     public int[][] getTwIntervals() {

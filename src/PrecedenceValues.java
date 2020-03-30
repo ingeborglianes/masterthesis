@@ -6,7 +6,8 @@ public class PrecedenceValues {
     private int connectedRoute;
     private int route;
 
-    PrecedenceValues(OperationInRoute operationObject, OperationInRoute connectedOperationObject,int connectedOperationID,int index, int route,  int connectedRoute){
+    PrecedenceValues(OperationInRoute operationObject, OperationInRoute connectedOperationObject,int connectedOperationID,
+                     int index, int route,  int connectedRoute){
         this.operationObject=operationObject;
         this.connectedOperationObject=connectedOperationObject;
         this.connectedOperationID=connectedOperationID;
