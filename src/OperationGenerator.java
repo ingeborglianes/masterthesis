@@ -91,9 +91,9 @@ public class OperationGenerator {
         int[] op5v2 = new int[]{2, 3, 4};
         int[] op5BT = new int[]{6};
         OperationType op5 = new OperationType(5, op5v1, op5v2, op5BT,
-                0, 0, 700, 24, 40, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "Large inspection of the facility");
+                0, 0, 700, 24, 10, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "Large inspection of the facility");
 
-        return new OperationType[]{op9,op8,op12,op13,op14,op11,op15};
+        return new OperationType[]{op9,op8,op12,op13,op14,op11,op15,op5};
     }
 }
 
