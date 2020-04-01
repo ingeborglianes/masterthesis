@@ -61,17 +61,17 @@ public class OperationGenerator {
         int[] op8v1 = new int[]{2, 3, 4, 6};
         int[] op8v2 = new int[]{2, 3, 4, 6};
         OperationType op8 = new OperationType(8, op8v1, op8v2, null,
-                0, 9, 700, 160, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Small installation facility");
+                0, 0, 700, 160, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Small installation facility");
         int[] op9v1 = new int[]{2, 3, 4, 6};
         OperationType op9 = new OperationType(9, op9v1, null, null,
-                8, 0, 700, 160, 6, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Easy transport of equipment to facility");
+                0, 0, 700, 160, 6, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Easy transport of equipment to facility");
         //int[] op8v1 = new int[]{2, 3, 4, 6};
         //int[] op8v2 = new int[]{2, 3, 4, 6};
         //OperationType op8 = new OperationType(8, op8v1, op8v2, null,
         //        0, 0, 600, 30, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4, "Small installation facility");
         int[] op10v1 = new int[]{2, 3, 4, 6};
         OperationType op10 = new OperationType(10, op10v1, null, null,
-                0, 0, 700, 100, 2, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Remove dead fish");
+                0, 0, 400, 100, 2, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Remove dead fish");
         int[] op12v1 = new int[]{1, 2, 3, 4, 6};
         OperationType op12 = new OperationType(12, op12v1, null, null,
                 0, 0, 700, 100, 5, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Inspect net ROV");
@@ -93,7 +93,7 @@ public class OperationGenerator {
         OperationType op5 = new OperationType(5, op5v1, op5v2, op5BT,
                 0, 0, 700, 24, 10, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "Large inspection of the facility");
 
-        return new OperationType[]{op9,op8,op12,op13,op14,op11,op15,op5};
+        return new OperationType[]{op8,op13,op14,op11,op15};
     }
 }
 
