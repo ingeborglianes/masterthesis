@@ -93,7 +93,7 @@ public class OperationGenerator {
         OperationType op5 = new OperationType(5, op5v1, op5v2, op5BT,
                 0, 0, 700, 24, 10, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "Large inspection of the facility");
 
-        return new OperationType[]{op8,op13,op14,op11,op15};
+        return new OperationType[]{op8,op9,op10,op12,op13,op14,op11,op15};
     }
 }
 

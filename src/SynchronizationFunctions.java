@@ -55,5 +55,37 @@ public class SynchronizationFunctions {
         }
     }
 
+    if(simALNS[o-startNodes.length-1][1] != 0 ) {
+                    ConnectedValues simOp = simultaneousOp.get(simALNS[o - startNodes.length - 1][1]);
+                    int prevEarliest=0;
+                    if(simOp.getIndex() > 0) {
+                        prevEarliest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
+                    }
+                    OperationInRoute firstOp = vesselroutes.get(simOp.getRoute()).get(vesselroutes.get(simOp.getRoute()).size() - 1);
+                    if (simOp.getIndex() == 0) {
+                        prevEarliest = twIntervals[firstOp.getID() - startNodes.length - 1][0];
+                    }
+                    firstOp.setEarliestTime(prevEarliest);
+                    unroutedTasks.add(simOp.getOperationObject());
+                    vesselroutes.get(simOp.getRoute()).remove(simOp.getIndex());
+                    simultaneousOp.remove(simOp.getOperationObject().getID());
+                    simOpRoutes.get(simOp.getRoute()).remove(simOp.getOperationObject().getID());
+                    int nextLatest = 0;
+                    if (vesselroutes.get(simOp.getRoute()).size() > simOp.getIndex()) {
+                        nextLatest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex()).getLatestTime();
+                    }
+                    OperationInRoute lastOp = vesselroutes.get(simOp.getRoute()).get(vesselroutes.get(simOp.getRoute()).size() - 1);
+                    if (simOp.getIndex() == vesselroutes.get(simOp.getRoute()).size()) {
+                        nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
+                    }
+                    lastOp.setLatestTime(nextLatest);
+                    updateEarliest(prevEarliest, Math.max(simOp.getIndex()-1, 0), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                    updateLatestAfterRemoval(nextLatest, Math.min(simOp.getIndex(), vesselroutes.get(simOp.getRoute()).size() - 1), simOp.getRoute());
+                    updatePrecedenceOver(precedenceOverRoutes.get(routeIndex), simOp.getIndex(),simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
+                            startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
+                    updatePrecedenceOf(precedenceOverRoutes.get(routeIndex), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
+                            precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
+                    updateSimultaneousAfterRemoval(simOpRoutes.get(routeIndex), simOp.getRoute(), simOp.getIndex() - 1, o);
+
      */
 }

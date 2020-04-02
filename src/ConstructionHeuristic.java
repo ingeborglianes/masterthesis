@@ -47,10 +47,10 @@ public class ConstructionHeuristic {
     private Map<Integer, ConsolidatedValues> consolidatedOperations = new HashMap<>();
 
     public ConstructionHeuristic(int [][] OperationsForVessel, int [][] TimeWindowsForOperations, int [][][] Edges, int [][][][] SailingTimes,
-                                      int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
-                                      int [] SailingCostForVessel, int [][][] operationGain, int [][] Precedence, int [][] Simultaneous,
-                                      int [] BigTasks, Map<Integer, List<Integer>> ConsolidatedTasks, int[] endNodes, int[] startNodes, double[] endPenaltyforVessel,
-                                      int[][] twIntervals, int[][] precedenceALNS, int[][] simALNS, int[][] bigTasksALNS, int[][] timeWindowsForOperations){
+                                 int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
+                                 int [] SailingCostForVessel, int [][][] operationGain, int [][] Precedence, int [][] Simultaneous,
+                                 int [] BigTasks, Map<Integer, List<Integer>> ConsolidatedTasks, int[] endNodes, int[] startNodes, double[] endPenaltyforVessel,
+                                 int[][] twIntervals, int[][] precedenceALNS, int[][] simALNS, int[][] bigTasksALNS, int[][] timeWindowsForOperations){
         this.OperationsForVessel=OperationsForVessel;
         this.TimeWindowsForOperations=TimeWindowsForOperations;
         this.Edges=Edges;
@@ -374,7 +374,20 @@ public class ConstructionHeuristic {
                 }
                 if(simALNS[o-startNodes.length-1][1] != 0 ) {
                     ConnectedValues simOp = simultaneousOp.get(simALNS[o - startNodes.length - 1][1]);
-                    int prevEarliest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
+                    int prevEarliest=0;
+                    if(simOp.getIndex() - 1!=-1){
+                        prevEarliest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
+                    }
+                    if(simOp.getIndex() - 1==-1){
+                        OperationInRoute firstOp = vesselroutes.get(simOp.getRoute()).get(0);
+                        if(twIntervals[firstOp.getID()-startNodes.length-1][0]==0){
+                            prevEarliest = 1;
+                        }
+                        else{
+                            prevEarliest=twIntervals[firstOp.getID()-startNodes.length-1][0];
+                        }
+                        firstOp.setEarliestTime(prevEarliest);
+                    }
                     unroutedTasks.add(simOp.getOperationObject());
                     vesselroutes.get(simOp.getRoute()).remove(simOp.getIndex());
                     simultaneousOp.remove(simOp.getOperationObject().getID());
@@ -388,7 +401,7 @@ public class ConstructionHeuristic {
                         nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
                         lastOp.setLatestTime(nextLatest);
                     }
-                    updateEarliest(prevEarliest, simOp.getIndex() - 1, simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                    updateEarliest(prevEarliest, Math.max(simOp.getIndex() - 1,0), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
                     updateLatestAfterRemoval(nextLatest, Math.min(simOp.getIndex(), vesselroutes.get(simOp.getRoute()).size() - 1), simOp.getRoute());
                     updatePrecedenceOver(precedenceOverRoutes.get(routeIndex), simOp.getIndex(),simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
                             startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
@@ -512,7 +525,8 @@ public class ConstructionHeuristic {
             if(vesselroutes.get(r)!=null) {
                 OperationInRoute or = vesselroutes.get(r).get(0);
                 int opTime = TimeVesselUseOnOperation[r][or.getID() - 1 - startNodes.length][or.getEarliestTime()-1];
-                int cost0 = SailingTimes[r][or.getEarliestTime() + opTime-1][r][or.getID() - 1]*SailingCostForVessel[r];
+                System.out.println(or.getEarliestTime());
+                int cost0 = SailingTimes[r][EarliestStartingTimeForVessel[r]][r][or.getID() - 1]*SailingCostForVessel[r];
                 int gain0 = operationGain[r][or.getID() - 1 - startNodes.length][or.getEarliestTime()-1];
                 routeSailingCost[r] += cost0;
                 routeOperationGain[r] += gain0;
@@ -993,7 +1007,7 @@ public class ConstructionHeuristic {
                             System.out.println(simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getRoute() + " Con op of o ID" );
                             System.out.println(conOp.getIndex());
                             if((simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() - conOp.getIndex() > 0 &&
-                                insertIndex - op.getIndex() < 0) || (simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() -
+                                    insertIndex - op.getIndex() < 0) || (simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() -
                                     conOp.getIndex() < 0 && insertIndex - op.getIndex() > 0)){
                                 return false;
                             }
@@ -1164,9 +1178,9 @@ public class ConstructionHeuristic {
                 updateSailingTime=objectK.getLatestTime()+opTimeK;
             }
             //System.out.println("New sailing time "+updateSailingTime);
-            int newTime=lastLatest-
+            int newTime=Math.min(lastLatest-
                     SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
-                            [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK;
+                            [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK,twIntervals[objectK.getID()-1-startNodes.length][1]);
             //System.out.println("New time: "+newTime + " , " +"ID K: "+objectK.getID());
             if(newTime==objectK.getLatestTime()){
                 break;
@@ -1262,7 +1276,7 @@ public class ConstructionHeuristic {
         int[] vesseltypes =new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_instance_15_locations_simpleTestSIM.txt",
+                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
@@ -1272,7 +1286,7 @@ public class ConstructionHeuristic {
                 dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
-        //PrintData.printSailingTimes(dg.getSailingTimes(),2,dg.getOperationGain()[0].length,4);
+        PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getOperationGain()[0].length,4);
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),4);
         //PrintData.printTimeWindowsIntervals(dg.getTwIntervals());
         PrintData.printOperationsForVessel(dg.getOperationsForVessel());
