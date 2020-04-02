@@ -379,50 +379,7 @@ public class ConstructionHeuristic {
                     consolidatedOperations.put(bigTasksALNS[o - startNodes.length - 1][0], new ConsolidatedValues(false, false, 0, 0, 0));
                 }
                 if(simALNS[o-startNodes.length-1][1] != 0 ) {
-                    ConnectedValues simOp = simultaneousOp.get(simALNS[o - startNodes.length - 1][1]);
-                    int prevEarliest=0;
-                    if(simOp.getIndex() - 1!=-1){
-                        prevEarliest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
-                    }
-                    if(simOp.getIndex() - 1==-1){
-                        OperationInRoute firstOp = vesselroutes.get(simOp.getRoute()).get(0);
-                        if(twIntervals[firstOp.getID()-startNodes.length-1][0]==0){
-                            prevEarliest = 1;
-                        }
-                        else{
-                            prevEarliest=twIntervals[firstOp.getID()-startNodes.length-1][0];
-                        }
-                        firstOp.setEarliestTime(prevEarliest);
-                    }
-                    unroutedTasks.add(simOp.getOperationObject());
-                    vesselroutes.get(simOp.getRoute()).remove(simOp.getIndex());
-                    simultaneousOp.remove(simOp.getOperationObject().getID());
-                    simOpRoutes.get(simOp.getRoute()).remove(simOp.getOperationObject().getID());
-                    int nextLatest = 0;
-                    if (vesselroutes.get(simOp.getRoute()).size() > simOp.getIndex()) {
-                        nextLatest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex()).getLatestTime();
-                    }
-                    if (simOp.getIndex() == vesselroutes.get(simOp.getRoute()).size()) {
-                        OperationInRoute lastOp = vesselroutes.get(simOp.getRoute()).get(vesselroutes.get(simOp.getRoute()).size() - 1);
-                        nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
-                        lastOp.setLatestTime(nextLatest);
-                    }
-                    updateEarliest(prevEarliest, Math.max(simOp.getIndex() - 1,0), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
-                    updateLatestAfterRemoval(nextLatest, Math.min(simOp.getIndex(), vesselroutes.get(simOp.getRoute()).size() - 1), simOp.getRoute());
-                    updatePrecedenceOver(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
-                            startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
-                    updatePrecedenceOf(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
-                            precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
-                    updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1, o);
-
-                    //System.out.println("Update by removal VESSEL "+simOp.getRoute());
-                    for (int n = 0; n < vesselroutes.get(simOp.getRoute()).size(); n++) {
-                        //System.out.println("Number in order: "+n);
-                        //System.out.println("ID "+vesselroutes.get(simOp.getRoute()).get(n).getID());
-                        //System.out.println("Earliest starting time "+vesselroutes.get(simOp.getRoute()).get(n).getEarliestTime());
-                        //System.out.println("latest starting time "+vesselroutes.get(simOp.getRoute()).get(n).getLatestTime());
-                        //System.out.println(" ");
-                    }
+                    updatesAfterRemovalSim(o);
                 }
             }
             //After iterating through all possible insertion places, we here add the operation at the best insertion place
@@ -458,12 +415,13 @@ public class ConstructionHeuristic {
                 }
                 else if (simA != 0){
                     ConnectedValues sValues = simultaneousOp.get(simA);
-                    if(sValues.getConnectedOperationObject() == null) {
+                    if(sValues.getConnectedOperationObject() == null){
                         ConnectedValues cValuesReplace=new ConnectedValues(sValues.getOperationObject(), newOr, sValues.getConnectedOperationID(),
                                 sValues.getIndex(), sValues.getRoute(), routeIndex);
                         simultaneousOp.replace(simA, sValues, cValuesReplace);
                         simOpRoutes.get(sValues.getRoute()).replace(simA, sValues, cValuesReplace);
-                    }else{
+                    }
+                    else{
                         ConnectedValues cValuesPut1=new ConnectedValues(sValues.getOperationObject(), newOr, sValues.getConnectedOperationID(),
                                 sValues.getIndex(), sValues.getRoute(), routeIndex);
                         simultaneousOp.put(simA, cValuesPut1);
@@ -473,8 +431,6 @@ public class ConstructionHeuristic {
                     simultaneousOp.put(o, sim2);
                     simOpRoutes.get(routeIndex).put(o, sim2);
                 }
-
-
                 System.out.println("NEW ADD: Vessel route "+routeIndex);
                 System.out.println("Operation "+o);
                 System.out.println("Earliest time "+ earliest);
@@ -679,7 +635,6 @@ public class ConstructionHeuristic {
                                     }
                                 }
                             }
-
                         }
                     }
                 }
@@ -1202,6 +1157,53 @@ public class ConstructionHeuristic {
             }
             objectK.setLatestTime(newTime);
             lastLatest=newTime;
+        }
+    }
+
+    public void updatesAfterRemovalSim(int o){
+        ConnectedValues simOp = simultaneousOp.get(simALNS[o - startNodes.length - 1][1]);
+        int prevEarliest=0;
+        if(simOp.getIndex() - 1!=-1){
+            prevEarliest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
+        }
+        if(simOp.getIndex() - 1==-1){
+            OperationInRoute firstOp = vesselroutes.get(simOp.getRoute()).get(0);
+            if(twIntervals[firstOp.getID()-startNodes.length-1][0]==0){
+                prevEarliest = 1;
+            }
+            else{
+                prevEarliest=twIntervals[firstOp.getID()-startNodes.length-1][0];
+            }
+            firstOp.setEarliestTime(prevEarliest);
+        }
+        unroutedTasks.add(simOp.getOperationObject());
+        vesselroutes.get(simOp.getRoute()).remove(simOp.getIndex());
+        simultaneousOp.remove(simOp.getOperationObject().getID());
+        simOpRoutes.get(simOp.getRoute()).remove(simOp.getOperationObject().getID());
+        int nextLatest = 0;
+        if (vesselroutes.get(simOp.getRoute()).size() > simOp.getIndex()) {
+            nextLatest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex()).getLatestTime();
+        }
+        if (simOp.getIndex() == vesselroutes.get(simOp.getRoute()).size()) {
+            OperationInRoute lastOp = vesselroutes.get(simOp.getRoute()).get(vesselroutes.get(simOp.getRoute()).size() - 1);
+            nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
+            lastOp.setLatestTime(nextLatest);
+        }
+        updateEarliest(prevEarliest, Math.max(simOp.getIndex() - 1,0), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+        updateLatestAfterRemoval(nextLatest, Math.min(simOp.getIndex(), vesselroutes.get(simOp.getRoute()).size() - 1), simOp.getRoute());
+        updatePrecedenceOver(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
+                startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
+        updatePrecedenceOf(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
+                precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
+        updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1, o);
+
+        //System.out.println("Update by removal VESSEL "+simOp.getRoute());
+        for (int n = 0; n < vesselroutes.get(simOp.getRoute()).size(); n++) {
+            //System.out.println("Number in order: "+n);
+            //System.out.println("ID "+vesselroutes.get(simOp.getRoute()).get(n).getID());
+            //System.out.println("Earliest starting time "+vesselroutes.get(simOp.getRoute()).get(n).getEarliestTime());
+            //System.out.println("latest starting time "+vesselroutes.get(simOp.getRoute()).get(n).getLatestTime());
+            //System.out.println(" ");
         }
     }
 
