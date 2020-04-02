@@ -728,7 +728,7 @@ public class ConstructionHeuristic {
             int newTime=Math.min(objectK.getLatestTime(),lastLatest-
                     SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
                             [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK);
-            //System.out.println("New time: "+ newTime + " , " + "ID K: " +objectK.getID());
+            System.out.println("New time: "+ newTime + " , " + "ID K: " +objectK.getID());
             if(newTime==objectK.getLatestTime()){
                 break;
             }
@@ -890,7 +890,8 @@ public class ConstructionHeuristic {
                                           Map<Integer, PrecedenceValues> precedenceOfOperations, List<List<OperationInRoute>> vesselroutes, Boolean update) {
         if(simOpRoutes.get(routeIndex)!=null){
             for (ConnectedValues sValues : simOpRoutes.get(routeIndex).values()) {
-                //System.out.println("Update caused by simultaneous " + sValues.getOperationObject().getID() + " in route " + routeIndex);
+                //System.out.println("Update caused by simultaneous " + sValues.getOperationObject().getID() + " in route " + routeIndex +
+                //        " with latest time: " + sValues.getOperationObject().getLatestTime());
                 int cur_earliestTemp = sValues.getOperationObject().getEarliestTime();
                 int cur_latestTemp = sValues.getOperationObject().getLatestTime();
 
@@ -905,12 +906,16 @@ public class ConstructionHeuristic {
                     int earliestPO = simOp.getEarliestTime();
                     int earliestTemp = Math.max(cur_earliestTemp, earliestPO);
                     int latestPO = simOp.getLatestTime();
+                    //System.out.println(cur_latestTemp + " . " + latestPO);
                     int latestTemp = Math.min(cur_latestTemp, latestPO);
                     if (earliestTemp > cur_earliestTemp) {
                         cur_earliestTemp = earliestTemp;
+                        //System.out.println("kjører her 1");
                         sValues.getOperationObject().setEarliestTime(cur_earliestTemp);
-                        updateEarliest(cur_earliestTemp,indexInRoute,routeIndex,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes);
+                        //System.out.println("oppdaterer: " + sValues.getOperationObject().getID() + " med ny earliest tid " + sValues.getOperationObject().getEarliestTime());
+                        updateEarliest(cur_earliestTemp,sValues.getIndex(),sValues.getRoute(),TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes);
                     }else if(earliestTemp>earliestPO){
+                        //System.out.println("kjører her 2");
                         ConnectedValues simOpObj = simultaneousOp.get(simOp.getID());
                         simOpObj.getOperationObject().setEarliestTime(cur_earliestTemp);
                         updateEarliest(cur_earliestTemp,simOpObj.getIndex(),simOpObj.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
@@ -921,11 +926,17 @@ public class ConstructionHeuristic {
                     }
                     if (latestTemp < cur_latestTemp) {
                         cur_latestTemp = latestTemp;
+                        //System.out.println("kjører her 3");
                         sValues.getOperationObject().setLatestTime(cur_latestTemp);
-                        updateLatest(cur_latestTemp,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                        //System.out.println("oppdaterer: " + sValues.getOperationObject().getID() + " med ny latest tid " + sValues.getOperationObject().getLatestTime());
+                        updateLatest(cur_latestTemp,sValues.getIndex(),sValues.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
                     }else if(latestTemp<latestPO){
+                        //System.out.println("kjører her 4");
+                        //System.out.println(latestTemp + " , "+latestPO);
                         ConnectedValues simOpObj = simultaneousOp.get(simOp.getID());
+                        //System.out.println(simOpObj.getOperationObject().getID() + " , " + simOpObj.getOperationObject().getLatestTime());
                         simOpObj.getOperationObject().setLatestTime(cur_latestTemp);
+                        //System.out.println("oppdaterer: " + simOpObj.getOperationObject().getID() + " med ny latest tid " + simOpObj.getOperationObject().getLatestTime());
                         updateLatest(cur_latestTemp,simOpObj.getIndex(),simOpObj.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
                         updateSimultaneous(simOpRoutes,simOpObj.getRoute(),simOpObj.getIndex(),simOpObj.getOperationObject().getID(),
                                 simultaneousOp,precedenceOverRoutes, precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
