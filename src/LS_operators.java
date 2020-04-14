@@ -66,7 +66,8 @@ public class LS_operators {
     }
 
 
-    public List<List<OperationInRoute>> one_relocate(List<List<OperationInRoute>> vesselroutes, int vessel, int pos1, int pos2, int[] startnodes){
+    public List<List<OperationInRoute>> one_relocate(List<List<OperationInRoute>> vesselroutes, int vessel, int pos1, int pos2,
+                                                     int[] startnodes, List<OperationInRoute> unroutedTasks){
         if (pos1 == pos2){
             System.out.println("Cannot relocate task to same position");
             return vesselroutes;
@@ -239,13 +240,15 @@ public class LS_operators {
         updateEarliest(earliest,earliest_insert,vessel,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes);
         updateLatest(latest,latest_insert,vessel,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes);
         updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel,vesselroutes);
-
+        /*
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel),pos2,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
                                                     TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,
                                                     vesselroutes,SailingTimes);
         ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(vessel),pos2, TimeVesselUseOnOperation,startNodes,simOpRoutes,
                                                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,
                                                 vesselroutes,simultaneousOp,SailingTimes);
+
+         */
         updateSimultaneous(simOpRoutes,vessel,pos2,vesselroutes.get(vessel).get(pos2).getID(), simultaneousOp,
                 precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                 precedenceOfOperations,vesselroutes, pos1,pos2, "onerelocate");
@@ -257,6 +260,7 @@ public class LS_operators {
         }
         */
         System.out.println("Relocate performed");
+        printLSOSolution(vesseltypes,vesselroutes,unroutedTasks);
         return vesselroutes;
 
     }
@@ -901,7 +905,7 @@ public class LS_operators {
 
         if(simOpRoutes.get(routeIndex)!=null){
             for (ConnectedValues sValues : simOpRoutes.get(routeIndex).values()) {
-                //System.out.println("Update caused by simultaneous " + sValues.getOperationObject().getID() + " in route " + routeIndex);
+                System.out.println("Update caused by simultaneous " + sValues.getOperationObject().getID() + " in route " + routeIndex);
                 int cur_earliestTemp = sValues.getOperationObject().getEarliestTime();
                 int cur_latestTemp = sValues.getOperationObject().getLatestTime();
                 //System.out.println(routeIndex + " Route index");
@@ -1044,12 +1048,13 @@ public class LS_operators {
         return true;
     }
 
-    public List<List<OperationInRoute>> searchAll (List<List<OperationInRoute>> vesselroutes){
+    public List<List<OperationInRoute>> searchAll (List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks){
         for(int vessel=1; vessel<vesselroutes.size()-1;vessel++){
             for(int position=0;position<vesselroutes.get(vessel).size()-1;position++){
                 for(int task=0;task<vesselroutes.get(vessel).size()-1;task++) {
                     System.out.println(vessel + " , " + task + " , " + position);
-                    vesselroutes = one_relocate(vesselroutes,vessel,task,position,startNodes);
+                    vesselroutes = one_relocate(vesselroutes,vessel,task,position,startNodes,unroutedTasks);
+                    //printLSOSolution(vesseltypes,vesselroutes,unroutedTasks);
                 }
             }
         }
@@ -1108,7 +1113,7 @@ public class LS_operators {
         int[] vesseltypes = new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/test_instance_15_locations_PRECEDENCEtest.txt",
+                "test_instances/test_instance_15_locations_simpleTestSIM.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
@@ -1126,9 +1131,9 @@ public class LS_operators {
                                             dg.getTwIntervals(),a.getRouteSailingCost(),a.getObjValue(),dg.getStartNodes(), dg.getSimultaneousALNS(),
                                             a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),
                                             a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes());
-        //List<List<OperationInRoute>> new_vesselroutes = LSO.one_relocate(a.vesselroutes,1,3,2,startnodes);
-        List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes);
-        LSO.printLSOSolution(vesseltypes,new_vesselroutes,a.getUnroutedTasks());
+        //List<List<OperationInRoute>> new_vesselroutes = LSO.one_relocate(a.vesselroutes,1,2,3,startnodes,a.getUnroutedTasks());
+        List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes, a.getUnroutedTasks());
+        //LSO.printLSOSolution(vesseltypes,new_vesselroutes,a.getUnroutedTasks());
     }
 
 }
