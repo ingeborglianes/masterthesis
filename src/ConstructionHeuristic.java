@@ -392,7 +392,7 @@ public class ConstructionHeuristic {
                     ConnectedValues simOp = simultaneousOp.get(simALNS[o - startNodes.length - 1][1]);
                     removeSimOf(simOp,simultaneousOp, vesselroutes, TimeVesselUseOnOperation, startNodes,
                     SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
-                            precedenceOverRoutes, precedenceOfRoutes);
+                            precedenceOverRoutes, precedenceOfRoutes, EarliestStartingTimeForVessel);
                 }
             }
             //After iterating through all possible insertion places, we here add the operation at the best insertion place
@@ -501,7 +501,7 @@ public class ConstructionHeuristic {
                                           int [] EarliestStartingTimeForVessel, int [][][] operationGain, int[] routeSailingCost,
                                           int [] routeOperationGain, int objValue){
         for (int r=0;r<vesselroutes.size();r++){
-            if(vesselroutes.get(r)!=null) {
+            if(vesselroutes.get(r)!= null && !vesselroutes.get(r).isEmpty()) {
                 OperationInRoute or = vesselroutes.get(r).get(0);
                 int opTime = TimeVesselUseOnOperation[r][or.getID() - 1 - startNodes.length][or.getEarliestTime()-1];
                 System.out.println(or.getEarliestTime());
@@ -1130,7 +1130,7 @@ public class ConstructionHeuristic {
 
     public static void updateSimultaneousAfterRemoval(Map<Integer,ConnectedValues> simultaneous, int routeIndex, int indexInRoute, Map<Integer,ConnectedValues> simultaneousOp,
                                                       List<List<OperationInRoute>> vesselroutes, int[][][] TimeVesselUseOnOperation, int[] startNodes,
-                                                      int[][][][] SailingTimes) {
+                                                      int[][][][] SailingTimes, int[][] twIntervals,int[] EarliestStartingTime) {
         if(simultaneous!=null){
             System.out.println("UPDATE SIM");
             for (ConnectedValues sValues : simultaneous.values()) {
@@ -1148,23 +1148,36 @@ public class ConstructionHeuristic {
                     System.out.println("connected not null");
                     OperationInRoute simOp = sValues.getConnectedOperationObject();
                     ConnectedValues simOpObj = simultaneousOp.get(simOp.getID());
-                    int conOpPrevEarliest = vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()-1).getEarliestTime();
-                    int conOpNextLatest = vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()+1).getLatestTime();
-                    int conOpPrevOpTime = TimeVesselUseOnOperation[simOpObj.getRoute()]
-                            [vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()-1).getID()-startNodes.length-1][conOpPrevEarliest];
+                    int conOpPrevEarliest= EarliestStartingTime[simOpObj.getRoute()];
+                    int conOpPrevOpTime = 0;
+                    int sailingTimePrevToCur=SailingTimes[simOpObj.getRoute()][conOpPrevEarliest+conOpPrevOpTime]
+                            [simOpObj.getRoute()][simOpObj.getOperationObject().getID()-1];
+                    if(simOpObj.getIndex()-1>=0) {
+                        conOpPrevEarliest = vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex() - 1).getEarliestTime();
+                        conOpPrevOpTime = TimeVesselUseOnOperation[simOpObj.getRoute()]
+                                [vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()-1).getID()-startNodes.length-1][conOpPrevEarliest-1];
+                        sailingTimePrevToCur=SailingTimes[simOpObj.getRoute()][conOpPrevEarliest+conOpPrevOpTime-1]
+                                [vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()-1).getID()-1][simOpObj.getOperationObject().getID()-1];
+                    }
+
                     int earliestPO = conOpPrevEarliest + conOpPrevOpTime
-                            + SailingTimes[simOpObj.getRoute()][conOpPrevEarliest+conOpPrevOpTime]
-                            [vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()-1).getID()-1][simOpObj.getOperationObject().getID()-1];
+                            + sailingTimePrevToCur;
                     ////System.out.println(earliestPO);
                     int conOpOpTime = TimeVesselUseOnOperation[simOpObj.getRoute()]
                             [simOpObj.getOperationObject().getID()-startNodes.length-1][earliestPO];
-                    int latestPO = conOpNextLatest - conOpOpTime -
-                            SailingTimes[simOpObj.getRoute()][earliestPO][simOpObj.getOperationObject().getID()-1]
-                                    [vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()+1).getID()-1];
-                    ////System.out.println(latestPO);
-                    int earliestTemp = Math.max(cur_earliestTemp, earliestPO);
-                    int latestTemp = Math.min(cur_latestTemp, latestPO);
+                    int conOpNextLatest = twIntervals[twIntervals.length-1][1];
+                    int sailingTimeCurToNext=0;
+                    if(vesselroutes.get(simOpObj.getRoute()).size()-1>simOpObj.getIndex()+1){
+                        conOpNextLatest = vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()+1).getLatestTime();
+                        sailingTimeCurToNext=SailingTimes[simOpObj.getRoute()][earliestPO+conOpOpTime-1]
+                                    [simOpObj.getOperationObject().getID()-1][vesselroutes.get(simOpObj.getRoute()).get(simOpObj.getIndex()+1).getID()-1];
+                    }
 
+                    int latestPO = conOpNextLatest - conOpOpTime -
+                            sailingTimeCurToNext;
+                    ////System.out.println(latestPO);
+                    int earliestTemp = Math.max(cur_earliestTemp, Math.max(earliestPO,twIntervals[simOp.getID()-1-startNodes.length][0]));
+                    int latestTemp = Math.min(cur_latestTemp, Math.min(latestPO,twIntervals[simOp.getID()-1-startNodes.length][1]));
                     if (earliestTemp > cur_earliestTemp) {
                         cur_earliestTemp = earliestTemp;
                         sValues.getOperationObject().setEarliestTime(cur_earliestTemp);
@@ -1224,7 +1237,7 @@ public class ConstructionHeuristic {
                                               int[][][][] SailingTimes, int[][] twIntervals, List<OperationInRoute> unroutedTasks,
                                               List<Map<Integer, ConnectedValues>> simOpRoutes, Map<Integer, PrecedenceValues> precedenceOverOperations,
                                               Map<Integer, PrecedenceValues> precedenceOfOperations,List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
-                                              List<Map<Integer, PrecedenceValues>> precedenceOfRoutes){
+                                              List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, int[] EarliestStartingTimeForVessel){
         int prevEarliest=0;
         if(simOp.getIndex() - 1!=-1){
             prevEarliest = vesselroutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
@@ -1260,7 +1273,7 @@ public class ConstructionHeuristic {
         updatePrecedenceOf(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
         updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1,
-                simultaneousOp, vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes);
+                simultaneousOp, vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes,twIntervals,EarliestStartingTimeForVessel);
 
         //System.out.println("Update by removal VESSEL "+simOp.getRoute());
         for (int n = 0; n < vesselroutes.get(simOp.getRoute()).size(); n++) {
