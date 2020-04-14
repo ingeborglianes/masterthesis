@@ -58,34 +58,15 @@ public class LargeNeighboorhoodSearch {
             int selectedTaskID = selectedTask.getID();
             //sim task
             if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 || simALNS[selectedTaskID-startNodes.length-1][0] != 0) {
-                /*
-                //simultaneous over removed
-                ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(simALNS[selectedTaskID-startNodes.length-1][1]),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,
-                        SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
-                        precedenceOverRoutes, precedenceOfRoutes);
-                // next: remove simultaneous of
-                ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(selectedTaskID),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,
-                        SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
-                        precedenceOverRoutes, precedenceOfRoutes);
+                removeSynchronizedOp(simultaneousOp.get(selectedTaskID),null,0);
                 if(simALNS[selectedTaskID-startNodes.length-1][0] != 0 ) {
-
+                    removeSynchronizedOp(simultaneousOp.get(simALNS[selectedTaskID-startNodes.length-1][0]),null,0);
                 }
-                else if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 ) {
-
+                if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 ) {
+                    removeSynchronizedOp(simultaneousOp.get(simALNS[selectedTaskID-startNodes.length-1][1]),null,0);
                 }
             }
 
-                /*
-                //simultaneous of removed
-                ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(simALNS[selectedTaskID-startNodes.length-1][0]),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,
-                        SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
-                        precedenceOverRoutes, precedenceOfRoutes);
-                // next: remove simultaneous over
-                ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(selectedTaskID),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,
-                        SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
-                        precedenceOverRoutes, precedenceOfRoutes);
-                */
-            }
             //precedence of task
             else if(precedenceOfOperations.get(selectedTask.getID())!=null){
 
@@ -119,6 +100,107 @@ public class LargeNeighboorhoodSearch {
 
     public void routeRemoval(){
 
+    }
+
+    public void removeSynchronizedOp(ConnectedValues simOp, PrecedenceValues pOp, int presType){
+        int route;
+        int index;
+        if(simOp!=null){
+            route=simOp.getRoute();
+            index=simOp.getIndex();
+        }
+        else{
+            route=pOp.getRoute();
+            index=pOp.getIndex();
+        }
+        int prevEarliest=0;
+        if(index - 1!=-1){
+            prevEarliest = vesselRoutes.get(route).get(index - 1).getEarliestTime();
+        }
+        if(index - 1==-1){
+            OperationInRoute firstOp = vesselRoutes.get(route).get(0);
+            if(twIntervals[firstOp.getID()-startNodes.length-1][0]==0){
+                prevEarliest = 1;
+            }
+            else{
+                prevEarliest=twIntervals[firstOp.getID()-startNodes.length-1][0];
+            }
+            firstOp.setEarliestTime(prevEarliest);
+        }
+        unroutedTasks.add(simOp.getOperationObject());
+        vesselRoutes.get(route).remove(index);
+        if(simOp!=null){
+            simultaneousOp.remove(simOp.getOperationObject().getID());
+            simOpRoutes.get(simOp.getRoute()).remove(simOp.getOperationObject().getID());
+        }
+        if(pOp!=null){
+            if(presType==0) {
+                precedenceOverOperations.remove(pOp.getOperationObject().getID());
+                precedenceOverRoutes.get(route).remove(pOp.getOperationObject().getID());
+            }
+            else{
+                precedenceOfOperations.remove(pOp.getOperationObject().getID());
+                precedenceOfRoutes.get(route).remove(pOp.getOperationObject().getID());
+            }
+        }
+        int nextLatest = 0;
+        if (vesselRoutes.get(simOp.getRoute()).size() > simOp.getIndex()) {
+            nextLatest = vesselRoutes.get(simOp.getRoute()).get(simOp.getIndex()).getLatestTime();
+        }
+        if (simOp.getIndex() == vesselRoutes.get(simOp.getRoute()).size()) {
+            OperationInRoute lastOp = vesselRoutes.get(simOp.getRoute()).get(vesselRoutes.get(simOp.getRoute()).size() - 1);
+            nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
+            lastOp.setLatestTime(nextLatest);
+        }
+        ConstructionHeuristic.updateEarliest(prevEarliest, Math.max(simOp.getIndex() - 1,0), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes);
+        ConstructionHeuristic.updateLatestAfterRemoval(nextLatest, Math.min(simOp.getIndex(), vesselRoutes.get(simOp.getRoute()).size() - 1), simOp.getRoute(),vesselRoutes, TimeVesselUseOnOperation, startNodes,
+                SailingTimes, twIntervals);
+        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
+                startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselRoutes,SailingTimes);
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
+                precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselRoutes,simultaneousOp,SailingTimes);
+        ConstructionHeuristic.updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1,
+                simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes);
+    }
+
+    //remember to change argument to int operationNumber
+    public void removeNormalOp(ConnectedValues simOp){
+        int prevEarliest=0;
+        if(simOp.getIndex() - 1!=-1){
+            prevEarliest = vesselRoutes.get(simOp.getRoute()).get(simOp.getIndex() - 1).getEarliestTime();
+        }
+        if(simOp.getIndex() - 1==-1){
+            OperationInRoute firstOp = vesselRoutes.get(simOp.getRoute()).get(0);
+            if(twIntervals[firstOp.getID()-startNodes.length-1][0]==0){
+                prevEarliest = 1;
+            }
+            else{
+                prevEarliest=twIntervals[firstOp.getID()-startNodes.length-1][0];
+            }
+            firstOp.setEarliestTime(prevEarliest);
+        }
+        unroutedTasks.add(simOp.getOperationObject());
+        vesselRoutes.get(simOp.getRoute()).remove(simOp.getIndex());
+        simultaneousOp.remove(simOp.getOperationObject().getID());
+        simOpRoutes.get(simOp.getRoute()).remove(simOp.getOperationObject().getID());
+        int nextLatest = 0;
+        if (vesselRoutes.get(simOp.getRoute()).size() > simOp.getIndex()) {
+            nextLatest = vesselRoutes.get(simOp.getRoute()).get(simOp.getIndex()).getLatestTime();
+        }
+        if (simOp.getIndex() == vesselRoutes.get(simOp.getRoute()).size()) {
+            OperationInRoute lastOp = vesselRoutes.get(simOp.getRoute()).get(vesselRoutes.get(simOp.getRoute()).size() - 1);
+            nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
+            lastOp.setLatestTime(nextLatest);
+        }
+        ConstructionHeuristic.updateEarliest(prevEarliest, Math.max(simOp.getIndex() - 1,0), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes);
+        ConstructionHeuristic.updateLatestAfterRemoval(nextLatest, Math.min(simOp.getIndex(), vesselRoutes.get(simOp.getRoute()).size() - 1), simOp.getRoute(),vesselRoutes, TimeVesselUseOnOperation, startNodes,
+                SailingTimes, twIntervals);
+        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
+                startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselRoutes,SailingTimes);
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
+                precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselRoutes,simultaneousOp,SailingTimes);
+        ConstructionHeuristic.updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1,
+                simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes);
     }
 
 }
