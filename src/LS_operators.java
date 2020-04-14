@@ -1,5 +1,6 @@
 import javax.sound.midi.Soundbank;
 import java.io.FileNotFoundException;
+import java.sql.Time;
 import java.util.*;
 
 public class LS_operators {
@@ -67,6 +68,7 @@ public class LS_operators {
 
     public List<List<OperationInRoute>> one_relocate(List<List<OperationInRoute>> vesselroutes, int vessel, int pos1, int pos2, int[] startnodes){
         if (pos1 == pos2){
+            System.out.println("Cannot relocate task to same position");
             return vesselroutes;
         }
 
@@ -109,13 +111,15 @@ public class LS_operators {
         }
         if(pos2 == 0){
             old_pos2_dist = SailingTimes[vessel][0][startnodes[vessel]-1][vesselroutes.get(vessel).get(pos2).getID()-1];
+            System.out.println(old_pos2_dist + " old pos 2 dist");
         }
         else if(pos2 == vesselroutes.get(vessel).size()-1){
             old_pos2_dist = 0;
+            System.out.println(old_pos2_dist + " old pos 2 dist");
         } else {
             old_pos2_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(pos2).getEarliestTime()+
                     TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos2).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos2).getEarliestTime()]]
-                    [vesselroutes.get(vessel).get(pos2).getID()-1][vesselroutes.get(vessel).get(pos2+1).getID()-1];
+                    [vesselroutes.get(vessel).get(pos2-1).getID()-1][vesselroutes.get(vessel).get(pos2).getID()-1];
             System.out.println(old_pos2_dist + " old pos 2 dist");
 
         }
@@ -134,17 +138,17 @@ public class LS_operators {
         int new_pos2_dist;
         int new_second_sailing;
 
-        if(pos1==0){
+        if(pos1==vesselroutes.get(vessel).size()-1){
             //System.out.println("Sailing from: " + vesselroutes.get(vessel).get(new_pos).getID() + " sailing to: " + vesselroutes.get(vessel).get(cur_pos+1).getID() +
             //        " it takes time periods: " + SailingTimes[vessel][vesselroutes.get(vessel).get(new_pos).getTimeperiod()][vesselroutes.get(vessel).get(new_pos).getID()][vesselroutes.get(vessel).get(cur_pos+1).getID()]
             //        + " in time peiod: " + vesselroutes.get(vessel).get(new_pos).getTimeperiod());
 
-            new_pos1_dist = SailingTimes[vessel][0][startnodes[vessel]-1][vesselroutes.get(vessel).get(pos1).getID()-1];
+            new_pos1_dist = 0;
             System.out.println(new_pos1_dist + " new pos 1 dist");
         } else{
-            new_pos1_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+
-                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1-1).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()]]
-                    [vesselroutes.get(vessel).get(pos1-1).getID()-1][vesselroutes.get(vessel).get(pos1).getID()-1];
+            new_pos1_dist = SailingTimes[vessel][vesselroutes.get(vessel).get(pos2).getEarliestTime()+
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos2).getEarliestTime()]]
+                    [vesselroutes.get(vessel).get(pos1).getID()-1][vesselroutes.get(vessel).get(pos1+1).getID()-1];
             System.out.println(new_pos1_dist + " new pos 1 dist");
         }
 
@@ -187,8 +191,8 @@ public class LS_operators {
         }
 
         int delta = first_delta + second_delta;
-        if(delta > 0){
-            System.out.println("Sailing time increased, undesirable relocate. Returning old vesselroutes");
+        if(delta >= 0){
+            System.out.println("Sailing time increased or unchanged, undesirable relocate. Returning old vesselroutes");
             return old_vesselroutes;
         }
 
@@ -236,18 +240,23 @@ public class LS_operators {
         updateLatest(latest,latest_insert,vessel,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes);
         updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel,vesselroutes);
 
-        //ConstructionHeuristic.updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
-        //ConstructionHeuristic.updatePrecedenceOf(checkPrecedence(routeIndex,1),indexInRoute);
+        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel),pos2,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
+                                                    TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,
+                                                    vesselroutes,SailingTimes);
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(vessel),pos2, TimeVesselUseOnOperation,startNodes,simOpRoutes,
+                                                precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,
+                                                vesselroutes,simultaneousOp,SailingTimes);
         updateSimultaneous(simOpRoutes,vessel,pos2,vesselroutes.get(vessel).get(pos2).getID(), simultaneousOp,
                 precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                 precedenceOfOperations,vesselroutes, pos1,pos2, "onerelocate");
-/*
+        /*
         for(Map<Integer, ConnectedValues> simOpRoute : simOpRoutes){
             for(ConnectedValues simOp : simOpRoute.values()){
                 System.out.println(simOp.getOperationObject().getID() + " in route " + simOp.getRoute() + " with index " + simOp.getIndex());
             }
         }
-*/
+        */
+        System.out.println("Relocate performed");
         return vesselroutes;
 
     }
@@ -1099,11 +1108,11 @@ public class LS_operators {
         int[] vesseltypes = new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/test_instance_15_locations_simpleTestSIM.txt",
+                "test_instances/test_instance_15_locations_PRECEDENCEtest.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
-        //PrintData.printSailingTimes(dg.getSailingTimes(),2,12, 4);
+        //PrintData.printSailingTimes(dg.getSailingTimes(),2,17, 4);
         //PrintData.printSailingTimes(dg.getSailingTimes(),3,23, 4);
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
@@ -1117,8 +1126,8 @@ public class LS_operators {
                                             dg.getTwIntervals(),a.getRouteSailingCost(),a.getObjValue(),dg.getStartNodes(), dg.getSimultaneousALNS(),
                                             a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),
                                             a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes());
-        List<List<OperationInRoute>> new_vesselroutes = LSO.one_relocate(a.vesselroutes,1,3,2,startnodes);
-        //List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes);
+        //List<List<OperationInRoute>> new_vesselroutes = LSO.one_relocate(a.vesselroutes,1,3,2,startnodes);
+        List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes);
         LSO.printLSOSolution(vesseltypes,new_vesselroutes,a.getUnroutedTasks());
     }
 
