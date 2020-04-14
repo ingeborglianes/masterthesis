@@ -57,7 +57,7 @@ public class LargeNeighboorhoodSearch {
             OperationInRoute selectedTask=vesselRoutes.get(randomRoute).get(randomIndex);
             int selectedTaskID = selectedTask.getID();
             //sim task
-            if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 ) {
+            if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 || simALNS[selectedTaskID-startNodes.length-1][0] != 0) {
                 /*
                 //simultaneous over removed
                 ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(simALNS[selectedTaskID-startNodes.length-1][1]),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,
@@ -67,10 +67,14 @@ public class LargeNeighboorhoodSearch {
                 ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(selectedTaskID),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,
                         SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
                         precedenceOverRoutes, precedenceOfRoutes);
+                if(simALNS[selectedTaskID-startNodes.length-1][0] != 0 ) {
 
-                 */
+                }
+                else if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 ) {
+
+                }
             }
-            else if(simALNS[selectedTaskID-startNodes.length-1][0] != 0 ) {
+
                 /*
                 //simultaneous of removed
                 ConstructionHeuristic.updatesAfterRemoval(simultaneousOp.get(simALNS[selectedTaskID-startNodes.length-1][0]),null,simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes,

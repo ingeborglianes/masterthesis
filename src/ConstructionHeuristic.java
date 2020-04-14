@@ -380,7 +380,7 @@ public class ConstructionHeuristic {
                 }
                 if(simALNS[o-startNodes.length-1][1] != 0 ) {
                     ConnectedValues simOp = simultaneousOp.get(simALNS[o - startNodes.length - 1][1]);
-                    updatesAfterRemoval(o,simOp,null,simultaneousOp, vesselroutes, TimeVesselUseOnOperation, startNodes,
+                    updatesAfterRemoval(simOp,null,simultaneousOp, vesselroutes, TimeVesselUseOnOperation, startNodes,
                     SailingTimes, twIntervals, unroutedTasks, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
                             precedenceOverRoutes, precedenceOfRoutes);
                 }
@@ -1087,7 +1087,7 @@ public class ConstructionHeuristic {
         return sim_latests;
     }
 
-    public static void updateSimultaneousAfterRemoval(Map<Integer,ConnectedValues> simultaneous, int routeIndex, int indexInRoute, int o, Map<Integer,ConnectedValues> simultaneousOp,
+    public static void updateSimultaneousAfterRemoval(Map<Integer,ConnectedValues> simultaneous, int routeIndex, int indexInRoute, Map<Integer,ConnectedValues> simultaneousOp,
                                                       List<List<OperationInRoute>> vesselroutes, int[][][] TimeVesselUseOnOperation, int[] startNodes,
                                                       int[][][][] SailingTimes) {
         if(simultaneous!=null){
@@ -1178,7 +1178,7 @@ public class ConstructionHeuristic {
         }
     }
 
-    public static void updatesAfterRemoval(int o,ConnectedValues simOp, PrecedenceValues pOp,Map<Integer,ConnectedValues> simultaneousOp,
+    public static void updatesAfterRemoval(ConnectedValues simOp, PrecedenceValues pOp,Map<Integer,ConnectedValues> simultaneousOp,
                                               List<List<OperationInRoute>> vesselroutes, int[][][] TimeVesselUseOnOperation, int[] startNodes,
                                               int[][][][] SailingTimes, int[][] twIntervals, List<OperationInRoute> unroutedTasks,
                                               List<Map<Integer, ConnectedValues>> simOpRoutes, Map<Integer, PrecedenceValues> precedenceOverOperations,
@@ -1218,7 +1218,7 @@ public class ConstructionHeuristic {
                 startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
         updatePrecedenceOf(precedenceOverRoutes.get(simOp.getRoute()), simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
-        updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1, o,
+        updateSimultaneousAfterRemoval(simOpRoutes.get(simOp.getRoute()), simOp.getRoute(), simOp.getIndex() - 1,
                 simultaneousOp, vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes);
 
         //System.out.println("Update by removal VESSEL "+simOp.getRoute());
