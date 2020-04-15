@@ -410,13 +410,14 @@ public class ConstructionHeuristic {
                     precedenceOverRoutes.get(routeIndex).put(o,pValues);
                 }
                 if (presOf!=0){
+                    System.out.println("Operation precedence of: "+o);
                     PrecedenceValues pValues= precedenceOverOperations.get(presOf);
                     PrecedenceValues pValuesReplace=new PrecedenceValues(pValues.getOperationObject(),
                             newOr,pValues.getConnectedOperationID(),pValues.getIndex(),pValues.getRoute(),routeIndex);
                     PrecedenceValues pValuesPut=new PrecedenceValues(newOr,pValues.getOperationObject(),presOf,indexInRoute,routeIndex,pValues.getRoute());
-                    precedenceOverOperations.replace(presOf,pValues,pValuesReplace);
+                    precedenceOverOperations.put(presOf,pValuesReplace);
                     precedenceOfOperations.put(o, pValuesPut);
-                    precedenceOverRoutes.get(pValues.getRoute()).replace(presOf,pValues,pValuesReplace);
+                    precedenceOverRoutes.get(pValues.getRoute()).put(presOf,pValuesReplace);
                     precedenceOfRoutes.get(routeIndex).put(o, pValuesPut);
                 }
                 //while((o-1-startNodes.length+k) < simALNS.length && simALNS[o-1-startNodes.length+k][0]!=0 ){
@@ -585,7 +586,9 @@ public class ConstructionHeuristic {
         if(precedenceOf!=null){
             for (PrecedenceValues pValues : precedenceOf.values()) {
                 OperationInRoute firstOr = pValues.getOperationObject();
+                System.out.println("FirstOr: "+firstOr.getID());
                 OperationInRoute secondOr = pValues.getConnectedOperationObject();
+                System.out.println(secondOr);
                 PrecedenceValues connectedOpPValues = precedenceOverOperations.get(secondOr.getID());
                 int routeConnectedOp = connectedOpPValues.getRoute();
                 int route = pValues.getRoute();
@@ -1381,7 +1384,7 @@ public class ConstructionHeuristic {
         int[] vesseltypes =new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
+                "test_instances/test_LNS.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
