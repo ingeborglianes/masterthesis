@@ -57,6 +57,7 @@ public class LargeNeighboorhoodSearch {
         this.numberOfRemoval=numberOfRemoval;
         this.routeSailingCost=new int[vesselRoutes.size()];
         this.routeOperationGain=new int[vesselRoutes.size()];
+        this.objValue=0;
     }
     //removal methods
 
@@ -82,12 +83,14 @@ public class LargeNeighboorhoodSearch {
         int selectedTaskID=selectedTask.getID();
         if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 || simALNS[selectedTaskID-startNodes.length-1][0] != 0
                 || precedenceALNS[selectedTaskID-startNodes.length-1][1] != 0 || precedenceALNS[selectedTaskID-startNodes.length-1][0] != 0) {
+            System.out.println("Remove synchronized task: "+selectedTask);
             removeSynchronizedOp(simultaneousOp.get(selectedTaskID),precedenceOverOperations.get(selectedTaskID),
                     precedenceOfOperations.get(selectedTaskID),selectedTaskID, selectedTask);
             removeDependentOperations(selectedTaskID);
         }
         //normal tasks
         else{
+            System.out.println("Remove normal task: "+selectedTask);
             removeNormalOp(selectedTask, route, index);
         }
     }
@@ -249,7 +252,7 @@ public class LargeNeighboorhoodSearch {
         System.out.println("SOLUTION AFTER LNS");
 
         System.out.println("Sailing cost per route: "+ Arrays.toString(routeSailingCost));
-        //System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
+        System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
         System.out.println("Objective value: "+objValue);
         for (int i=0;i<vesselRoutes.size();i++){
             int totalTime=0;
@@ -319,8 +322,5 @@ public class LargeNeighboorhoodSearch {
         LNS.runLNS();
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);
-
-
     }
-
 }
