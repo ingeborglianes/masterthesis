@@ -1,6 +1,7 @@
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 public class LargeNeighboorhoodSearch {
     private Map<Integer,PrecedenceValues> precedenceOverOperations;
@@ -27,6 +28,7 @@ public class LargeNeighboorhoodSearch {
     private int[] routeOperationGain;
     private int objValue;
     private ArrayList<Integer> removedOperations = new ArrayList<>();
+    Random generator = new Random(12);
 
     public LargeNeighboorhoodSearch(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
                                     Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
@@ -62,18 +64,32 @@ public class LargeNeighboorhoodSearch {
     //removal methods
 
     public void randomRemoval(){
-        while (removedOperations.size()<=numberOfRemoval){
+        while (removedOperations.size()<numberOfRemoval){
             int randomRoute=0;
             Boolean emptyRoute=true;
             while (emptyRoute) {
-                randomRoute = ThreadLocalRandom.current().nextInt(0, vesselRoutes.size());
+                randomRoute=generator.nextInt(vesselRoutes.size());
+                //randomRoute = ThreadLocalRandom.current().nextInt(0, vesselRoutes.size());
                 if(vesselRoutes.get(randomRoute)!=null && vesselRoutes.get(randomRoute).size()>0){
                     emptyRoute=false;
                 }
             }
-            int randomIndex = ThreadLocalRandom.current().nextInt(0, vesselRoutes.get(randomRoute).size());
+            //int randomIndex = ThreadLocalRandom.current().nextInt(0, vesselRoutes.get(randomRoute).size());
+            int randomIndex = generator.nextInt(vesselRoutes.get(randomRoute).size());
+            System.out.println("STATUS BEFORE REMOVAL");
+            for(int r=0;r<vesselRoutes.size();r++) {
+                System.out.println("VESSEL " + r);
+                if(vesselRoutes.get(r) != null) {
+                    for (int n = 0; n < vesselRoutes.get(r).size(); n++) {
+                        System.out.println("Number in order: " + n);
+                        System.out.println("ID " + vesselRoutes.get(r).get(n).getID());
+                        System.out.println("Earliest starting time " + vesselRoutes.get(r).get(n).getEarliestTime());
+                        System.out.println("latest starting time " + vesselRoutes.get(r).get(n).getLatestTime());
+                        System.out.println(" ");
+                    }
+                }
+            }
             OperationInRoute selectedTask=vesselRoutes.get(randomRoute).get(randomIndex);
-            System.out.println(selectedTask.getID());
             removeOperation(selectedTask, randomRoute,randomIndex);
         }
     }
@@ -83,14 +99,14 @@ public class LargeNeighboorhoodSearch {
         int selectedTaskID=selectedTask.getID();
         if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 || simALNS[selectedTaskID-startNodes.length-1][0] != 0
                 || precedenceALNS[selectedTaskID-startNodes.length-1][1] != 0 || precedenceALNS[selectedTaskID-startNodes.length-1][0] != 0) {
-            System.out.println("Remove synchronized task: "+selectedTask);
+            System.out.println("Remove synchronized task: "+selectedTask.getID());
             removeSynchronizedOp(simultaneousOp.get(selectedTaskID),precedenceOverOperations.get(selectedTaskID),
                     precedenceOfOperations.get(selectedTaskID),selectedTaskID, selectedTask);
             removeDependentOperations(selectedTaskID);
         }
         //normal tasks
         else{
-            System.out.println("Remove normal task: "+selectedTask);
+            System.out.println("Remove normal task: "+selectedTask.getID());
             removeNormalOp(selectedTask, route, index);
         }
     }
@@ -178,7 +194,7 @@ public class LargeNeighboorhoodSearch {
             precedenceOfRoutes.get(route).remove(selectedTaskID);
         }
         int nextLatest = findNextLatest(route,index);
-        if (nextLatest!=-1) {
+        if (nextLatest!=-1 && prevEarliest!=-1) {
             updateDependencies(prevEarliest, index, route, nextLatest);
         }
     }
@@ -189,7 +205,7 @@ public class LargeNeighboorhoodSearch {
         unroutedTasks.add(selectedTask);
         vesselRoutes.get(route).remove(index);
         int nextLatest = findNextLatest(route,index);
-        if (nextLatest!=-1) {
+        if (nextLatest!=-1 && prevEarliest!=-1) {
             updateDependencies(prevEarliest, index, route, nextLatest);
         }
     }
@@ -224,17 +240,16 @@ public class LargeNeighboorhoodSearch {
 
     public int findPrevEarliest(int route, int index){
         int prevEarliest=0;
-        if(index - 1!=-1){
+        if(index>0){
             prevEarliest = vesselRoutes.get(route).get(index - 1).getEarliestTime();
         }
-        if(index - 1==-1){
-            OperationInRoute firstOp = vesselRoutes.get(route).get(0);
-            if(twIntervals[firstOp.getID()-startNodes.length-1][0]==0){
-                prevEarliest = 1;
+        if(index==0){
+            if(vesselRoutes.get(route).size()==1){
+                return -1;
             }
-            else{
-                prevEarliest=twIntervals[firstOp.getID()-startNodes.length-1][0];
-            }
+            OperationInRoute firstOp = vesselRoutes.get(route).get(1);
+            int sailingTimeStartNodeToO=SailingTimes[route][EarliestStartingTimeForVessel[route]][route][firstOp.getID() - 1];
+            prevEarliest=Math.max(EarliestStartingTimeForVessel[route]+sailingTimeStartNodeToO+1,twIntervals[firstOp.getID()-startNodes.length-1][0]);
             firstOp.setEarliestTime(prevEarliest);
         }
         return prevEarliest;
