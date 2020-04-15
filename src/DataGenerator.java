@@ -225,8 +225,6 @@ public class DataGenerator {
     }
 
     public void generateOperations(){
-        List<int[]> precedenceALNSTemp= new ArrayList<>();
-        List<int[]> simultaneousALNSTemp= new ArrayList<>();
         List<int[]> bigTasksALNSTemp= new ArrayList<>();
         List<Operation> operations=new ArrayList<Operation>();
         int opNumber=1;
@@ -332,15 +330,7 @@ public class DataGenerator {
             }
         }
         Operation[] operations2=new Operation[operations.size()];
-        precedenceALNS=new int[precedenceALNSTemp.size()][2];
-        simultaneousALNS=new int[simultaneousALNSTemp.size()][2];
         bigTasksALNS=new int[bigTasksALNSTemp.size()][3];
-        for (int p=0;p<precedenceALNSTemp.size();p++){
-            precedenceALNS[p]=new int[]{precedenceALNSTemp.get(p)[0],precedenceALNSTemp.get(p)[1]};
-        }
-        for (int s=0;s<simultaneousALNSTemp.size();s++){
-            simultaneousALNS[s]=new int[]{simultaneousALNSTemp.get(s)[0],simultaneousALNSTemp.get(s)[1]};
-        }
         for (int b=0;b<bigTasksALNSTemp.size();b++){
             if(bigTasksALNSTemp.get(b)!=null) {
                 bigTasksALNS[b] = new int[]{bigTasksALNSTemp.get(b)[0], bigTasksALNSTemp.get(b)[1], bigTasksALNSTemp.get(b)[2]};

@@ -99,13 +99,32 @@ public class LargeNeighboorhoodSearch {
     public void sortOperationsSavingValue(){
         SortedSet<KeyValuePair> profitDecrease = new TreeSet<KeyValuePair>();
         ArrayList<Integer> takenSyncOperations=new ArrayList<>();
-        //modelling choice per now: choose to
-        for (List<OperationInRoute> vr : vesselRoutes) {
-            for(OperationInRoute or :vr){
+        //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
+        for (int r=0;r< vesselRoutes.size();r++) {
+            for(int i=0;i<vesselRoutes.get(r).size();i++){
                 //System.out.println((g+1+startNodes.length)+" "+operationGain[0][g][0]);
                 //Key value (= operation number) in savingValues is not null indexed
-                int operationID=or.getID();
-                int savingValue=0;
+                OperationInRoute or=vesselRoutes.get(r).get(i);
+                int operationID = or.getID();
+                int sailingCostPrevToCurrent=0;
+                int sailingCostCurrentToNext=0;
+                int sailingCostPrevToNext=0;
+                int profitDecreaseForOperation=0;
+                if(vesselRoutes.get(r).size()==1){
+                    int sailingTimeStartNodeToO=SailingTimes[r][EarliestStartingTimeForVessel[r]][r][operationID - 1];
+                    profitDecreaseForOperation+=sailingTimeStartNodeToO*SailingCostForVessel[r];
+                }
+                else if (i==0){
+                    int sailingTimeStartNodeToO=SailingTimes[r][EarliestStartingTimeForVessel[r]][r][operationID - 1];
+                    profitDecreaseForOperation+=sailingTimeStartNodeToO*SailingCostForVessel[r];
+                }
+                else if(i==vesselRoutes.get(r).size()){
+
+                }
+                else{
+
+                }
+                /*
                 if(simultaneousOp.get(operationID)!=null){
 
                 }
@@ -118,7 +137,8 @@ public class LargeNeighboorhoodSearch {
                 else{
 
                 }
-                profitDecrease.add(new KeyValuePair(operationID+1+startNodes.length,savingValue));
+                 */
+                profitDecrease.add(new KeyValuePair(operationID+1+startNodes.length,profitDecreaseForOperation));
             }
         }
         /*
@@ -142,7 +162,7 @@ public class LargeNeighboorhoodSearch {
             System.out.println("Operation "+op+" Gain: "+operationGain[0][op-1-startNodes.length][0]);
         }
         System.out.println("Sorted tasks: "+Arrays.toString(sortedOperations));
-        
+
          */
     }
 
