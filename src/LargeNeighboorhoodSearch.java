@@ -26,6 +26,7 @@ public class LargeNeighboorhoodSearch {
     private int[][][] operationGain;
     private int[] routeSailingCost;
     private int[] routeOperationGain;
+    private int[] sortedOperationsByProfitDecrease;
     private int objValue;
     private ArrayList<Integer> removedOperations = new ArrayList<>();
     Random generator = new Random(12);
@@ -60,6 +61,7 @@ public class LargeNeighboorhoodSearch {
         this.routeSailingCost=new int[vesselRoutes.size()];
         this.routeOperationGain=new int[vesselRoutes.size()];
         this.objValue=0;
+        this.sortedOperationsByProfitDecrease=new int[simALNS.length];
     }
     //removal methods
 
@@ -92,6 +94,85 @@ public class LargeNeighboorhoodSearch {
             OperationInRoute selectedTask=vesselRoutes.get(randomRoute).get(randomIndex);
             removeOperation(selectedTask, randomRoute,randomIndex);
         }
+    }
+
+    public void sortOperationsSavingValue(){
+        SortedSet<KeyValuePair> profitDecrease = new TreeSet<KeyValuePair>();
+        ArrayList<Integer> takenSyncOperations=new ArrayList<>();
+        //modelling choice per now: choose to
+        for (List<OperationInRoute> vr : vesselRoutes) {
+            for(OperationInRoute or :vr){
+                //System.out.println((g+1+startNodes.length)+" "+operationGain[0][g][0]);
+                //Key value (= operation number) in savingValues is not null indexed
+                int operationID=or.getID();
+                int savingValue=0;
+                if(simultaneousOp.get(operationID)!=null){
+
+                }
+                else if(precedenceOverOperations.get(operationID)==null){
+
+                }
+                else if(precedenceOfOperations.get(operationID)==null){
+
+                }
+                else{
+
+                }
+                profitDecrease.add(new KeyValuePair(operationID+1+startNodes.length,savingValue));
+            }
+        }
+        /*
+        int index=0;
+        for (KeyValuePair keyValuePair : penaltiesDict) {
+            if(!DataGenerator.containsElement(keyValuePair.key,sortedOperations)){
+                sortedOperations[index] = keyValuePair.key;
+            }
+            if(bigTasksALNS[keyValuePair.key-startNodes.length-1]!= null && bigTasksALNS[keyValuePair.key- startNodes.length-1][0]==keyValuePair.key){
+                for (int i=1;i<bigTasksALNS[keyValuePair.key-startNodes.length-1].length;i++){
+                    index+=1;
+                    sortedOperations[index]=bigTasksALNS[keyValuePair.key-startNodes.length-1][i];
+                }
+            }
+            index+=1;
+        }
+        System.out.println("BIG TASK ALNS LIST");
+        PrintData.printBigTasksALNS(bigTasksALNS,nOperations);
+        System.out.println("Sorted by operation gain: ");
+        for(Integer op : sortedOperations){
+            System.out.println("Operation "+op+" Gain: "+operationGain[0][op-1-startNodes.length][0]);
+        }
+        System.out.println("Sorted tasks: "+Arrays.toString(sortedOperations));
+        
+         */
+    }
+
+    public void worstRemoval(){
+        while (removedOperations.size()<numberOfRemoval){
+
+        }
+    }
+
+/*
+    public void randomRemovalWRandomness(){
+
+    }
+
+    public void worstRemovalWRandomness(){
+
+    }
+
+ */
+
+    public void relatedRemoval(){
+
+    }
+
+    public void synchronizedRemoval(){
+
+    }
+
+    public void routeRemoval(){
+
     }
 
     public void removeOperation(OperationInRoute selectedTask, int route, int index){
@@ -139,26 +220,6 @@ public class LargeNeighboorhoodSearch {
                 removeDependentOperations(dependentOperation);
             }
         }
-    }
-
-    public void worstRemoval(){
-
-    }
-
-    public void randomRemovalWRandomness(){
-
-    }
-
-    public void worstRemovalWRandomness(){
-
-    }
-
-    public void synchronizedRemoval(){
-
-    }
-
-    public void routeRemoval(){
-
     }
 
     public void removeSynchronizedOp(ConnectedValues simOp, PrecedenceValues precedenceOverOp, PrecedenceValues precedenceOfOp,int selectedTaskID,
