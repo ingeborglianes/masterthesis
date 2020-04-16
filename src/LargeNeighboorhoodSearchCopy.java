@@ -3,7 +3,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Random;
 
-public class LargeNeighboorhoodSearch {
+public class LargeNeighboorhoodSearchCopy {
     private Map<Integer,PrecedenceValues> precedenceOverOperations;
     private Map<Integer,PrecedenceValues> precedenceOfOperations;
     //map for operations that are connected as simultaneous operations. ID= operation number. Value= Simultaneous value.
@@ -32,7 +32,7 @@ public class LargeNeighboorhoodSearch {
     private ArrayList<Integer> removedOperations = new ArrayList<>();
     Random generator = new Random(35);
 
-    public LargeNeighboorhoodSearch(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
+    public LargeNeighboorhoodSearchCopy(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
                                     Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
                                     List<Map<Integer,PrecedenceValues>> precedenceOfRoutes, List<Map<Integer,PrecedenceValues>> precedenceOverRoutes,
                                     Map<Integer, ConsolidatedValues> consolidatedOperations, List<OperationInRoute> unroutedTasks,
@@ -273,7 +273,7 @@ public class LargeNeighboorhoodSearch {
                 removeSynchronizedOp(simultaneousOp.get(dependentOperation),
                         precedenceOverOperations.get(dependentOperation),
                         precedenceOfOperations.get(dependentOperation),dependentOperation,
-                        precedenceOverOperations.get(dependentOperation).getOperationObject());
+                        precedenceOverOperations.get(dependentOperation).getConnectedOperationObject());
                 if(precedenceALNS[dependentOperation-startNodes.length-1][0] != 0){
                     removeDependentOperations(dependentOperation);
                 }
@@ -317,7 +317,6 @@ public class LargeNeighboorhoodSearch {
             }
         }
         updateIndexes(route,index);
-        System.out.println("Operation to remove: "+selectedTaskID);
         vesselRoutes.get(route).remove(index);
         if(simOp!=null){
             simultaneousOp.remove(selectedTaskID);
@@ -354,8 +353,6 @@ public class LargeNeighboorhoodSearch {
         removedOperations.add(selectedTask.getID());
         int prevEarliest=findPrevEarliest(route, index);
         unroutedTasks.add(selectedTask);
-        System.out.println("REMOVE NORMAL OP: "+selectedTask.getID());
-        updateIndexes(route, index);
         vesselRoutes.get(route).remove(index);
         int nextLatest = findNextLatest(route,index);
         if (nextLatest!=-1 && prevEarliest!=-1) {
@@ -460,26 +457,19 @@ public class LargeNeighboorhoodSearch {
     public void updateIndexes(int route, int index){
         if(index+1<vesselRoutes.get(route).size()){
             for(int i=index+1;i<vesselRoutes.get(route).size();i++){
-                System.out.println("Evaluate index: "+index);
                 OperationInRoute curOp=vesselRoutes.get(route).get(i);
                 int curOpId=curOp.getID();
-                if(simultaneousOp.get(curOpId)!=null){
-                    System.out.println("index update because of sim");
-                    int simIndex=simultaneousOp.get(curOpId).getIndex();
-                    simultaneousOp.get(curOpId).setIndex(simIndex-1);
-                    simOpRoutes.get(route).get(curOpId).setIndex(simIndex-1);
+                if(simultaneousOp.get(i)!=null){
+                    simultaneousOp.get(curOpId).setIndex(simultaneousOp.get(curOpId).getIndex()-1);
+                    simOpRoutes.get(route).get(curOpId).setIndex(simultaneousOp.get(curOpId).getIndex()-1);
                 }
-                if(precedenceOverOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres over");
-                    int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
-                    precedenceOverOperations.get(curOpId).setIndex(pOverIndex-1);
-                    precedenceOverRoutes.get(route).get(curOpId).setIndex(pOverIndex-1);
+                if(precedenceOverOperations.get(i)!=null){
+                    precedenceOverOperations.get(curOpId).setIndex(simultaneousOp.get(curOpId).getIndex()-1);
+                    precedenceOverRoutes.get(route).get(curOpId).setIndex(simultaneousOp.get(curOpId).getIndex()-1);
                 }
-                if(precedenceOfOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres of");
-                    int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
-                    precedenceOfOperations.get(curOpId).setIndex(pOfIndex-1);
-                    precedenceOfRoutes.get(route).get(curOpId).setIndex(pOfIndex-1);
+                if(precedenceOfOperations.get(i)!=null){
+                    precedenceOfOperations.get(curOpId).setIndex(simultaneousOp.get(curOpId).getIndex()-1);
+                    precedenceOfRoutes.get(route).get(curOpId).setIndex(simultaneousOp.get(curOpId).getIndex()-1);
                 }
             }
         }
@@ -516,7 +506,7 @@ public class LargeNeighboorhoodSearch {
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
-        LargeNeighboorhoodSearch LNS = new LargeNeighboorhoodSearch(a.getPrecedenceOverOperations(),a.getPrecedenceOfOperations(),
+        LargeNeighboorhoodSearchCopy LNS = new LargeNeighboorhoodSearchCopy(a.getPrecedenceOverOperations(),a.getPrecedenceOfOperations(),
                 a.getSimultaneousOp(),a.getSimOpRoutes(),a.getPrecedenceOfRoutes(),a.getPrecedenceOverRoutes(),
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
@@ -527,3 +517,4 @@ public class LargeNeighboorhoodSearch {
         LNS.printLNSSolution(vesseltypes);
     }
 }
+
