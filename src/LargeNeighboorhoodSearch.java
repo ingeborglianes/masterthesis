@@ -349,7 +349,7 @@ public class LargeNeighboorhoodSearch {
                 SailingTimes, twIntervals);
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(route), index,simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
                 startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselRoutes,SailingTimes);
-        ConstructionHeuristic.updatePrecedenceOf(precedenceOverRoutes.get(route), index,TimeVesselUseOnOperation,startNodes,simOpRoutes,
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(route), index,TimeVesselUseOnOperation,startNodes,simOpRoutes,
                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselRoutes,simultaneousOp,SailingTimes);
         ConstructionHeuristic.updateSimultaneousAfterRemoval(simOpRoutes.get(route), route, index- 1,
                 simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes,twIntervals,EarliestStartingTimeForVessel);
@@ -454,7 +454,7 @@ public class LargeNeighboorhoodSearch {
         int[] vesseltypes = new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
+                "test_instances/test_LNS.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
