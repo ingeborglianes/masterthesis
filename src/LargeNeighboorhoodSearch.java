@@ -102,7 +102,7 @@ public class LargeNeighboorhoodSearch {
         }
     }
 
-    public void sortOperationsSavingValue(){
+    public void sortOperationsProfitDecrease(){
         SortedSet<KeyValuePair> profitDecrease = new TreeSet<KeyValuePair>();
         ArrayList<Integer> takenSyncOperations=new ArrayList<>();
         //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
@@ -287,19 +287,36 @@ public class LargeNeighboorhoodSearch {
         int route=0;
         int index=0;
         if(simOp!=null){
+            System.out.println("Simultaneous, operation: "+selectedTask.getID());
             route=simOp.getRoute();
             index=simOp.getIndex();
         }
         else if(precedenceOverOp!=null){
+            System.out.println("Precedence over, operation: "+selectedTask.getID());
             route=precedenceOverOp.getRoute();
             index=precedenceOverOp.getIndex();
         }
         else if(precedenceOfOp!=null){
+            System.out.println("Precedence of, operation: "+selectedTask.getID());
             route=precedenceOfOp.getRoute();
             index=precedenceOfOp.getIndex();
         }
         int prevEarliest=findPrevEarliest(route,index);
         unroutedTasks.add(selectedTask);
+        System.out.println("STATUS BEFORE REMOVAL");
+        for(int r=0;r<vesselRoutes.size();r++) {
+            System.out.println("VESSEL " + r);
+            if(vesselRoutes.get(r) != null) {
+                for (int n = 0; n < vesselRoutes.get(r).size(); n++) {
+                    System.out.println("Number in order: " + n);
+                    System.out.println("ID " + vesselRoutes.get(r).get(n).getID());
+                    System.out.println("Earliest starting time " + vesselRoutes.get(r).get(n).getEarliestTime());
+                    System.out.println("latest starting time " + vesselRoutes.get(r).get(n).getLatestTime());
+                    System.out.println(" ");
+                }
+            }
+        }
+        System.out.println("route: "+route);
         vesselRoutes.get(route).remove(index);
         if(simOp!=null){
             simultaneousOp.remove(selectedTaskID);
