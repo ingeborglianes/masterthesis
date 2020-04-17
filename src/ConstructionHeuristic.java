@@ -592,29 +592,31 @@ public class ConstructionHeuristic {
                 int precedenceIndex =pValues.getIndex();
                 if (secondOr != null) {
                     PrecedenceValues connectedOpPValues = precedenceOfOperations.get(secondOr.getID());
-                    int routeConnectedOp = connectedOpPValues.getRoute();
-                    int route = pValues.getRoute();
-                    if (routeConnectedOp == pValues.getRoute()) {
-                        continue;
-                    }
-                    int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
-                            [firstOr.getEarliestTime()-1];
-                    int indexConnected = connectedOpPValues.getIndex();
-                    if (insertIndex <= precedenceIndex) {
-                        //System.out.println("Index demands update");
-                        //System.out.println("Old earliest: " + secondOr.getEarliestTime());
-                        //System.out.println("New earliest: " + newESecondOr);
-                        if (secondOr.getEarliestTime() < newESecondOr) {
-                            secondOr.setEarliestTime(newESecondOr);
-                            updateEarliest(newESecondOr, indexConnected, routeConnectedOp, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
-                            updatePrecedenceOver(precedenceOverRoutes.get(routeConnectedOp),connectedOpPValues.getIndex(),simOpRoutes,precedenceOfOperations,
-                                    precedenceOverOperations,TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,
-                                    precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
-                            updateSimultaneous(simOpRoutes,routeConnectedOp,connectedOpPValues.getIndex(),
-                                    simultaneousOp, precedenceOverRoutes, precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
-                                    precedenceOfOperations,vesselroutes);
+                    if(connectedOpPValues!=null) {
+                        int routeConnectedOp = connectedOpPValues.getRoute();
+                        int route = pValues.getRoute();
+                        if (routeConnectedOp == pValues.getRoute()) {
+                            continue;
                         }
-                        //System.out.println("update earliest because of precedence over");
+                        int newESecondOr = firstOr.getEarliestTime() + TimeVesselUseOnOperation[route][firstOr.getID() - startNodes.length - 1]
+                                [firstOr.getEarliestTime() - 1];
+                        int indexConnected = connectedOpPValues.getIndex();
+                        if (insertIndex <= precedenceIndex) {
+                            //System.out.println("Index demands update");
+                            //System.out.println("Old earliest: " + secondOr.getEarliestTime());
+                            //System.out.println("New earliest: " + newESecondOr);
+                            if (secondOr.getEarliestTime() < newESecondOr) {
+                                secondOr.setEarliestTime(newESecondOr);
+                                updateEarliest(newESecondOr, indexConnected, routeConnectedOp, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                                updatePrecedenceOver(precedenceOverRoutes.get(routeConnectedOp), connectedOpPValues.getIndex(), simOpRoutes, precedenceOfOperations,
+                                        precedenceOverOperations, TimeVesselUseOnOperation, startNodes, precedenceOverRoutes,
+                                        precedenceOfRoutes, simultaneousOp, vesselroutes, SailingTimes);
+                                updateSimultaneous(simOpRoutes, routeConnectedOp, connectedOpPValues.getIndex(),
+                                        simultaneousOp, precedenceOverRoutes, precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations,
+                                        precedenceOfOperations, vesselroutes);
+                            }
+                            //System.out.println("update earliest because of precedence over");
+                        }
                     }
                 }
             }
@@ -661,9 +663,6 @@ public class ConstructionHeuristic {
                                 precedenceOfRoutes, TimeVesselUseOnOperation,startNodes,SailingTimes, precedenceOverOperations,precedenceOfOperations,vesselroutes);
                         //System.out.println("update latest because of precedence of");
                     }
-                }
-                if (insertIndex <= precedenceIndex) {
-                    pValues.setIndex(precedenceIndex);
                 }
             }
         }
