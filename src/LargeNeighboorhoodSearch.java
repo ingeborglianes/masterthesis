@@ -371,7 +371,12 @@ public class LargeNeighboorhoodSearch {
             ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, r, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes, twIntervals);
             ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(r).size() - 1, r, vesselRoutes, TimeVesselUseOnOperation,
                     startNodes, SailingTimes, twIntervals);
+            ConstructionHeuristic.updateSimultaneous(simOpRoutes,r,0,simultaneousOp,precedenceOverRoutes,
+                    precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,
+                    vesselRoutes);
+            //ConstructionHeuristic.updatePrecedenceOver(precedenceOverOperations.get(r),0,);
         }
+
     }
 
     public void runLNS(){
