@@ -322,7 +322,7 @@ public class LargeNeighboorhoodSearch {
         }
          */
         vesselRoutes.get(route).remove(index);
-        updateIndexesRemoval(route, index);
+        ConstructionHeuristic.updateIndexesRemoval(route, index, vesselRoutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
         System.out.println("Operation to remove: "+selectedTaskID);
         if(simOp!=null){
             simultaneousOp.remove(selectedTaskID);
@@ -356,58 +356,7 @@ public class LargeNeighboorhoodSearch {
         unroutedTasks.add(selectedTask);
         System.out.println("REMOVE NORMAL OP: "+selectedTask.getID());
         vesselRoutes.get(route).remove(index);
-        updateIndexesRemoval(route, index);
-    }
-
-    public void updateIndexesRemoval(int route, int index){
-        if(index<vesselRoutes.get(route).size()){
-            for(int i=index;i<vesselRoutes.get(route).size();i++){
-                System.out.println("Evaluate index: "+index);
-                OperationInRoute curOp=vesselRoutes.get(route).get(i);
-                int curOpId=curOp.getID();
-                if(simultaneousOp.get(curOpId)!=null){
-                    System.out.println("index update because of sim");
-                    int simIndex=simultaneousOp.get(curOpId).getIndex();
-                    simultaneousOp.get(curOpId).setIndex(simIndex-1);
-                }
-                if(precedenceOverOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres over");
-                    int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
-                    precedenceOverOperations.get(curOpId).setIndex(pOverIndex-1);
-                }
-                if(precedenceOfOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres of");
-                    int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
-                    precedenceOfOperations.get(curOpId).setIndex(pOfIndex-1);
-                }
-            }
-        }
-    }
-
-    public void updateIndexesInsertion(int route, int index){
-        if(index+1<vesselRoutes.get(route).size()){
-            for(int i=index+1;i<vesselRoutes.get(route).size();i++){
-                System.out.println("Evaluate index: "+index);
-                OperationInRoute curOp=vesselRoutes.get(route).get(i);
-                int curOpId=curOp.getID();
-                if(simultaneousOp.get(curOpId)!=null){
-                    System.out.println("index update because of sim");
-                    int simIndex=simultaneousOp.get(curOpId).getIndex();
-                    simultaneousOp.get(curOpId).setIndex(simIndex+1);
-                }
-                if(precedenceOverOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres over");
-                    int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
-                    precedenceOverOperations.get(curOpId).setIndex(pOverIndex+1);
-                }
-                if(precedenceOfOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres of");
-                    int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
-                    precedenceOfOperations.get(curOpId).setIndex(pOfIndex+1);
-
-                }
-            }
-        }
+        ConstructionHeuristic.updateIndexesRemoval(route, index, vesselRoutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
     }
 
     public void updateAllTimesAfterRemoval(){
@@ -416,7 +365,7 @@ public class LargeNeighboorhoodSearch {
             System.out.println("Updating route: " + r);
             int earliest = Math.max(SailingTimes[r][EarliestStartingTimeForVessel[r]][startNodes[r] - 1][vesselRoutes.get(r).get(0).getID() - 1] + 1,
                     twIntervals[vesselRoutes.get(r).get(0).getID() - 1-startNodes.length][0]);
-            int latest = Math.min(SailingTimes[0].length,twIntervals[vesselRoutes.get(r).size() - 1-startNodes.length][1]);
+            int latest = Math.min(SailingTimes[0].length,twIntervals[vesselRoutes.get(r).get(vesselRoutes.get(r).size()-1).getID()-1-startNodes.length][1]);
             vesselRoutes.get(r).get(0).setEarliestTime(earliest);
             vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1).setLatestTime(latest);
             ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, r, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes, twIntervals);

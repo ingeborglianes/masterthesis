@@ -1295,7 +1295,7 @@ public class ConstructionHeuristic {
             System.out.println("Updating route: " +route);
             int earliest = Math.max(SailingTimes[route][route][startNodes[route] - 1][vesselroutes.get(route).get(0).getID() - 1] + 1,
                     twIntervals[vesselroutes.get(route).get(0).getID() - 1-startNodes.length][0]);
-            int latest = Math.max(SailingTimes[0].length,twIntervals[vesselroutes.get(route).size() - 1-startNodes.length][1]);
+            int latest = Math.max(SailingTimes[0].length,twIntervals[vesselroutes.get(route).get(vesselroutes.get(route).size()-1).getID()-1-startNodes.length][1]);
             vesselroutes.get(route).get(0).setEarliestTime(earliest);
             vesselroutes.get(route).get(vesselroutes.get(route).size() - 1).setLatestTime(latest);
             updateEarliestAfterRemoval(earliest, 0, route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,twIntervals);
@@ -1596,7 +1596,7 @@ public class ConstructionHeuristic {
         int[] vesseltypes =new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/test_LNS.txt",
+                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
