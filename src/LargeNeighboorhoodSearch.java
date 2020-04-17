@@ -249,22 +249,26 @@ public class LargeNeighboorhoodSearch {
     }
 
     public void removeDependentOperations(int selectedTaskID){
-        if(simALNS[selectedTaskID-startNodes.length-1][0] != 0 ) {
-            int dependentOperation= simALNS[selectedTaskID-startNodes.length-1][0];
-            removeSynchronizedOp(simultaneousOp.get(dependentOperation),
-                    precedenceOverOperations.get(dependentOperation),
-                    precedenceOfOperations.get(dependentOperation),dependentOperation, simultaneousOp.get(dependentOperation).getOperationObject());
-            if(precedenceALNS[dependentOperation-startNodes.length-1][0] != 0){
-                removeDependentOperations(dependentOperation);
+        if(simALNS[selectedTaskID-startNodes.length-1][0] != 0 ){
+            int dependentOperation = simALNS[selectedTaskID - startNodes.length - 1][0];
+            if(simultaneousOp.get(dependentOperation)!=null) {
+                removeSynchronizedOp(simultaneousOp.get(dependentOperation),
+                        precedenceOverOperations.get(dependentOperation),
+                        precedenceOfOperations.get(dependentOperation), dependentOperation, simultaneousOp.get(dependentOperation).getOperationObject());
+                if (precedenceALNS[dependentOperation - startNodes.length - 1][0] != 0) {
+                    removeDependentOperations(dependentOperation);
+                }
             }
         }
         if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 ) {
             int dependentOperation= simALNS[selectedTaskID-startNodes.length-1][1];
-            removeSynchronizedOp(simultaneousOp.get(dependentOperation),
-                    precedenceOverOperations.get(dependentOperation),
-                    precedenceOfOperations.get(dependentOperation),dependentOperation, simultaneousOp.get(dependentOperation).getOperationObject());
-            if(precedenceALNS[dependentOperation-startNodes.length-1][0] != 0){
-                removeDependentOperations(dependentOperation);
+            if(simultaneousOp.get(dependentOperation)!=null) {
+                removeSynchronizedOp(simultaneousOp.get(dependentOperation),
+                        precedenceOverOperations.get(dependentOperation),
+                        precedenceOfOperations.get(dependentOperation), dependentOperation, simultaneousOp.get(dependentOperation).getOperationObject());
+                if (precedenceALNS[dependentOperation - startNodes.length - 1][0] != 0) {
+                    removeDependentOperations(dependentOperation);
+                }
             }
         }
         if(precedenceALNS[selectedTaskID-startNodes.length-1][0] != 0 ) {
@@ -273,7 +277,7 @@ public class LargeNeighboorhoodSearch {
                 removeSynchronizedOp(simultaneousOp.get(dependentOperation),
                         precedenceOverOperations.get(dependentOperation),
                         precedenceOfOperations.get(dependentOperation),dependentOperation,
-                        precedenceOverOperations.get(dependentOperation).getOperationObject());
+                        precedenceOfOperations.get(dependentOperation).getOperationObject());
                 if(precedenceALNS[dependentOperation-startNodes.length-1][0] != 0){
                     removeDependentOperations(dependentOperation);
                 }
@@ -407,7 +411,18 @@ public class LargeNeighboorhoodSearch {
     }
 
     public void updateAllTimesAfterRemoval(){
-
+        System.out.println("UPDATE TIMES AFTER ALL REMOVALS");
+        for(int r=0;r<vesselRoutes.size();r++) {
+            System.out.println("Updating route: " + r);
+            int earliest = Math.max(SailingTimes[r][EarliestStartingTimeForVessel[r]][startNodes[r] - 1][vesselRoutes.get(r).get(0).getID() - 1] + 1,
+                    twIntervals[vesselRoutes.get(r).get(0).getID() - 1-startNodes.length][0]);
+            int latest = Math.min(SailingTimes[0].length,twIntervals[vesselRoutes.get(r).size() - 1-startNodes.length][1]);
+            vesselRoutes.get(r).get(0).setEarliestTime(earliest);
+            vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1).setLatestTime(latest);
+            ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, r, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes, twIntervals);
+            ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(r).size() - 1, r, vesselRoutes, TimeVesselUseOnOperation,
+                    startNodes, SailingTimes, twIntervals);
+        }
     }
 
     public void runLNS(){

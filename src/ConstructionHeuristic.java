@@ -419,7 +419,7 @@ public class ConstructionHeuristic {
                             precedenceOfRoutes.get(pRoute).remove(simALNS[o-startNodes.length-1][1]);
                             precedenceOfOperations.remove(simALNS[o-startNodes.length-1][1]);
                         }
-                        updateIndexesRemoval(route,index);
+                        updateIndexesRemoval(route,index, vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
                     }
                 }
 
@@ -493,7 +493,7 @@ public class ConstructionHeuristic {
                     vesselroutes.get(routeIndex).add(indexInRoute,newOr);
                 }
                 allOperations.remove(Integer.valueOf(o));
-                updateIndexesInsertion(routeIndex,indexInRoute);
+                updateIndexesInsertion(routeIndex,indexInRoute, vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
                 //Update all earliest starting times forward
                 updateEarliest(earliest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
                 updateLatest(latest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
@@ -503,6 +503,7 @@ public class ConstructionHeuristic {
                         precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
                 updateSimultaneous(simOpRoutes,routeIndex,indexInRoute,simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,
                         startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,vesselroutes);
+                /*
                 System.out.println("SIMULTANEOUS DICTIONARY");
                 for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
                     ConnectedValues simOp = entry.getValue();
@@ -521,6 +522,8 @@ public class ConstructionHeuristic {
                     System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
                             presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
                 }
+
+                 */
                 for(int r=0;r<nVessels;r++) {
                     System.out.println("VESSEL " + r);
                     if(vesselroutes.get(r) != null) {
@@ -1290,17 +1293,16 @@ public class ConstructionHeuristic {
 
         for(int route : updatedRoutes) {
             System.out.println("Updating route: " +route);
-            int earliest = SailingTimes[route][0][startNodes[route] - 1][vesselroutes.get(route).get(0).getID() - 1] + 1;
-            int latest = SailingTimes[0].length;
+            int earliest = Math.max(SailingTimes[route][route][startNodes[route] - 1][vesselroutes.get(route).get(0).getID() - 1] + 1,
+                    twIntervals[vesselroutes.get(route).get(0).getID() - 1-startNodes.length][0]);
+            int latest = Math.max(SailingTimes[0].length,twIntervals[vesselroutes.get(route).size() - 1-startNodes.length][1]);
             vesselroutes.get(route).get(0).setEarliestTime(earliest);
-            vesselroutes.get(route).get(vesselroutes.get(route).size() - 1).setLatestTime(SailingTimes[0].length);
+            vesselroutes.get(route).get(vesselroutes.get(route).size() - 1).setLatestTime(latest);
             updateEarliestAfterRemoval(earliest, 0, route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,twIntervals);
             updateLatestAfterRemoval(latest, vesselroutes.get(route).size() - 1, route, vesselroutes, TimeVesselUseOnOperation,
                     startNodes, SailingTimes,twIntervals);
         }
     }
-
-
 
     public static void updateEarliestAfterRemoval(int earliest, int indexInRoute, int routeIndex, int [][][] TimeVesselUseOnOperation,
                                       int[] startNodes, int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes,
@@ -1322,7 +1324,6 @@ public class ConstructionHeuristic {
 
         }
     }
-
 
 
     public static void updateLatestAfterRemoval(int latest, int indexInRoute, int routeIndex,
@@ -1452,7 +1453,9 @@ public class ConstructionHeuristic {
         return removeConsolidatedSmallTasks;
     }
 
-    public void updateIndexesRemoval(int route, int index){
+    public static void updateIndexesRemoval(int route, int index, List<List<OperationInRoute>> vesselroutes,
+                                            Map<Integer,ConnectedValues> simultaneousOp, Map<Integer,PrecedenceValues> precedenceOverOperations,
+                                            Map<Integer,PrecedenceValues> precedenceOfOperations){
         if(index<vesselroutes.get(route).size()){
             for(int i=index;i<vesselroutes.get(route).size();i++){
                 System.out.println("Evaluate index: "+index);
@@ -1477,7 +1480,9 @@ public class ConstructionHeuristic {
         }
     }
 
-    public void updateIndexesInsertion(int route, int index){
+    public static void updateIndexesInsertion(int route, int index,List<List<OperationInRoute>> vesselroutes,
+                                              Map<Integer,ConnectedValues> simultaneousOp, Map<Integer,PrecedenceValues> precedenceOverOperations,
+                                              Map<Integer,PrecedenceValues> precedenceOfOperations){
         if(index+1<vesselroutes.get(route).size()){
             for(int i=index+1;i<vesselroutes.get(route).size();i++){
                 System.out.println("Evaluate index: "+index);
@@ -1567,14 +1572,24 @@ public class ConstructionHeuristic {
 
         }
         System.out.println(" ");
-        /*
-
+        System.out.println("SIMULTANEOUS DICTIONARY");
         for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
             ConnectedValues simOp = entry.getValue();
             System.out.println("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
                     simOp.getRoute() + " with index: " + simOp.getIndex());
         }
-         */
+        System.out.println("PRECEDENCE OVER DICTIONARY");
+        for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverOperations.entrySet()){
+            PrecedenceValues presOverOp = entry.getValue();
+            System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                    presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
+        }
+        System.out.println("PRECEDENCE OF DICTIONARY");
+        for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
+            PrecedenceValues presOfOp = entry.getValue();
+            System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                    presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+        }
     }
 
     public static void main(String[] args) throws FileNotFoundException {
