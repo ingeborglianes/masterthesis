@@ -33,13 +33,13 @@ public class LargeNeighboorhoodSearch {
     Random generator = new Random(35);
 
     public LargeNeighboorhoodSearch(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
-                                    Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
-                                    List<Map<Integer,PrecedenceValues>> precedenceOfRoutes, List<Map<Integer,PrecedenceValues>> precedenceOverRoutes,
-                                    Map<Integer, ConsolidatedValues> consolidatedOperations, List<OperationInRoute> unroutedTasks,
-                                    List<List<OperationInRoute>> vesselRoutes, int [][]twIntervals,
-                                    int[][] precedenceALNS,int[][] simALNS,int [] startNodes, int [][][][] SailingTimes,
-                                    int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel,int[] EarliestStartingTimeForVessel,
-                                    int[][][] operationGain, int[][] bigTasksALNS, int numberOfRemoval){
+                                        Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
+                                        List<Map<Integer,PrecedenceValues>> precedenceOfRoutes, List<Map<Integer,PrecedenceValues>> precedenceOverRoutes,
+                                        Map<Integer, ConsolidatedValues> consolidatedOperations, List<OperationInRoute> unroutedTasks,
+                                        List<List<OperationInRoute>> vesselRoutes, int [][]twIntervals,
+                                        int[][] precedenceALNS,int[][] simALNS,int [] startNodes, int [][][][] SailingTimes,
+                                        int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel,int[] EarliestStartingTimeForVessel,
+                                        int[][][] operationGain, int[][] bigTasksALNS, int numberOfRemoval){
         this.precedenceOverOperations=precedenceOverOperations;
         this.precedenceOfOperations=precedenceOfOperations;
         this.simultaneousOp=simultaneousOp;
@@ -301,8 +301,8 @@ public class LargeNeighboorhoodSearch {
             route=precedenceOfOp.getRoute();
             index=precedenceOfOp.getIndex();
         }
-        int prevEarliest=findPrevEarliest(route,index);
         unroutedTasks.add(selectedTask);
+        /*
         System.out.println("STATUS BEFORE REMOVAL");
         for(int r=0;r<vesselRoutes.size();r++) {
             System.out.println("VESSEL " + r);
@@ -316,9 +316,10 @@ public class LargeNeighboorhoodSearch {
                 }
             }
         }
-        updateIndexes(route,index);
-        System.out.println("Operation to remove: "+selectedTaskID);
+         */
         vesselRoutes.get(route).remove(index);
+        updateIndexesRemoval(route, index);
+        System.out.println("Operation to remove: "+selectedTaskID);
         if(simOp!=null){
             simultaneousOp.remove(selectedTaskID);
             simOpRoutes.get(route).remove(selectedTaskID);
@@ -339,10 +340,6 @@ public class LargeNeighboorhoodSearch {
             precedenceOfOperations.remove(selectedTaskID);
             precedenceOfRoutes.get(route).remove(selectedTaskID);
         }
-        int nextLatest = findNextLatest(route,index);
-        if (nextLatest!=-1 && prevEarliest!=-1) {
-            updateDependencies(prevEarliest, index, route, nextLatest);
-        }
     }
 
     public void removeNormalOp(OperationInRoute selectedTask, int route, int index){
@@ -352,60 +349,80 @@ public class LargeNeighboorhoodSearch {
                     new ConsolidatedValues(false, false, 0, 0, 0));
         }
         removedOperations.add(selectedTask.getID());
-        int prevEarliest=findPrevEarliest(route, index);
         unroutedTasks.add(selectedTask);
         System.out.println("REMOVE NORMAL OP: "+selectedTask.getID());
-        updateIndexes(route, index);
         vesselRoutes.get(route).remove(index);
-        int nextLatest = findNextLatest(route,index);
-        if (nextLatest!=-1 && prevEarliest!=-1) {
-            updateDependencies(prevEarliest, index, route, nextLatest);
-        }
+        updateIndexesRemoval(route, index);
     }
 
-    public void updateDependencies(int prevEarliest, int index, int route, int nextLatest){
-        ConstructionHeuristic.updateEarliest(prevEarliest, Math.max(index - 1,0), route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes);
-        ConstructionHeuristic.updateLatestAfterRemoval(nextLatest, Math.min(index, vesselRoutes.get(route).size() - 1), route,vesselRoutes, TimeVesselUseOnOperation, startNodes,
-                SailingTimes, twIntervals);
-        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(route), index,simOpRoutes,precedenceOfOperations,precedenceOverOperations,TimeVesselUseOnOperation,
-                startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselRoutes,SailingTimes);
-        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(route), index,TimeVesselUseOnOperation,startNodes,simOpRoutes,
-                precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselRoutes,simultaneousOp,SailingTimes);
-        ConstructionHeuristic.updateSimultaneousAfterRemoval(simOpRoutes.get(route), route, index- 1,
-                simultaneousOp, vesselRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes,twIntervals,EarliestStartingTimeForVessel);
-    }
-
-    public int findNextLatest(int route, int index){
-        int nextLatest = 0;
-        if (vesselRoutes.get(route).size() > index) {
-            nextLatest = vesselRoutes.get(route).get(index).getLatestTime();
-        }
-        if (index == vesselRoutes.get(route).size()) {
-            if(vesselRoutes.get(route).size()==0){
-                return -1;
+    public void updateIndexesRemoval(int route, int index){
+        if(index<vesselRoutes.get(route).size()){
+            for(int i=index;i<vesselRoutes.get(route).size();i++){
+                System.out.println("Evaluate index: "+index);
+                OperationInRoute curOp=vesselRoutes.get(route).get(i);
+                int curOpId=curOp.getID();
+                if(simultaneousOp.get(curOpId)!=null){
+                    System.out.println("index update because of sim");
+                    int simIndex=simultaneousOp.get(curOpId).getIndex();
+                    simultaneousOp.get(curOpId).setIndex(simIndex-1);
+                }
+                if(precedenceOverOperations.get(curOpId)!=null){
+                    System.out.println("index update because of pres over");
+                    int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
+                    precedenceOverOperations.get(curOpId).setIndex(pOverIndex-1);
+                }
+                if(precedenceOfOperations.get(curOpId)!=null){
+                    System.out.println("index update because of pres of");
+                    int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
+                    precedenceOfOperations.get(curOpId).setIndex(pOfIndex-1);
+                }
             }
-            OperationInRoute lastOp = vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1);
-            nextLatest = twIntervals[lastOp.getID() - startNodes.length - 1][1];
-            lastOp.setLatestTime(nextLatest);
         }
-        return nextLatest;
     }
 
-    public int findPrevEarliest(int route, int index){
-        int prevEarliest=0;
-        if(index>0){
-            prevEarliest = vesselRoutes.get(route).get(index - 1).getEarliestTime();
-        }
-        if(index==0){
-            if(vesselRoutes.get(route).size()==1){
-                return -1;
+    public void updateIndexesInsertion(int route, int index){
+        if(index+1<vesselRoutes.get(route).size()){
+            for(int i=index+1;i<vesselRoutes.get(route).size();i++){
+                System.out.println("Evaluate index: "+index);
+                OperationInRoute curOp=vesselRoutes.get(route).get(i);
+                int curOpId=curOp.getID();
+                if(simultaneousOp.get(curOpId)!=null){
+                    System.out.println("index update because of sim");
+                    int simIndex=simultaneousOp.get(curOpId).getIndex();
+                    simultaneousOp.get(curOpId).setIndex(simIndex+1);
+                }
+                if(precedenceOverOperations.get(curOpId)!=null){
+                    System.out.println("index update because of pres over");
+                    int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
+                    precedenceOverOperations.get(curOpId).setIndex(pOverIndex+1);
+                }
+                if(precedenceOfOperations.get(curOpId)!=null){
+                    System.out.println("index update because of pres of");
+                    int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
+                    precedenceOfOperations.get(curOpId).setIndex(pOfIndex+1);
+
+                }
             }
-            OperationInRoute firstOp = vesselRoutes.get(route).get(1);
-            int sailingTimeStartNodeToO=SailingTimes[route][EarliestStartingTimeForVessel[route]][route][firstOp.getID() - 1];
-            prevEarliest=Math.max(EarliestStartingTimeForVessel[route]+sailingTimeStartNodeToO+1,twIntervals[firstOp.getID()-startNodes.length-1][0]);
-            firstOp.setEarliestTime(prevEarliest);
         }
-        return prevEarliest;
+    }
+
+    public void updateAllTimesAfterRemoval(){
+
+    }
+
+    public void runLNS(){
+        if(numberOfRemoval>simALNS.length){
+            System.out.println("Not possible, number of removal is larger than the number of tasks");
+        }
+        else{
+            //randomRemoval();
+            synchronizedRemoval();
+            //routeRemoval();
+            ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
+                    EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
+            updateAllTimesAfterRemoval();
+        }
+
     }
 
     public void printLNSSolution(int[] vessseltypes){
@@ -454,47 +471,6 @@ public class LargeNeighboorhoodSearch {
         System.out.println("REMOVED Operations");
         for(Integer rO: removedOperations){
             System.out.println(rO);
-        }
-    }
-
-    public void updateIndexes(int route, int index){
-        if(index+1<vesselRoutes.get(route).size()){
-            for(int i=index+1;i<vesselRoutes.get(route).size();i++){
-                System.out.println("Evaluate index: "+index);
-                OperationInRoute curOp=vesselRoutes.get(route).get(i);
-                int curOpId=curOp.getID();
-                if(simultaneousOp.get(curOpId)!=null){
-                    System.out.println("index update because of sim");
-                    int simIndex=simultaneousOp.get(curOpId).getIndex();
-                    simultaneousOp.get(curOpId).setIndex(simIndex-1);
-                    simOpRoutes.get(route).get(curOpId).setIndex(simIndex-1);
-                }
-                if(precedenceOverOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres over");
-                    int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
-                    precedenceOverOperations.get(curOpId).setIndex(pOverIndex-1);
-                    precedenceOverRoutes.get(route).get(curOpId).setIndex(pOverIndex-1);
-                }
-                if(precedenceOfOperations.get(curOpId)!=null){
-                    System.out.println("index update because of pres of");
-                    int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
-                    precedenceOfOperations.get(curOpId).setIndex(pOfIndex-1);
-                    precedenceOfRoutes.get(route).get(curOpId).setIndex(pOfIndex-1);
-                }
-            }
-        }
-    }
-
-    public void runLNS(){
-        if(numberOfRemoval>simALNS.length){
-            System.out.println("Not possible, number of removal is larger than the number of tasks");
-        }
-        else{
-            //randomRemoval();
-            //synchronizedRemoval();
-            routeRemoval();
-            ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
-                    EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
         }
     }
 
