@@ -28,10 +28,19 @@ public class LargeNeighboorhoodSearch {
     private int[] routeSailingCost;
     private int[] routeOperationGain;
     private ArrayList<Integer> sortedOperationsByProfitDecrease;
+    private ArrayList<Integer> sortedOperationsByRelatedness;
+    private ArrayList<OperationInRoute> setOfRelatedOperations = new ArrayList<>();
     private int objValue;
     private ArrayList<Integer> removedOperations = new ArrayList<>();
     private Map<Integer,routeIndexObjectForOperation> routeObjectDict=new HashMap<>();
-    Random generator = new Random(35);
+    private int[][] distOperationsInInstance;
+    private double relatednessWeightDistance;
+    private double relatednessWeightDuration;
+    private double relatednessWeightTimewindows;
+    private double relatednessWeightPrecedenceOver;
+    private double relatednessWeightPrecedenceOf;
+    private double relatednessWeightSimultaneous;
+    Random generator;
 
     public LargeNeighboorhoodSearch(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
                                         Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
@@ -40,7 +49,10 @@ public class LargeNeighboorhoodSearch {
                                         List<List<OperationInRoute>> vesselRoutes, int [][]twIntervals,
                                         int[][] precedenceALNS,int[][] simALNS,int [] startNodes, int [][][][] SailingTimes,
                                         int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel,int[] EarliestStartingTimeForVessel,
-                                        int[][][] operationGain, int[][] bigTasksALNS, int numberOfRemoval){
+                                        int[][][] operationGain, int[][] bigTasksALNS, int numberOfRemoval, int randomSeed,
+                                    int[][] distOperationsInInstance,double relatednessWeightDistance, double relatednessWeightDuration,
+                                    double relatednessWeightTimewindows, double relatednessWeightPrecedenceOver, double relatednessWeightPrecedenceOf,
+                                    double relatednessWeightSimultaneous){
         this.precedenceOverOperations=precedenceOverOperations;
         this.precedenceOfOperations=precedenceOfOperations;
         this.simultaneousOp=simultaneousOp;
@@ -65,22 +77,37 @@ public class LargeNeighboorhoodSearch {
         this.objValue=0;
         this.sortedOperationsByProfitDecrease=new ArrayList<>();
         this.bigTasksALNS=bigTasksALNS;
+        this.generator= new Random(randomSeed);
+        this.distOperationsInInstance=distOperationsInInstance;
+        this.relatednessWeightDistance=relatednessWeightDistance;
+        this.relatednessWeightDuration=relatednessWeightDuration;
+        this.relatednessWeightTimewindows=relatednessWeightTimewindows;
+        this.relatednessWeightPrecedenceOver=relatednessWeightPrecedenceOver;
+        this.relatednessWeightPrecedenceOf=relatednessWeightPrecedenceOf;
+        this.relatednessWeightSimultaneous=relatednessWeightSimultaneous;
     }
     //removal methods
 
+    public int[] findRandomIndexRoute(){
+        int randomRoute=0;
+        Boolean emptyRoute=true;
+        while (emptyRoute) {
+            randomRoute=generator.nextInt(vesselRoutes.size());
+            //randomRoute = ThreadLocalRandom.current().nextInt(0, vesselRoutes.size());
+            if(vesselRoutes.get(randomRoute)!=null && vesselRoutes.get(randomRoute).size()>0){
+                emptyRoute=false;
+            }
+        }
+        //int randomIndex = ThreadLocalRandom.current().nextInt(0, vesselRoutes.get(randomRoute).size());
+        int randomIndex = generator.nextInt(vesselRoutes.get(randomRoute).size());
+        return new int[]{randomRoute,randomIndex};
+    }
+
     public void randomRemoval(){
         while (removedOperations.size()<numberOfRemoval){
-            int randomRoute=0;
-            Boolean emptyRoute=true;
-            while (emptyRoute) {
-                randomRoute=generator.nextInt(vesselRoutes.size());
-                //randomRoute = ThreadLocalRandom.current().nextInt(0, vesselRoutes.size());
-                if(vesselRoutes.get(randomRoute)!=null && vesselRoutes.get(randomRoute).size()>0){
-                    emptyRoute=false;
-                }
-            }
-            //int randomIndex = ThreadLocalRandom.current().nextInt(0, vesselRoutes.get(randomRoute).size());
-            int randomIndex = generator.nextInt(vesselRoutes.get(randomRoute).size());
+            int [] indexRoute= findRandomIndexRoute();
+            int randomRoute=indexRoute[0];
+            int randomIndex =indexRoute[1];
             /*
             System.out.println("STATUS BEFORE REMOVAL");
             for(int r=0;r<vesselRoutes.size();r++) {
@@ -121,7 +148,29 @@ public class LargeNeighboorhoodSearch {
     }
 
     public void relatedRemoval(){
-
+        int [] indexRoute= findRandomIndexRoute();
+        int randomRoute=indexRoute[0];
+        int randomIndex =indexRoute[1];
+        OperationInRoute randomOp=vesselRoutes.get(randomRoute).get(randomIndex);
+        setOfRelatedOperations.add(randomOp);
+        removeOperations(randomOp,randomRoute,randomIndex,"relatedRemoval");
+        while (removedOperations.size()<numberOfRemoval){
+            int randomIndexFromRelatedSet=generator.nextInt(setOfRelatedOperations.size());
+            OperationInRoute chosenTask=setOfRelatedOperations.get(randomIndexFromRelatedSet);
+            System.out.println("Operation to be compared randomness with "+chosenTask.getID());
+            sortOperationsRelatedness(chosenTask);
+            int selectedTaskID=sortedOperationsByRelatedness.get(0);
+            routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
+            OperationInRoute selectedTask = properties.getOr();
+            int route=properties.getRoute();
+            int index=0;
+            for (int i=0;i<vesselRoutes.get(route).size();i++){
+                if(vesselRoutes.get(route).get(i).getID()==selectedTaskID){
+                    index=i;
+                }
+            }
+            removeOperations(selectedTask,route,index,"relatedRemoval");
+        }
     }
 
     public void synchronizedRemoval(){
@@ -174,10 +223,59 @@ public class LargeNeighboorhoodSearch {
         }
     }
 
+    public void sortOperationsRelatedness(OperationInRoute chosenTask){
+        //want to remove the operations that causes the smallest profit decrease if it is removed
+        Map<Integer,Double> relatedness = new TreeMap<Integer,Double>();
+        ArrayList<Integer> sortedOperationsByRelatednessTemp=new ArrayList<>();
+        //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
+        for (int r=0;r< vesselRoutes.size();r++) {
+            if(vesselRoutes.get(r).size()>0) {
+                for (int i = 0; i < vesselRoutes.get(r).size(); i++) {
+                    //System.out.println((g+1+startNodes.length)+" "+operationGain[0][g][0]);
+                    //Key value (= operation number) in savingValues is not null indexed
+                    OperationInRoute evaluatedOr = vesselRoutes.get(r).get(i);
+                    double distance= distOperationsInInstance[chosenTask.getID()-startNodes.length-1][evaluatedOr.getID()-startNodes.length-1];
+                    double differenceDuration=Math.abs(TimeVesselUseOnOperation[r][chosenTask.getID()-startNodes.length][chosenTask.getEarliestTime()-1]-
+                            TimeVesselUseOnOperation[r][evaluatedOr.getID()-startNodes.length-1][evaluatedOr.getEarliestTime()-1]);
+                    double differenceTimeWindows = Math.abs((twIntervals[chosenTask.getID()-startNodes.length-1][1]-twIntervals[chosenTask.getID()-startNodes.length-1][0])
+                            -(twIntervals[evaluatedOr.getID()-startNodes.length-1][1]-twIntervals[evaluatedOr.getID()-startNodes.length-1][0]));
+                    double precdenceOver=1.0;
+                    if(precedenceALNS[chosenTask.getID()-startNodes.length-1][0]!=0 && precedenceALNS[evaluatedOr.getID()-startNodes.length-1][0] !=0){
+                        precdenceOver=0.0;
+                    }
+                    double precdenceOf=1.0;
+                    if(precedenceALNS[chosenTask.getID()-startNodes.length-1][1]!= 0 && precedenceALNS[evaluatedOr.getID()-startNodes.length-1][1]!=0){
+                        precdenceOf=0.0;
+                    }
+                    int sim1 =simALNS[chosenTask.getID()-startNodes.length-1][0]+simALNS[chosenTask.getID()-startNodes.length-1][1];
+                    int sim2=simALNS[evaluatedOr.getID()-startNodes.length-1][0]+simALNS[evaluatedOr.getID()-startNodes.length-1][1];
+                    double sim=1.0;
+                    if(sim1!=0 && sim2!=0){
+                        sim=0.0;
+                    }
+                    double relatednessForOperation=relatednessWeightDistance*distance+relatednessWeightDuration*differenceDuration+
+                            relatednessWeightTimewindows*differenceTimeWindows+ relatednessWeightPrecedenceOver*precdenceOver+
+                            relatednessWeightPrecedenceOf*precdenceOf+relatednessWeightSimultaneous*sim;
+                    relatedness.put(evaluatedOr.getID(), relatednessForOperation);
+                    System.out.println("relatedness for operation: "+relatednessForOperation);
+                    routeObjectDict.put(evaluatedOr.getID(), new routeIndexObjectForOperation(r, evaluatedOr));
+                }
+            }
+        }
+        System.out.println("Before sorting"+relatedness);
+        SortedSet<Map.Entry<Integer,Double>> sortedRelatedness=entriesSortedByValues(relatedness);
+        System.out.println("After sorting"+sortedRelatedness);
+        System.out.println("Print all keys + values");
+        for (Map.Entry<Integer, Double> entry  : sortedRelatedness) {
+            System.out.println("Key "+entry.getKey()+" : Value "+entry.getValue());
+            sortedOperationsByRelatednessTemp.add(entry.getKey());
+        }
+        sortedOperationsByRelatedness=sortedOperationsByRelatednessTemp;
+    }
+
     public void sortOperationsProfitDecrease(){
         //want to remove the operations that causes the smallest profit decrease if it is removed
         Map<Integer,Integer> profitDecrease = new TreeMap<Integer,Integer>();
-        ArrayList<Integer> takenSyncOperations=new ArrayList<>();
         //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
         for (int r=0;r< vesselRoutes.size();r++) {
             if(vesselRoutes.get(r).size()>0) {
@@ -223,7 +321,7 @@ public class LargeNeighboorhoodSearch {
                         }
                     }
                     int sailingDiff = -sailingTimePrevToCurrent - sailingTimeCurrentToNext + sailingTimePrevToNext;
-                    profitDecreaseForOperation = operationGain[r][operationID - startNodes.length - 1][or.getEarliestTime()] +
+                    profitDecreaseForOperation = operationGain[r][operationID - startNodes.length - 1][or.getEarliestTime()-1] +
                             sailingDiff * SailingCostForVessel[r];
                     profitDecrease.put(or.getID(), profitDecreaseForOperation);
                     routeObjectDict.put(or.getID(), new routeIndexObjectForOperation(r, or));
@@ -492,7 +590,8 @@ public class LargeNeighboorhoodSearch {
             //randomRemoval();
             //synchronizedRemoval();
             //routeRemoval();
-            worstRemoval();
+            //worstRemoval();
+            relatedRemoval();
             ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                     EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
             updateAllTimesAfterRemoval();
@@ -585,7 +684,9 @@ public class LargeNeighboorhoodSearch {
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),5);
+                dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
+                0.08,0.5,0.02,0.1,
+                0.1,0.1);
         LNS.runLNS();
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);

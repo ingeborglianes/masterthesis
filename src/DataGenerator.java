@@ -10,6 +10,7 @@ public class DataGenerator {
     private Vessel[] vesselTypes;
     private Operation[] operations;
     private int[][][][] sailingTimes;
+    private int[][] distOperationsInInstance;
     private Map<Integer, List<OperationType>> logOperations=new HashMap<Integer, List<OperationType>>();
     private int [][] simultaneous;
     private int [][] precedence;
@@ -373,6 +374,7 @@ public class DataGenerator {
             //exception handling left as an exercise for the reader
         }
         this.operations=operations2;
+        this.distOperationsInInstance=new int[this.operations.length][this.operations.length];
     }
 
     public void createPrecedence(){
@@ -562,11 +564,14 @@ public class DataGenerator {
                     for (Operation o2 : this.operations) {
                         sailingTimes[v.getNum() - 1][t][o1.getNumber() + nStartNodes - 1][o2.getNumber() + nStartNodes - 1] =
                                 (int) Math.ceil(distanceArray[o1.getLocation() - 1][o2.getLocation() - 1] / (v.getSpeed() - weatherPenaltySpeed[t]));
+                        if(t==0){
+                            distOperationsInInstance[o1.getNumber()-1][o2.getNumber()-1]=
+                                    (int) Math.ceil(distanceArray[o1.getLocation() - 1][o2.getLocation() - 1]);
+                        }
                     }
                 }
                 for (int n = 0; n < nStartNodes; n++) {
                     for (Operation o : this.operations) {
-
                         sailingTimes[v.getNum() - 1][t][n][o.getNumber() + nStartNodes - 1]
                                 = (int) Math.ceil(distanceArray[locationsStartNodes[n] - 1][o.getLocation() - 1] / (v.getSpeed() - weatherPenaltySpeed[t]));
                     }
@@ -574,7 +579,6 @@ public class DataGenerator {
             }
         }
         this.sailingTimes=sailingTimes;
-        int index=0;
     }
 
     public void generateData() throws FileNotFoundException {
@@ -727,6 +731,10 @@ public class DataGenerator {
 
     public int[][] getBigTasksALNS() {
         return bigTasksALNS;
+    }
+
+    public int[][] getDistOperationsInInstance() {
+        return distOperationsInInstance;
     }
 
     public static String removeSpace(String str)
