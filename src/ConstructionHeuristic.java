@@ -5,6 +5,7 @@ import java.sql.SQLOutput;
 import java.sql.Time;
 import java.util.*;
 import java.util.jar.JarOutputStream;
+import java.util.stream.IntStream;
 
 public class ConstructionHeuristic {
     private int [][] OperationsForVessel;
@@ -1452,7 +1453,8 @@ public class ConstructionHeuristic {
 
         System.out.println("Sailing cost per route: "+Arrays.toString(routeSailingCost));
         System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
-        System.out.println("Objective value: "+objValue);
+        int obj= IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
+        System.out.println("Objective value: "+obj);
         for (int i=0;i<vesselroutes.size();i++){
             int totalTime=0;
             System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);

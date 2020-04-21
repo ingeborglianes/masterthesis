@@ -2,8 +2,9 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Random;
+import java.util.stream.IntStream;
 
-public class LargeNeighboorhoodSearch {
+public class LargeNeighboorhoodSearchRemoval {
     private Map<Integer,PrecedenceValues> precedenceOverOperations;
     private Map<Integer,PrecedenceValues> precedenceOfOperations;
     //map for operations that are connected as simultaneous operations. ID= operation number. Value= Simultaneous value.
@@ -42,7 +43,7 @@ public class LargeNeighboorhoodSearch {
     private double relatednessWeightSimultaneous;
     Random generator;
 
-    public LargeNeighboorhoodSearch(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
+    public LargeNeighboorhoodSearchRemoval(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
                                         Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
                                         List<Map<Integer,PrecedenceValues>> precedenceOfRoutes, List<Map<Integer,PrecedenceValues>> precedenceOverRoutes,
                                         Map<Integer, ConsolidatedValues> consolidatedOperations, List<OperationInRoute> unroutedTasks,
@@ -579,10 +580,12 @@ public class LargeNeighboorhoodSearch {
                 updatePrecedenceOfAfterRemovals(precedenceOfRoutes.get(r));
             }
         }
-
     }
 
-    public void runLNS(){
+    //Insertion methods
+
+
+    public void runLNSRemoval(){
         if(numberOfRemoval>simALNS.length){
             System.out.println("Not possible, number of removal is larger than the number of tasks");
         }
@@ -608,11 +611,12 @@ public class LargeNeighboorhoodSearch {
         //PrintData.printTimeWindows(timeWindowsForOperations);
         //PrintData.printTimeWindowsIntervals(twIntervals);
 
-        System.out.println("SOLUTION AFTER LNS");
+        System.out.println("SOLUTION AFTER LNS REMOVAL");
 
         System.out.println("Sailing cost per route: "+ Arrays.toString(routeSailingCost));
         System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
-        System.out.println("Objective value: "+objValue);
+        int obj= IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
+        System.out.println("Objective value: "+obj);
         for (int i=0;i<vesselRoutes.size();i++){
             int totalTime=0;
             System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
@@ -646,6 +650,25 @@ public class LargeNeighboorhoodSearch {
         for(Integer rO: removedOperations){
             System.out.println(rO);
         }
+        System.out.println(" ");
+        System.out.println("SIMULTANEOUS DICTIONARY");
+        for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
+            ConnectedValues simOp = entry.getValue();
+            System.out.println("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
+                    simOp.getRoute() + " with index: " + simOp.getIndex());
+        }
+        System.out.println("PRECEDENCE OVER DICTIONARY");
+        for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverOperations.entrySet()){
+            PrecedenceValues presOverOp = entry.getValue();
+            System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                    presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
+        }
+        System.out.println("PRECEDENCE OF DICTIONARY");
+        for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
+            PrecedenceValues presOfOp = entry.getValue();
+            System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                    presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+        }
     }
 
     static <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
@@ -659,6 +682,42 @@ public class LargeNeighboorhoodSearch {
         );
         sortedEntries.addAll(map.entrySet());
         return sortedEntries;
+    }
+
+    public Map<Integer, PrecedenceValues> getPrecedenceOverOperations() {
+        return precedenceOverOperations;
+    }
+
+    public Map<Integer, PrecedenceValues> getPrecedenceOfOperations() {
+        return precedenceOfOperations;
+    }
+
+    public Map<Integer, ConnectedValues> getSimultaneousOp() {
+        return simultaneousOp;
+    }
+
+    public List<Map<Integer, ConnectedValues>> getSimOpRoutes() {
+        return simOpRoutes;
+    }
+
+    public List<Map<Integer, PrecedenceValues>> getPrecedenceOfRoutes() {
+        return precedenceOfRoutes;
+    }
+
+    public List<Map<Integer, PrecedenceValues>> getPrecedenceOverRoutes() {
+        return precedenceOverRoutes;
+    }
+
+    public Map<Integer, ConsolidatedValues> getConsolidatedOperations() {
+        return consolidatedOperations;
+    }
+
+    public List<OperationInRoute> getUnroutedTasks() {
+        return unroutedTasks;
+    }
+
+    public List<List<OperationInRoute>> getVesselRoutes() {
+        return vesselRoutes;
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -679,15 +738,15 @@ public class LargeNeighboorhoodSearch {
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
-        LargeNeighboorhoodSearch LNS = new LargeNeighboorhoodSearch(a.getPrecedenceOverOperations(),a.getPrecedenceOfOperations(),
+        LargeNeighboorhoodSearchRemoval LNS = new LargeNeighboorhoodSearchRemoval(a.getPrecedenceOverOperations(),a.getPrecedenceOfOperations(),
                 a.getSimultaneousOp(),a.getSimOpRoutes(),a.getPrecedenceOfRoutes(),a.getPrecedenceOverRoutes(),
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
                 dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
-                0.08,0.5,0.02,0.1,
+                0.08,0.5,0.01,0.1,
                 0.1,0.1);
-        LNS.runLNS();
+        LNS.runLNSRemoval();
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
