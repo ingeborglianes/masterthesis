@@ -1,4 +1,7 @@
+import javafx.scene.control.ListCell;
+
 import java.io.FileNotFoundException;
+import java.sql.Time;
 import java.util.*;
 
 public class LS_operators {
@@ -12,7 +15,8 @@ public class LS_operators {
     private int [][] twIntervals;
     private int nTimePeriods = 60;
     private int [] routeSailingCost;
-    //private int[] routeOperationGain;
+    private int[] routeOperationGain;
+    private int [][][] operationGain;
     private int objValue;
     private int[][] simALNS;
     //map for operations that are connected with precedence. ID= operation number. Value= Precedence value.
@@ -29,7 +33,8 @@ public class LS_operators {
 
     public LS_operators(int [][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes,
                         int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int [] EarliestStartingTimeForVessel,
-                        int [][] twIntervals, int [] routeSailingCost, int objValue, int[] startNodes, int[][] simALNS,
+                        int [][] twIntervals, int [] routeSailingCost, int[] routeOperationGain,int objValue, int[] startNodes, int[][] simALNS,
+                        int [][][] operationGain,
                         Map<Integer,PrecedenceValues> precedenceOverOperations,Map<Integer,PrecedenceValues> precedenceOfOperations,
                         Map<Integer, ConnectedValues> simultaneousOp,List<Map<Integer, ConnectedValues>> simOpRoutes,
                         List<Map<Integer,PrecedenceValues>> precedenceOfRoutes, List<Map<Integer,PrecedenceValues>> precedenceOverRoutes){
@@ -41,9 +46,11 @@ public class LS_operators {
         this.SailingCostForVessel = SailingCostForVessel;
         this.twIntervals = twIntervals;
         this.routeSailingCost = routeSailingCost;
+        this.routeOperationGain = routeOperationGain;
         this.objValue = objValue;
         this.startNodes = startNodes;
         this.simALNS = simALNS;
+        this.operationGain = operationGain;
         this.precedenceOverOperations =precedenceOverOperations;
         this.precedenceOfOperations = precedenceOfOperations;
         this.simultaneousOp = simultaneousOp;
@@ -274,7 +281,7 @@ public class LS_operators {
         updateEarliest(earliest,earliest_insert,vessel,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,twIntervals, "onerelocate");
         updateLatest(latest,latest_insert,vessel,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,twIntervals,"onerelocate");
         updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel,vesselroutes,null);
-        /*
+
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel),pos2,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
                                                     TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,
                                                     vesselroutes,SailingTimes);
@@ -282,8 +289,8 @@ public class LS_operators {
                                                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,
                                                 vesselroutes,simultaneousOp,SailingTimes);
 
-         */
-        updateSimultaneous(simOpRoutes,vessel, null,simultaneousOp,
+
+        updateSimultaneous(simOpRoutes,vessel, simultaneousOp,
                 precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                 precedenceOfOperations,vesselroutes, pos1,pos2, "onerelocate");
         /*
@@ -374,13 +381,17 @@ public class LS_operators {
         //Tracking new times for vessel 1
         int new_vessel1_dist;
 
-        if(vesselroutes.get(vessel1).size() == 0){
+        if(vesselroutes.get(vessel1).size() == 1){
             new_vessel1_dist = 0;
             System.out.println(new_vessel1_dist + " New vessel1 dist");
         } else if(pos1==0) {
             new_vessel1_dist = SailingTimes[vessel1][EarliestStartingTimeForVessel[vessel1]][startnodes[vessel1]-1][vesselroutes.get(vessel1).get(pos1+1).getID()-1] ;
             System.out.println(new_vessel1_dist + " New vessel1 dist");
-        } else{
+        } else if(pos1 == vesselroutes.get(vessel1).size()-1){
+            new_vessel1_dist = 0;
+            System.out.println(new_vessel1_dist + " New vessel1 dist");
+        }
+        else{
             new_vessel1_dist = SailingTimes[vessel1][vesselroutes.get(vessel1).get(pos1-1).getEarliestTime()+
                     TimeVesselUseOnOperation[vessel1][vesselroutes.get(vessel1).get(pos1-1).getID()-1-nStartnodes][vesselroutes.get(vessel1).get(pos1-1).getEarliestTime()]]
                     [vesselroutes.get(vessel1).get(pos1-1).getID()-1][vesselroutes.get(vessel1).get(pos1+1).getID()-1];
@@ -413,9 +424,9 @@ public class LS_operators {
                             [new_vesselroutes.get(vessel2).get(pos2).getID()-1][new_vesselroutes.get(vessel2).get(pos2+1).getID()-1] ;
             System.out.println(new_vessel2_dist + " New vessel2 dist");
         } else if (pos2==new_vesselroutes.get(vessel2).size()-1){
-            new_second_sailing = SailingTimes[vessel2][new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+
+            new_second_sailing = SailingTimes[vessel2][Math.min(nTimePeriods-1,new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+
                     TimeVesselUseOnOperation[vessel2][new_vesselroutes.get(vessel2).get(pos2-1).getID()-1-nStartnodes]
-                            [new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()]][new_vesselroutes.get(vessel2).get(pos2-1).getID()-1]
+                            [new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()])][new_vesselroutes.get(vessel2).get(pos2-1).getID()-1]
                     [new_vesselroutes.get(vessel2).get(pos2).getID()-1];
             new_vessel2_dist = new_second_sailing;
             System.out.println(new_vessel2_dist + " New vessel2 dist");
@@ -426,7 +437,7 @@ public class LS_operators {
             new_vessel2_dist = new_second_sailing +
                     SailingTimes[vessel2][Math.min(nTimePeriods-1,new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+
                             new_second_sailing + TimeVesselUseOnOperation[vessel2][new_vesselroutes.get(vessel2).get(pos2).getID()-1-nStartnodes]
-                            [new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime() + new_second_sailing])]
+                            [Math.min(nTimePeriods-1,new_vesselroutes.get(vessel2).get(pos2-1).getEarliestTime() + new_second_sailing)])]
                             [new_vesselroutes.get(vessel2).get(pos2).getID()-1][new_vesselroutes.get(vessel2).get(pos2+1).getID()-1];
             System.out.println(new_vessel2_dist + " New vessel2 dist");
         }
@@ -452,17 +463,19 @@ public class LS_operators {
         new_vesselroutes.get(vessel2).remove(pos2);
         new_vesselroutes.get(vessel1).add(pos1,toMoveBack);
 
-        if(pos1 == 0){
-            int sailing = SailingTimes[vessel1][EarliestStartingTimeForVessel[vessel1]][startNodes[vessel1]-1][vesselroutes.get(vessel1).get(pos1).getID()-1];
-            vesselroutes.get(vessel1).get(pos1).setEarliestTime(sailing);
+        if(vesselroutes.get(vessel1).isEmpty()){
+
+        }else if(pos1 == 0){
+            int sailing = SailingTimes[vessel1][EarliestStartingTimeForVessel[vessel1]][startNodes[vessel1]-1][vesselroutes.get(vessel1).get(pos1).getID()-1]+1;
+            vesselroutes.get(vessel1).get(pos1).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel1).get(pos1).getID()-1-startnodes.length][0],sailing));
             updateEarliest(sailing, 0, vessel1, TimeVesselUseOnOperation,
                     startNodes, SailingTimes, vesselroutes,twIntervals,"twoRelocate");
         }else if(pos1 == vesselroutes.get(vessel1).size()){
-            vesselroutes.get(vessel1).get(pos1-1).setLatestTime(nTimePeriods-1);
-            updateLatest(nTimePeriods-1,pos1-1,vessel1,TimeVesselUseOnOperation,
+            vesselroutes.get(vessel1).get(pos1-1).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel1).get(pos1-1).getID()-1-startnodes.length][1],nTimePeriods));
+            updateLatest(nTimePeriods,pos1-1,vessel1,TimeVesselUseOnOperation,
                     startNodes,SailingTimes,vesselroutes,twIntervals,"twoRelocate");
         }else if(pos1 == vesselroutes.get(vessel1).size()-1){
-            vesselroutes.get(vessel1).get(pos1).setLatestTime(nTimePeriods-1);
+            vesselroutes.get(vessel1).get(pos1).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel1).get(pos1).getID()-1-startnodes.length][1],nTimePeriods));
             updateLatest(nTimePeriods,pos1,vessel1,TimeVesselUseOnOperation,
                     startNodes,SailingTimes,vesselroutes,twIntervals,"twoRelocate");
         }
@@ -472,31 +485,55 @@ public class LS_operators {
             updateLatest(vesselroutes.get(vessel1).get(pos1+1).getLatestTime(),pos1+1,vessel1, TimeVesselUseOnOperation,
                     startNodes,SailingTimes,vesselroutes,twIntervals,"twoRelocate");
         }
+        if(vesselroutes.get(vessel2).size() == 1) {
+            int sailing = SailingTimes[vessel2][EarliestStartingTimeForVessel[vessel2]][startNodes[vessel2] - 1][vesselroutes.get(vessel2).get(pos2).getID() - 1] + 1;
+            vesselroutes.get(vessel2).get(pos2).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][0],sailing));
+            vesselroutes.get(vessel2).get(pos2).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][1],nTimePeriods));
 
-        if(pos2 == 0){
-            int sailing = SailingTimes[vessel2][EarliestStartingTimeForVessel[vessel2]][startNodes[vessel2]-1][vesselroutes.get(vessel2).get(pos2).getID()-1];
-            vesselroutes.get(vessel2).get(pos2).setEarliestTime(sailing);
-            updateEarliest(sailing, 0, vessel2, TimeVesselUseOnOperation,
-                    startNodes, SailingTimes, vesselroutes,twIntervals,"twoRelocate");
+        }else if(pos2 == 0){
+            int sailing = SailingTimes[vessel2][EarliestStartingTimeForVessel[vessel2]][startNodes[vessel2]-1][vesselroutes.get(vessel2).get(pos2).getID()-1]+1;
+            int opTime = TimeVesselUseOnOperation[vessel2][vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][sailing];
+            int sailingToNext = SailingTimes[vessel2][sailing+opTime][vesselroutes.get(vessel2).get(pos2).getID()-1][vesselroutes.get(vessel2).get(pos2+1).getID()-1];
+            vesselroutes.get(vessel2).get(pos2).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][0],sailing));
+            vesselroutes.get(vessel2).get(pos2).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][1],vesselroutes.get(vessel2).get(pos2+1).getLatestTime()-sailingToNext-opTime));
+
         }else if(pos2== vesselroutes.get(vessel2).size()-1){
-            vesselroutes.get(vessel2).get(pos2).setLatestTime(nTimePeriods-1);
-            updateLatest(nTimePeriods,pos2,vessel1, TimeVesselUseOnOperation,
-                    startNodes,SailingTimes,vesselroutes,twIntervals,"twoRelocate");
+            int prevOp = TimeVesselUseOnOperation[vessel2][vesselroutes.get(vessel2).get(pos2-1).getID()-1-startnodes.length][vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()];
+            int sailingToOp = SailingTimes[vessel2][Math.min(vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+prevOp,nTimePeriods-1)][vesselroutes.get(vessel2).get(pos2-1).getID()-1][vesselroutes.get(vessel2).get(pos2).getID()-1];
+            vesselroutes.get(vessel2).get(pos2).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][0],vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+sailingToOp));
+            vesselroutes.get(vessel2).get(pos2).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][1],nTimePeriods));
+
         }else {
-            updateEarliest(vesselroutes.get(vessel2).get(pos2 - 1).getEarliestTime(), pos2 - 1, vessel2, TimeVesselUseOnOperation,
-                    startNodes, SailingTimes, vesselroutes,twIntervals,"twoRelocate");
-            updateLatest(vesselroutes.get(vessel2).get(pos2 + 1).getLatestTime(), pos2 + 1, vessel2, TimeVesselUseOnOperation,
-                    startNodes, SailingTimes, vesselroutes,twIntervals,"twoRelocate");
+            int prevOp = TimeVesselUseOnOperation[vessel2][vesselroutes.get(vessel2).get(pos2-1).getID()-1-startnodes.length][vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()];
+            int sailingToOp = SailingTimes[vessel2][vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+prevOp][vesselroutes.get(vessel2).get(pos2-1).getID()-1][vesselroutes.get(vessel2).get(pos2).getID()-1];
+
+            vesselroutes.get(vessel2).get(pos2).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][0],vesselroutes.get(vessel2).get(pos2-1).getEarliestTime()+sailingToOp));
+
+            int opTime = TimeVesselUseOnOperation[vessel2][vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][vesselroutes.get(vessel2).get(pos2).getEarliestTime()];
+            int sailingToNext = SailingTimes[vessel2][vesselroutes.get(vessel2).get(pos2).getEarliestTime()+opTime][vesselroutes.get(vessel2).get(pos2).getID()-1][vesselroutes.get(vessel2).get(pos2+1).getID()-1];
+
+            vesselroutes.get(vessel2).get(pos2).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][1],
+                                                                        vesselroutes.get(vessel2).get(pos2+1).getLatestTime()-sailingToNext-opTime));
         }
+
+        if(vesselroutes.get(vessel2).get(pos2).getEarliestTime() > vesselroutes.get(vessel2).get(pos2).getLatestTime()){
+            System.out.println("Infeasible relocate, eraliest time is larger than latest time");
+            return retainOldSolution(new_vesselroutes,unroutedTasks);
+        }
+
+        updateEarliest(vesselroutes.get(vessel2).get(pos2).getEarliestTime(),pos2,vessel2,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,twIntervals,"tworelocate");
+        updateLatest(vesselroutes.get(vessel2).get(pos2).getLatestTime(),pos2,vessel2,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,twIntervals,"tworelocate");
 
         List<Integer> updatedRoutes = new ArrayList<>(){{add(vessel2);}};
         updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel1,vesselroutes,updatedRoutes);
         ConstructionHeuristic.updateIndexesInsertion(vessel2,pos2,vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
         ConstructionHeuristic.updateIndexesRemoval(vessel1,pos1,vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
-        //ConstructionHeuristic.updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
-        //ConstructionHeuristic.updatePrecedenceOf(checkPrecedence(routeIndex,1),indexInRoute);
+        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel2),pos2,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
+                                                    TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(vessel2),pos2,TimeVesselUseOnOperation,startNodes, simOpRoutes,
+                                                precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
 
-        updateSimultaneous(simOpRoutes,vessel2, vessel1,simultaneousOp,
+        updateSimultaneous(simOpRoutes,vessel2, simultaneousOp,
                 precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                 precedenceOfOperations,vesselroutes,pos1, pos2,"noUpdate");
 
@@ -637,19 +674,6 @@ public class LS_operators {
             return vesselroutes;
         }
 
-        if(pos2 == new_vesselroutes.get(vessel).size()-1) {
-            int newEarliestTime = new_vesselroutes.get(vessel).get(pos1).getEarliestTime() + first_delta + new_second_sailing;
-            if (newEarliestTime > nTimePeriods) {
-                System.out.println("Infeasible one-exchange");
-                return vesselroutes;
-            }
-        }else{
-            int newEarliestTime = new_vesselroutes.get(vessel).get(new_vesselroutes.get(vessel).size()-1).getEarliestTime() + first_delta + second_delta;
-            if(newEarliestTime > nTimePeriods){
-                System.out.println("Infeasible one-exchange");
-                return vesselroutes;
-            }
-        }
 
         // Relocating the elements in the original vesselroutes list to secure the same object structure
         OperationInRoute toMoveOriginal1 = vesselroutes.get(vessel).get(pos1);
@@ -691,10 +715,13 @@ public class LS_operators {
         updateLatest(pos2latest,pos2,vessel,TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,twIntervals, "oneexchange");
 
         updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel,vesselroutes,null);
-        //ConstructionHeuristic.updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
-        //ConstructionHeuristic.updatePrecedenceOf(checkPrecedence(routeIndex,1),indexInRoute);
 
-        updateSimultaneous(simOpRoutes,vessel,null, simultaneousOp,
+        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel),pos2,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
+                                                    TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(vessel),pos2,TimeVesselUseOnOperation,startNodes,simOpRoutes,precedenceOverOperations,
+                                                precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
+
+        updateSimultaneous(simOpRoutes,vessel, simultaneousOp,
                 precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                 precedenceOfOperations,vesselroutes, pos1,pos2, "oneExchange");
 
@@ -727,7 +754,7 @@ public class LS_operators {
 
         if(!((ConstructionHeuristic.containsElement (vesselroutes.get(vessel1).get(pos1).getID(), OperationsForVessel[vessel2])) &&
                 ConstructionHeuristic.containsElement(vesselroutes.get(vessel2).get(pos2).getID(), OperationsForVessel[vessel1]))){
-            System.out.println("Cannot exchange to same route, or one of the vessels cannot perform this task");
+            System.out.println("One of the vessels cannot perform this task");
             return vesselroutes;
         }
 
@@ -900,11 +927,11 @@ public class LS_operators {
 
         if(pos1 == 0){
             int sailing = SailingTimes[vessel1][EarliestStartingTimeForVessel[vessel1]][startNodes[vessel1]-1][vesselroutes.get(vessel1).get(pos1).getID()-1];
-            vesselroutes.get(vessel1).get(pos1).setEarliestTime(sailing);
+            vesselroutes.get(vessel1).get(pos1).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel1).get(pos1).getID()-1-startnodes.length][0],sailing));
             updateEarliest(sailing, 0, vessel1, TimeVesselUseOnOperation,
                     startNodes, SailingTimes, vesselroutes,twIntervals,"twoExchange");
         }else if(pos1 == vesselroutes.get(vessel1).size()-1){
-            vesselroutes.get(vessel1).get(pos1).setLatestTime(nTimePeriods);
+            vesselroutes.get(vessel1).get(pos1).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel1).get(pos1).getID()-1-startnodes.length][1],nTimePeriods));
             updateLatest(nTimePeriods,pos1,vessel1,TimeVesselUseOnOperation,
                     startNodes,SailingTimes,vesselroutes,twIntervals,"twoExchange");
         }
@@ -915,13 +942,16 @@ public class LS_operators {
                     startNodes,SailingTimes,vesselroutes,twIntervals,"twoExchange");
         }
 
+
+
+
         if(pos2 == 0){
             int sailing = SailingTimes[vessel2][EarliestStartingTimeForVessel[vessel2]][startNodes[vessel2]-1][vesselroutes.get(vessel2).get(pos2).getID()-1];
-            vesselroutes.get(vessel2).get(pos2).setEarliestTime(sailing);
+            vesselroutes.get(vessel2).get(pos2).setEarliestTime(Math.max(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][0],sailing));
             updateEarliest(sailing, 0, vessel2, TimeVesselUseOnOperation,
                     startNodes, SailingTimes, vesselroutes,twIntervals,"twoExchange");
         }else if(pos2== vesselroutes.get(vessel2).size()-1){
-            vesselroutes.get(vessel2).get(pos2).setLatestTime(nTimePeriods-1);
+            vesselroutes.get(vessel2).get(pos2).setLatestTime(Math.min(twIntervals[vesselroutes.get(vessel2).get(pos2).getID()-1-startnodes.length][1],nTimePeriods));
             updateLatest(nTimePeriods,pos2,vessel1, TimeVesselUseOnOperation,
                     startNodes,SailingTimes,vesselroutes,twIntervals,"twoExchange");
         }else {
@@ -934,10 +964,12 @@ public class LS_operators {
         List<Integer> updatedRoutes = new ArrayList<>(){{add(vessel2);}};
         updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel1,vesselroutes,updatedRoutes);
 
-        //ConstructionHeuristic.updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
-        //ConstructionHeuristic.updatePrecedenceOf(checkPrecedence(routeIndex,1),indexInRoute);
+        ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel1),pos1,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
+                TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
+        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(vessel1),pos1,TimeVesselUseOnOperation,startNodes,simOpRoutes,precedenceOverOperations,precedenceOfOperations,
+                                                precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
 
-        updateSimultaneous(simOpRoutes,vessel2, vessel1,simultaneousOp,
+        updateSimultaneous(simOpRoutes,vessel2, simultaneousOp,
                 precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                 precedenceOfOperations,vesselroutes,pos1, pos2,"twoExchange");
 
@@ -957,16 +989,25 @@ public class LS_operators {
 
     }
 
-/*
+
     public List<List<OperationInRoute>> insert(List<List<OperationInRoute>> vesselroutes, OperationInRoute unrouted_operation, int vessel, int pos1,
-                       int[] routeSailingCost, int[] startnodes ) {
+                       int[] startnodes, List<OperationInRoute> unroutedTasks) {
+
+
+        if(simALNS[unrouted_operation.getID()-1-startnodes.length][1] != 0 ||
+                simALNS[unrouted_operation.getID()-1-startnodes.length][0] != 0){
+            System.out.println("Cannot insert simultaneousOp with this method");
+            return vesselroutes;
+        }
+
+        if(!(ConstructionHeuristic.containsElement (unrouted_operation.getID(), OperationsForVessel[vessel]))){
+            System.out.println("Vessel cannot perform this task");
+            return vesselroutes;
+        }
+
         int nStartnodes = startnodes.length;
-
-        // Calculate old time
-        int SailingCost = routeSailingCost[vessel];
-
-        //Make copy of old vesselroutes list
-        List<List<OperationInRoute>> old_vesselroutes = copyVesselroutes(vesselroutes);
+        //Make copy of vesselroutes list
+        List<List<OperationInRoute>> new_vesselroutes = copyVesselroutes(vesselroutes);
 
         //Perform change
         vesselroutes.get(vessel).add(pos1,unrouted_operation);
@@ -977,62 +1018,168 @@ public class LS_operators {
 
 
         if(vesselroutes.get(vessel).size() == 1){
-            new_second_sailing = new_second_sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel][startnodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID()-1];
+            new_second_sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel]][startnodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID()-1];
             new_dist = new_second_sailing;
             System.out.println(new_dist + " New dist");
         } else if(pos1==0) {
-            new_second_sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel][startnodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID()-1];
+            new_second_sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel]][startnodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID()-1];
             new_dist = new_second_sailing +
                     SailingTimes[vessel][new_second_sailing +
                             TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID()-1-nStartnodes][new_second_sailing]]
                             [vesselroutes.get(vessel).get(pos1).getID()-1][vesselroutes.get(vessel).get(pos1+1).getID()-1] ;
-            // +TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos2).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos1).getEarliestTime()];
             System.out.println(new_dist + " New dist");
         } else if (pos1==vesselroutes.get(vessel).size()-1){
             new_second_sailing = SailingTimes[vessel][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+
                     TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1-1).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()]]
                     [vesselroutes.get(vessel).get(pos1-1).getID()-1][vesselroutes.get(vessel).get(pos1).getID()-1];
             new_dist =  new_second_sailing ;
-            // + TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos2).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos2).getEarliestTime()];
             System.out.println(new_dist + " New dist");
 
         } else{
-            new_second_sailing = SailingTimes[vessel][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+
-                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1-1).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()]]
+            new_second_sailing = SailingTimes[vessel][Math.min(nTimePeriods-1,vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1-1).getID()-1-nStartnodes][Math.min(vesselroutes.get(vessel).get(pos1-1).getEarliestTime(), nTimePeriods-1)])]
                     [vesselroutes.get(vessel).get(pos1-1).getID()-1][vesselroutes.get(vessel).get(pos1).getID()-1];
             new_dist = new_second_sailing +
                     SailingTimes[vessel][vesselroutes.get(vessel).get(pos1+1).getEarliestTime()+TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID()-1-nStartnodes]
                             [vesselroutes.get(vessel).get(pos1+1).getEarliestTime()]][vesselroutes.get(vessel).get(pos1).getID()-1][vesselroutes.get(vessel).get(pos1+1).getID()-1] ;
-            //+TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos2).getID()-1-nStartnodes][vesselroutes.get(vessel).get(pos1).getEarliestTime()] ;
             System.out.println(new_dist + " New dist");
         }
 
-        //Feasibility
-        if(pos1 == vesselroutes.get(vessel).size()-1) {
-            int newEarliestTime = vesselroutes.get(vessel).get(pos1-1).getEarliestTime() + new_dist;
-            if (newEarliestTime > nTimePeriods) {
-                System.out.println("Infeasible insertion");
-                return old_vesselroutes;
-            }
+
+        if(vesselroutes.get(vessel).size() == 1){
+            int sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel]][startNodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID() - 1];
+            vesselroutes.get(vessel).get(pos1).setEarliestTime(Math.max(sailing, twIntervals[unrouted_operation.getID() - 1 - startnodes.length][0]));
+            vesselroutes.get(vessel).get(pos1).setLatestTime(Math.min(nTimePeriods - 1, twIntervals[unrouted_operation.getID() - 1 - startnodes.length][1]));
+        } else if(pos1 == 0) {
+            int sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel]][startNodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID() - 1];
+            vesselroutes.get(vessel).get(pos1).setEarliestTime(Math.max(sailing, twIntervals[unrouted_operation.getID() - 1 - startnodes.length][0]));
+
+            int opTime = TimeVesselUseOnOperation[vessel][unrouted_operation.getID()-1-startNodes.length][vesselroutes.get(vessel).get(pos1).getEarliestTime()];
+            int sailingFromNext = SailingTimes[vessel][vesselroutes.get(vessel).get(pos1).getEarliestTime()+opTime]
+                    [unrouted_operation.getID()-1-startNodes.length][vesselroutes.get(vessel).get(pos1+1).getID()-1];
+
+            vesselroutes.get(vessel).get(pos1).setLatestTime(Math.min(vesselroutes.get(vessel).get(pos1+1).getLatestTime()-opTime-sailingFromNext,
+                    twIntervals[unrouted_operation.getID() - 1 - startnodes.length][0]));
+
+        }else if(pos1== vesselroutes.get(vessel).size()-1) {
+            vesselroutes.get(vessel).get(pos1).setLatestTime(Math.min(nTimePeriods - 1, twIntervals[unrouted_operation.getID() - 1 - startnodes.length][1]));
+
+            int prevOp = TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1-1).getID()-1-startNodes.length]
+                    [vesselroutes.get(vessel).get(pos1-1).getEarliestTime()];
+            int sailingToOp = SailingTimes[vessel][vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+prevOp]
+                    [vesselroutes.get(vessel).get(pos1-1).getID()-1][unrouted_operation.getID()-1];
+
+            vesselroutes.get(vessel).get(pos1).setEarliestTime(Math.max(vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+prevOp+sailingToOp,
+                    twIntervals[unrouted_operation.getID() - 1 - startnodes.length][0]));
+
+
         }else{
-            int newEarliestTime = vesselroutes.get(vessel).get(vesselroutes.get(vessel).size()-1).getEarliestTime() + new_dist;
-            if(newEarliestTime > nTimePeriods){
-                System.out.println("Infeasible two-exchange");
-                return old_vesselroutes;
-            }
+            int prevOp = TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1-1).getID()-1-startNodes.length]
+                    [Math.min(vesselroutes.get(vessel).get(pos1-1).getEarliestTime(),nTimePeriods-1)];
+            int sailingToOp = SailingTimes[vessel][Math.min(nTimePeriods-1,vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+prevOp)]
+                    [vesselroutes.get(vessel).get(pos1-1).getID()-1][unrouted_operation.getID()-1];
+
+            vesselroutes.get(vessel).get(pos1).setEarliestTime(Math.max(vesselroutes.get(vessel).get(pos1-1).getEarliestTime()+prevOp+sailingToOp,
+                    twIntervals[unrouted_operation.getID() - 1 - startnodes.length][0]));
+
+            int opTime = TimeVesselUseOnOperation[vessel][unrouted_operation.getID()-1-startNodes.length][Math.min(nTimePeriods-1,vesselroutes.get(vessel).get(pos1).getEarliestTime())];
+            int sailingFromNext = SailingTimes[vessel][Math.min(nTimePeriods-1,vesselroutes.get(vessel).get(pos1).getEarliestTime()+opTime)]
+                    [unrouted_operation.getID()-1-startNodes.length][vesselroutes.get(vessel).get(pos1+1).getID()-1];
+
+            vesselroutes.get(vessel).get(pos1).setLatestTime(Math.min(vesselroutes.get(vessel).get(pos1+1).getLatestTime()-opTime-sailingFromNext,
+                    twIntervals[unrouted_operation.getID() - 1 - startnodes.length][0]));
         }
 
-        //Update times & Cost
-        ConstructionHeuristic.updateEarliest(earliest,indexInRoute,routeIndex);
-        ConstructionHeuristic.updateLatest(latest,indexInRoute,routeIndex);
+
+        //Checking preliminary feasibility
+        if(vesselroutes.get(vessel).get(pos1).getLatestTime() <
+                vesselroutes.get(vessel).get(pos1).getEarliestTime() ){
+            System.out.println("Infeasible insertion - earliest time larger than latest time");
+            vesselroutes.get(vessel).remove(pos1);
+            return vesselroutes;
+        }
+
+        ConstructionHeuristic.updateEarliest(vesselroutes.get(vessel).get(pos1).getEarliestTime(),pos1,vessel,TimeVesselUseOnOperation,startNodes,
+                SailingTimes,vesselroutes);
+        ConstructionHeuristic.updateLatest(vesselroutes.get(vessel).get(pos1).getLatestTime(),pos1,vessel,TimeVesselUseOnOperation,startNodes,
+                SailingTimes,vesselroutes);
+        //updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel,vesselroutes,null);
+
         //ConstructionHeuristic.updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
         //ConstructionHeuristic.updatePrecedenceOf(checkPrecedence(routeIndex,1),indexInRoute);
-        //ConstructionHeuristic.updateSimultaneous(checkSimultaneous(routeIndex),routeIndex,indexInRoute,o);
 
+        ConstructionHeuristic.updateIndexesInsertion(vessel,pos1,vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
+        updateSimultaneous(simOpRoutes,vessel, simultaneousOp,
+                precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
+                precedenceOfOperations,vesselroutes,pos1, 1000,"insert");
+
+        //Checking feasibility:
+        if(!checkSolution(vesselroutes)){
+            new_vesselroutes.get(vessel).remove(pos1);
+            ConstructionHeuristic.updateIndexesRemoval(vessel,pos1,new_vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
+            return retainOldSolution(new_vesselroutes,unroutedTasks);
+        }
+
+        System.out.println("Unrouted insertion performed");
+        unroutedTasks.remove(unroutedTasks.indexOf(unrouted_operation));
+        printLSOSolution(vesseltypes,vesselroutes,unroutedTasks);
+        objValue = objValue + (new_dist*SailingCostForVessel[vessel]) + operationGain[vessel]
+                [vesselroutes.get(vessel).get(pos1).getID()-1-startNodes.length][vesselroutes.get(vessel).get(pos1).getEarliestTime()];
+        routeSailingCost[vessel] = routeSailingCost[vessel] + (new_dist*SailingCostForVessel[vessel]);
+        routeOperationGain[vessel] = routeOperationGain[vessel] + operationGain[vessel]
+                [vesselroutes.get(vessel).get(pos1).getID()-1-startNodes.length][vesselroutes.get(vessel).get(pos1).getEarliestTime()];
         return vesselroutes;
     }
 
- */
+    /*
+    public List<List<OperationInRoute>> relocateInsert(List<List<OperationInRoute>> vesselroutes, int[] startnodes,
+                                                       List<OperationInRoute> unroutedTasks){
+        List<List<OperationInRoute>> vesselroutes_copy = copyVesselroutes(vesselroutes);
+        for(OperationInRoute unroutedTask : unroutedTasks){
+            if(simALNS[unroutedTask.getID()-1-startnodes.length][1] != 0 ||
+                    simALNS[unroutedTask.getID()-1-startnodes.length][0] != 0){
+                System.out.println("Cannot insert simultaneousOp with this method");
+                return vesselroutes;
+            }
+            for(int vessel=0;vessel<vesselroutes.size()-1;vessel++){
+                if(ConstructionHeuristic.containsElement (unroutedTask.getID(), OperationsForVessel[vessel])){
+                    for(int vessel2=0;vessel<vesselroutes.size()-1;vessel++){
+                        for(int pos1=0;pos1<vesselroutes.get(vessel).size()-1;pos1++){
+                            for(int pos2=0;pos2<vesselroutes.get(vessel2).size()-1;pos2++){
+                                List<List<OperationInRoute>> relocated_vesselroutes = two_relocate(vesselroutes,vessel,vessel2,pos1,pos2,
+                                                                                                    startnodes,unroutedTasks);
+                                List<List<OperationInRoute>> inserted_vesselroutes = insert(relocated_vesselroutes,unroutedTask,vessel,pos1,
+                                                                                            startnodes,unroutedTasks);
+                            }
+                        }
+
+                    }
+                }
+            }
+
+        }
+        return null;
+    }
+
+    public List<List<OperationInRoute>> insertSim(List<List<OperationInRoute>> vesselroutes, int[] startnodes, List<OperationInRoute> unroutedTasks){
+        for(OperationInRoute unroutesSim1 : unroutedTasks) {
+            if (simALNS[unroutesSim1.getID() - 1 - startnodes.length][1] == 0 ||
+                    simALNS[unroutesSim1.getID() - 1 - startnodes.length][0] == 0) {
+
+                for(int vessel=0;vessel<vesselroutes.size()-1;vessel++){
+                    if(ConstructionHeuristic.containsElement (unroutesSim1.getID(), OperationsForVessel[vessel])){
+                        for(int pos1=0;pos1<vesselroutes.get(vessel).size()-1;pos1++){
+
+
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+     */
 
     public static void updateEarliest(int earliest, int indexInRoute, int routeIndex,
                                       int [][][] TimeVesselUseOnOperation, int[] startNodes, int[][][][] SailingTimes,
@@ -1045,7 +1192,7 @@ public class LS_operators {
             OperationInRoute objectFMinus1=vesselroutes.get(routeIndex).get(f-1);
             OperationInRoute objectF=vesselroutes.get(routeIndex).get(f);
             int opTimeFMinus1=TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1]
-                    [objectFMinus1.getLatestTime()-1];
+                    [objectFMinus1.getEarliestTime()];
             //System.out.println("ID operation "+ vesselroutes.get(routeIndex).get(f).getID() + " , " +"Route: "+ routeIndex);
             //System.out.println("Earliest already assigned F: "+ objectF.getEarliestTime() + " , " + "Potential update earliest F: "+
             //        (lastEarliest+
@@ -1053,7 +1200,7 @@ public class LS_operators {
             //                +TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1][objectFMinus1.getEarliestTime()-1]));
             int newTime=Math.max(lastEarliest+
                             SailingTimes[routeIndex][objectFMinus1.getEarliestTime()+opTimeFMinus1-1][objectFMinus1.getID()-1][objectF.getID()-1]
-                            +TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1][objectFMinus1.getEarliestTime()-1],
+                            +TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1][objectFMinus1.getEarliestTime()],
                     twIntervals[objectF.getID()-startNodes.length-1][0]);
 
             //System.out.println("New time: "+ newTime + " , " + "ID F: " +objectF.getID());
@@ -1106,7 +1253,7 @@ public class LS_operators {
         }
     }
 
-    public static void updateSimultaneous(List<Map<Integer, ConnectedValues>> simOpRoutes, int routeIndex, Integer oldRoute,
+    public static void updateSimultaneous(List<Map<Integer, ConnectedValues>> simOpRoutes, int routeIndex,
                                           Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
                                           List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, int[][][] TimeVesselUseOnOperation,
                                           int[] startNodes, int[][][][] SailingTimes, Map<Integer, PrecedenceValues> precedenceOverOperations,
@@ -1121,7 +1268,6 @@ public class LS_operators {
                 //System.out.println(cur_earliestTemp + " cur earliest temp of " + sValues.getOperationObject().getID());
 
                 int sIndex = sValues.getIndex();
-                int sRoute = sValues.getRoute();
                 if(function.equals("onerelocate")) {
                     if (pos1 < sIndex && pos2 > sIndex) {
                         sValues.setIndex(sIndex - 1);
@@ -1132,16 +1278,6 @@ public class LS_operators {
 
                 if(sValues.getConnectedOperationObject() != null) {
                     ConnectedValues simOp = simultaneousOp.get(sValues.getConnectedOperationObject().getID());
-                    /*
-                    if(function.equals("twoRelocate")){
-                        if(pos1 < simOp.getIndex() && simOp.getRoute() == oldRoute){
-                            simOp.setIndex(simOp.getIndex()-1);
-                        }
-                        if (pos2 <= sIndex && sRoute == routeIndex){
-                            sValues.setIndex(sIndex+1);
-                        }
-                    }
-                     */
 
                     int earliestPO;
                     int latestPO;
@@ -1184,10 +1320,10 @@ public class LS_operators {
                                 precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,vesselroutes);
 
 
-                        /*
+
                         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(simOp.getRoute()),simOp.getIndex(),simOpRoutes,precedenceOfOperations,
                                 precedenceOverOperations,TimeVesselUseOnOperation,startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
-                        */
+
 
                     }
                     if (latestTemp < cur_latestTemp) {
@@ -1204,11 +1340,10 @@ public class LS_operators {
                         ConstructionHeuristic.updateSimultaneous(simOpRoutes,simOp.getRoute(),simOp.getIndex(),
                                 simultaneousOp,precedenceOverRoutes, precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                                 precedenceOfOperations,vesselroutes);
-
-                        /*ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(simOp.getRoute()),simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
+                        ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(simOp.getRoute()),simOp.getIndex(),TimeVesselUseOnOperation,startNodes,simOpRoutes,
                                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselroutes,simultaneousOp,SailingTimes);
 
-                         */
+
                     }
                 }
             }
@@ -1222,7 +1357,7 @@ public class LS_operators {
         if(!simOpRoutes.get(v).isEmpty()){
             for(ConnectedValues op : simOpRoutes.get(v).values()){
                 int conRoute = op.getConnectedRoute();
-                if(!routesToUpdate.contains(conRoute)) {
+                if(!routesToUpdate.contains(conRoute) && !vesselroutes.get(conRoute).isEmpty()) {
                     routesToUpdate.add(conRoute);
                 }
             }
@@ -1230,22 +1365,25 @@ public class LS_operators {
         if(!precedenceOfRoutes.get(v).isEmpty()){
             for(PrecedenceValues op : precedenceOfRoutes.get(v).values()){
                 int conRoute = op.getConnectedRoute();
-                if(!routesToUpdate.contains(conRoute)) {
+                if(!routesToUpdate.contains(conRoute) && !vesselroutes.get(conRoute).isEmpty()) {
                     routesToUpdate.add(conRoute);
                 }
             }
         }
         if(!precedenceOverRoutes.get(v).isEmpty()){
             for(PrecedenceValues op : precedenceOverRoutes.get(v).values()){
-                int conRoute = op.getConnectedRoute();
-                if(!routesToUpdate.contains(conRoute)) {
-                    routesToUpdate.add(conRoute);
+                 OperationInRoute conRoute = op.getConnectedOperationObject();
+                 int conVessel = op.getConnectedRoute();
+                if(conRoute != null && !routesToUpdate.contains(conVessel) && !vesselroutes.get(conVessel).isEmpty()) {
+                    routesToUpdate.add(conVessel);
                 }
             }
         }
-        for(int route : updatedRoutes){
-            if(routesToUpdate.contains(route)) {
-                routesToUpdate.remove(Integer.valueOf(route));
+        if(updatedRoutes != null) {
+            for (int route : updatedRoutes) {
+                if (routesToUpdate.contains(route)) {
+                    routesToUpdate.remove(Integer.valueOf(route));
+                }
             }
         }
         for(int route : routesToUpdate) {
@@ -1304,7 +1442,7 @@ public class LS_operators {
         if(!precedenceOverOperations.isEmpty()){
             for(PrecedenceValues op : precedenceOverOperations.values()){
                 OperationInRoute conop = op.getConnectedOperationObject();
-                if(precedenceOfOperations.get(conop.getID()) != null) {
+                if(conop != null) {
                     if (conop.getEarliestTime() < op.getOperationObject().getEarliestTime() + TimeVesselUseOnOperation[op.getRoute()]
                             [op.getOperationObject().getID() - 1][op.getOperationObject().getEarliestTime()]) {
                         return false;
@@ -1358,21 +1496,41 @@ public class LS_operators {
 
     public List<List<OperationInRoute>> searchAll (List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks){
         for(int vessel=1; vessel<vesselroutes.size();vessel++){
-            for(int vessel2 = 1; vessel2<vesselroutes.size();vessel2++) {
-                if (!vesselroutes.get(vessel).isEmpty()) {
-                    for (int position = 0; position < vesselroutes.get(vessel2).size(); position++) {
-                        for (int task = 0; task < vesselroutes.get(vessel).size(); task++) {
-                            System.out.println(vessel + " , " + vessel2 + " , " + task + " , " + position);
-                            //vesselroutes = two_exchange(vesselroutes, vessel, vessel2, task, position, startNodes, unroutedTasks);
-                            vesselroutes = two_relocate(vesselroutes,vessel,vessel2,task,position,startNodes,unroutedTasks);
-                            //printLSOSolution(vesseltypes,vesselroutes,unroutedTasks);
+            if (!vesselroutes.get(vessel).isEmpty()) {
+                for (int vessel2 = 0; vessel2 < vesselroutes.size(); vessel2++) {
+                    //if (!vesselroutes.get(vessel2).isEmpty()) {
+                        for (int position = 0; position < vesselroutes.get(vessel2).size() + 1; position++) {
+                            for (int task = 0; task < vesselroutes.get(vessel).size(); task++) {
+                                System.out.println(vessel + " , " + vessel2 + " , " + task + " , " + position);
+                                //vesselroutes = two_exchange(vesselroutes, vessel, vessel2, task, position, startNodes, unroutedTasks);
+                                vesselroutes = two_relocate(vesselroutes, vessel, vessel2, task, position, startNodes, unroutedTasks);
+                                //vesselroutes = one_exchange(vesselroutes,vessel,task,position,startNodes,unroutedTasks);
+                                //printLSOSolution(vesseltypes,vesselroutes,unroutedTasks);
+                            }
                         }
+                    //}
+                }
+            }
+        }
+        return vesselroutes;
+    }
+
+    public List<List<OperationInRoute>> insertAll (List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks){
+        for(int vessel=1; vessel<vesselroutes.size();vessel++){
+            if (!unroutedTasks.isEmpty()) {
+                for (OperationInRoute task : unroutedTasks) {
+                    for (int position = 0; position < vesselroutes.get(vessel).size(); position++) {
+                        System.out.println(vessel + " , " + task.getID() + " , " + position);
+                        insert(vesselroutes,task,vessel,position,startNodes,unroutedTasks);
+                        //printLSOSolution(vesseltypes,vesselroutes,unroutedTasks);
                     }
                 }
             }
         }
         return vesselroutes;
     }
+
+
 
 
 
@@ -1432,14 +1590,14 @@ public class LS_operators {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1,2,3,4};
-        int[] startnodes=new int[]{1,2,3,4};
+        int[] vesseltypes = new int[]{1,2,3,4,5};
+        int[] startnodes=new int[]{1,2,3,4,5};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
+                "test_instances/20-5_g_m.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
-        //PrintData.printSailingTimes(dg.getSailingTimes(),2,20, 4);
+        //PrintData.printSailingTimes(dg.getSailingTimes(),4,20, 4);
         //PrintData.printSailingTimes(dg.getSailingTimes(),3,23, 4);
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
@@ -1450,12 +1608,13 @@ public class LS_operators {
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
         LS_operators LSO = new LS_operators(dg.getOperationsForVessel(),vesseltypes,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
-                dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),a.getRouteSailingCost(),a.getObjValue(),
-                dg.getStartNodes(), dg.getSimultaneousALNS(),
+                dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),a.getRouteSailingCost(),a.getRouteOperationGain(),
+                a.getObjValue(), dg.getStartNodes(), dg.getSimultaneousALNS(), a.getOperationGain(),
                 a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),
                 a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes());
-        //List<List<OperationInRoute>> new_vesselroutes = LSO.two_exchange(a.vesselroutes,3,2,1,1,startnodes,a.getUnroutedTasks());
+        //List<List<OperationInRoute>> new_vesselroutes = LSO.two_relocate(a.vesselroutes,1,3,4,0,startnodes,a.getUnroutedTasks());
         List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes, a.getUnroutedTasks());
+        //List<List<OperationInRoute>> new_vesselroutes = LSO.insert(a.vesselroutes,a.unroutedTasks.get(2),1,1, startnodes,a.getUnroutedTasks());
         LSO.printLSOSolution(vesseltypes,new_vesselroutes,a.getUnroutedTasks());
     }
 
