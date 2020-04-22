@@ -33,4 +33,8 @@ public class ConsolidatedValues {
     public int getConsolidatedRoute() {
         return consolidatedRoute;
     }
+
+    public void setConsolidatedRoute(int consolidatedRoute) {
+        this.consolidatedRoute = consolidatedRoute;
+    }
 }

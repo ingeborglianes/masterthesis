@@ -31,8 +31,8 @@ public class InstanceGenerator {
     }
 
     public void generateInstanceFromDistribution(){
-        //OpGen();
-        OpGenTest();
+        OpGen();
+        //OpGenTest();
         int period=this.days*24;
         for (int loc : this.locations) {
             for (OperationType opType : this.operationTypes) {

@@ -140,8 +140,8 @@ public class DataGenerator {
     public void runOperationGenerator(){
         OperationGenerator og=new OperationGenerator();
         //REMEMBER TO CHOOSE TEST OR NOT HERE
-        //this.operationTypes=og.createOperationTypes();
-        this.operationTypes=og.createOperationTypesTest();
+        this.operationTypes=og.createOperationTypes();
+        //this.operationTypes=og.createOperationTypesTest();
     }
 
     public void readInstance() throws FileNotFoundException {
