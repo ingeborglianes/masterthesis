@@ -308,6 +308,10 @@ public class ConstructionHeuristic {
                                                     operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute + changedTime - 1];
                                         }
                                         int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
+                                        if(o==19){
+                                            System.out.println("DELTA OPERATION GAIN LAST OPERATION: "+deltaOperationGainLastOperation);
+                                            System.out.println("benefit increase 19: "+benefitIncreaseTemp);
+                                        }
                                         if (benefitIncreaseTemp > 0 && benefitIncreaseTemp > benefitIncrease) {
                                             precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods, SailingTimes,
                                                     vesselroutes, precedenceOfOperations, precedenceOverRoutes);
@@ -558,6 +562,9 @@ public class ConstructionHeuristic {
                     int opPreviousTime = TimeVesselUseOnOperation[r][orPrevious.getID() - 1 - startNodes.length][orPrevious.getEarliestTime()-1];
                     int costN = SailingTimes[r][orPrevious.getEarliestTime() + opPreviousTime-1][orPrevious.getID() - 1][orCurrent.getID() - 1]*SailingCostForVessel[r];
                     int gainN = operationGain[r][orCurrent.getID() - 1 - startNodes.length][orCurrent.getEarliestTime()-1];
+                    if(orCurrent.getID()==19){
+                        System.out.println("OP gain op 19: "+gainN);
+                    }
                     routeSailingCost[r] += costN;
                     routeOperationGain[r] += gainN;
                     objValue-=costN;
@@ -729,7 +736,7 @@ public class ConstructionHeuristic {
                 }
                 int precedenceIndex = pValues.getIndex();
                 if (insertIndex > precedenceIndex) {
-                    System.out.println("ID: "+pValues.getOperationObject().getID());
+                    //System.out.println("ID: "+pValues.getOperationObject().getID());
                     int change = checkChangeLatest(latest, insertIndex, route, pValues.getIndex(), pValues.getOperationObject().getLatestTime(), o,
                                                     startNodes,TimeVesselUseOnOperation,SailingTimes, vesselroutes);
                     if (change!=0) {
@@ -908,6 +915,9 @@ public class ConstructionHeuristic {
 
     public static Integer checkChangeEarliestLastOperation(int earliestInsertionOperation, int earliestLastOperation, int indexInRoute, int routeIndex,int o,List<List<OperationInRoute>> vesselroutes,
                                                            int[][][] TimeVesselUseOnOperation, int[] startNodes, int [][][][] SailingTimes){
+        if(indexInRoute==vesselroutes.get(routeIndex).size()){
+            return 0;
+        }
         int lastEarliest=earliestInsertionOperation;
         for(int f=indexInRoute;f<vesselroutes.get(routeIndex).size();f++){
             int sailingtime;

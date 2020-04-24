@@ -1468,7 +1468,7 @@ public class LS_operators {
                 OperationInRoute conop = op.getConnectedOperationObject();
                 if(conop != null) {
                     if (conop.getEarliestTime() < op.getOperationObject().getEarliestTime() + TimeVesselUseOnOperation[op.getRoute()]
-                            [op.getOperationObject().getID() - 1][op.getOperationObject().getEarliestTime()]) {
+                            [op.getOperationObject().getID() - 1-startNodes.length][op.getOperationObject().getEarliestTime()]) {
                         return false;
                     }
                 }

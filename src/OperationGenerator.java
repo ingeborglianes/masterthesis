@@ -30,12 +30,12 @@ public class OperationGenerator {
         OperationType op7 = new OperationType(7, op7v1, null, null,
                 0, 0, 8760, 360, 48, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "tightening anchor lines");
         int[] op8v1 = new int[]{2, 3, 4, 6};
-        int[] op8v2 = new int[]{2, 3, 4, 6};
-        OperationType op8 = new OperationType(8, op8v1, op8v2, null,
-                0, 9, 8760, 360, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Small installation facility");
+        OperationType op8 = new OperationType(8, op8v1, null, null,
+                9, 0, 8760, 360, 6, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Easy transport of equipment to facility");
         int[] op9v1 = new int[]{2, 3, 4, 6};
-        OperationType op9 = new OperationType(9, op9v1, null, null,
-                8, 0, 8760, 360, 6, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Easy transport of equipment to facility");
+        int[] op9v2 = new int[]{2, 3, 4, 6};
+        OperationType op9 = new OperationType(9, op9v1, op9v2, null,
+                0, 8, 8760, 360, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Small installation facility");
         int[] op10v1 = new int[]{2, 3, 4, 6};
         OperationType op10 = new OperationType(10, op10v1, null, null,
                 0, 0, 720, 100, 2, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Remove dead fish");

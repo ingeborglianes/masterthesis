@@ -32,4 +32,8 @@ public class InsertionValues {
     public int getBenenefitIncrease() {
         return benenefitIncrease;
     }
+
+    public void setBenenefitIncrease(int benenefitIncrease) {
+        this.benenefitIncrease = benenefitIncrease;
+    }
 }

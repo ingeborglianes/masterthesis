@@ -720,6 +720,10 @@ public class LargeNeighboorhoodSearchRemoval {
         return vesselRoutes;
     }
 
+    public ArrayList<Integer> getRemovedOperations() {
+        return removedOperations;
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         int[] vesseltypes = new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
