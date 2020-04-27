@@ -1086,7 +1086,7 @@ public class ConstructionHeuristic {
                             //System.out.println(conOp.getIndex());
                             if((simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() - conOp.getIndex() > 0 &&
                                     insertIndex - op.getIndex() < 0) || (simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() -
-                                    conOp.getIndex() < 0 && insertIndex - op.getIndex() > 0)){
+                                    conOp.getIndex() <= 0 && insertIndex - op.getIndex() > 0)){
                                 //System.out.println("Sim infeasible");
                                 return false;
                             }

@@ -1,6 +1,5 @@
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -39,7 +38,7 @@ public class LargeNeighboorhoodSearchInsert {
                                           Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
                                           List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
                                           Map<Integer, ConsolidatedValues> consolidatedOperations, List<OperationInRoute> unroutedTasks,
-                                          List<List<OperationInRoute>> vesselRoutes,ArrayList<Integer> removedOperations, int[][] twIntervals,
+                                          List<List<OperationInRoute>> vesselRoutes, ArrayList<Integer> removedOperations, int[][] twIntervals,
                                           int[][] precedenceALNS, int[][] simALNS, int[] startNodes, int[][][][] SailingTimes,
                                           int[][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int[] EarliestStartingTimeForVessel,
                                           int[][][] operationGain, int[][] bigTasksALNS, int[][] OperationsForVessel, int randomSeed) {
@@ -143,28 +142,12 @@ public class LargeNeighboorhoodSearchInsert {
                         int ourBenefitIncrease=ourValues.getBenenefitIncrease();
                         if(ourBenefitIncrease==-100000) {
                             option.setBenenefitIncrease(-100000);
-                            allFeasibleInsertions.get(simA).remove(i);
-                            allFeasibleInsertions.get(simA).add(allFeasibleInsertions.get(simA).size(), option);
-                            if (currentID == presOfOp) {
-                                if (presOfOp != 0 && precedenceOverOperations.get(presOfOp) == null) {
-                                    InsertionValues correspondingPresOf = allFeasibleInsertions.get(presOfOp).get(i);
-                                    System.out.println("Benefit for index "+i+" "+correspondingPresOf.getBenenefitIncrease() + "moved to last position");
-                                    for (InsertionValues insertionVals : allFeasibleInsertions.get(presOfOp)){
-                                        System.out.println(insertionVals.getBenenefitIncrease());
-                                    }
-                                    allFeasibleInsertions.get(presOfOp).remove(i);
-                                    allFeasibleInsertions.get(presOfOp).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOf);
-                                    if (simALNS[presOfOp - 1 - startNodes.length][0] != 0) {
-                                        InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).get(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).remove(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                                    }
-                                    if (simALNS[presOfOp - 1 - startNodes.length][1] != 0) {
-                                        InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).get(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).remove(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                                    }
-                                }
+                            if(currentID==simA){
+                                currentRegretValue=prevRegretValue;
+                                currentID=prevID;
+                            }
+                            if(prevID==simA){
+                                prevRegretValue=-100000;
                             }
                         }
                         else{
@@ -201,7 +184,7 @@ public class LargeNeighboorhoodSearchInsert {
                         regretValueTemp=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
                     }
                     else if(allFeasibleInsertions.get(presOfOp).size()==1 && allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease()==-100000){
-                        regretValueTemp=0;
+                        regretValueTemp=-100000;
                     }
                     else{
                         int ourValue1=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
@@ -211,12 +194,11 @@ public class LargeNeighboorhoodSearchInsert {
                             regretValueTemp=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
                         }
                     }
-                    if (regretValueTemp > currentRegretValue && !(precedenceALNS[presOfOp-1-startNodes.length][1]!=0 &&
-                            allFeasibleInsertions.get(precedenceALNS[presOfOp-1-startNodes.length][1])!=null)) {
-                            prevRegretValue = currentRegretValue;
-                            currentRegretValue=regretValueTemp;
-                            prevID=currentID;
-                            currentID = presOfOp;
+                    if (regretValueTemp > currentRegretValue) {
+                        prevRegretValue = currentRegretValue;
+                        currentRegretValue = regretValueTemp;
+                        prevID = currentID;
+                        currentID = presOfOp;
                     }
                 }
                 else {
@@ -224,7 +206,7 @@ public class LargeNeighboorhoodSearchInsert {
                     if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() != -100000) {
                         regretValueTemp = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
                     } else if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() == -100000) {
-                        regretValueTemp = 0;
+                        regretValueTemp = -100000;
                     } else {
                         int ourValue1 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
                         int ourValue2 = allFeasibleInsertions.get(simA).get(1).getBenenefitIncrease();
@@ -236,7 +218,8 @@ public class LargeNeighboorhoodSearchInsert {
                     if (simA == currentID && regretValueTemp < currentRegretValue && prevRegretValue > regretValueTemp) {
                         currentRegretValue = prevRegretValue;
                         currentID = prevID;
-                    } else if (simA == currentID && regretValueTemp < currentRegretValue && prevRegretValue < regretValueTemp) {
+                    }
+                    else if (simA == currentID && regretValueTemp < currentRegretValue && prevRegretValue < regretValueTemp) {
                         currentRegretValue = regretValueTemp;
                     } else if (regretValueTemp > currentRegretValue) {
                         prevRegretValue = currentRegretValue;
@@ -249,68 +232,37 @@ public class LargeNeighboorhoodSearchInsert {
             else if (precedenceALNS[ourID-startNodes.length-1][1]!=0) {
                 int presOfOp=precedenceALNS[ourID-startNodes.length-1][1];
                 if(allFeasibleInsertions.get(presOfOp)!=null) {
-                    ArrayList<Integer> removeIndexes=new ArrayList<>();
-                    for (int i=0; i < allFeasibleInsertions.get(presOfOp).size();i++) {
-                        InsertionValues option =allFeasibleInsertions.get(presOfOp).get(i);
-                        findInsertionCosts(our, -1, -1, option.getEarliest(), option.getRouteIndex(), -1,option.getIndexInRoute(),-1);
-                        int size = allFeasibleInsertions.get(ourID).size();
-                        InsertionValues ourValues = allFeasibleInsertions.get(ourID).get(size - 1);
-                        int ourBenefitIncrease = ourValues.getBenenefitIncrease();
-                        if (ourBenefitIncrease == -100000) {
-                            InsertionValues correspondingPresOf = allFeasibleInsertions.get(presOfOp).get(i);
-                            System.out.println("Benefit for index "+i+" "+correspondingPresOf.getBenenefitIncrease() + " moved to last position");
-                            for (InsertionValues insertionVals : allFeasibleInsertions.get(presOfOp)){
-                                System.out.println(insertionVals.getBenenefitIncrease());
-                            }
-                            removeIndexes.add(i);
+                    if(allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease()!=-100000) {
+                        ArrayList<Integer> removeIndexes = new ArrayList<>();
+                        for (int i = 0; i < allFeasibleInsertions.get(presOfOp).size(); i++) {
+                            InsertionValues option = allFeasibleInsertions.get(presOfOp).get(i);
+                            findInsertionCosts(our, -1, -1, option.getEarliest(), option.getRouteIndex(), -1, option.getIndexInRoute(), -1);
                         }
-                    }
-                    for (int ri =0; ri< removeIndexes.size();ri++){
-                        InsertionValues correspondingPresOf = allFeasibleInsertions.get(presOfOp).get(removeIndexes.get(ri));
-                        allFeasibleInsertions.get(presOfOp).remove(removeIndexes.get(ri));
-                        allFeasibleInsertions.get(presOfOp).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOf);
-                        System.out.println("moved: ");
-                        for (InsertionValues insertionVals : allFeasibleInsertions.get(presOfOp)){
-                            System.out.println(insertionVals.getBenenefitIncrease());
-                        }
-                        if (simALNS[presOfOp - 1 - startNodes.length][0] != 0) {
-                            InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).get(removeIndexes.get(ri));
-                            allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).remove(removeIndexes.get(ri));
-                            allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                        }
-                        if (simALNS[presOfOp - 1 - startNodes.length][1] != 0) {
-                            InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).get(removeIndexes.get(ri));
-                            allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).remove(removeIndexes.get(ri));
-                            allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                        }
-                        if(ri!=removeIndexes.size()-1){
-                            for (int riNew=ri+1;riNew<removeIndexes.size();riNew++){
-                                int old=removeIndexes.get(riNew);
-                                removeIndexes.set( riNew, old-1);
+                        int regretValueTemp;
+                        if (allFeasibleInsertions.get(presOfOp).size() == 1 && allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease() != -100000) {
+                            regretValueTemp = allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
+                        } else if (allFeasibleInsertions.get(presOfOp).size() == 1 && allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease() == -100000) {
+                            regretValueTemp = -100000;
+                        } else {
+                            int ourValue1 = allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
+                            int ourValue2 = allFeasibleInsertions.get(presOfOp).get(1).getBenenefitIncrease();
+                            regretValueTemp = ourValue1 - ourValue2;
+                            if (allFeasibleInsertions.get(presOfOp).get(1).getBenenefitIncrease() == -100000) {
+                                regretValueTemp = allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
                             }
                         }
-                    }
-                    int regretValueTemp;
-                    if(allFeasibleInsertions.get(presOfOp).size()==1 && allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease()!=-100000){
-                        regretValueTemp=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
-                    }
-                    else if(allFeasibleInsertions.get(presOfOp).size()==1 && allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease()==-100000){
-                        regretValueTemp=0;
+                        if (regretValueTemp > currentRegretValue && !(precedenceALNS[presOfOp - 1 - startNodes.length][1] != 0 &&
+                                allFeasibleInsertions.get(precedenceALNS[presOfOp - 1 - startNodes.length][1]) != null)) {
+                            prevRegretValue = currentRegretValue;
+                            currentRegretValue = regretValueTemp;
+                            prevID = currentID;
+                            currentID = presOfOp;
+                        }
                     }
                     else{
-                        int ourValue1=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
-                        int ourValue2=allFeasibleInsertions.get(presOfOp).get(1).getBenenefitIncrease();
-                        regretValueTemp=ourValue1-ourValue2;
-                        if(allFeasibleInsertions.get(presOfOp).get(1).getBenenefitIncrease()==-100000){
-                            regretValueTemp=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
-                        }
-                    }
-                    if (regretValueTemp > currentRegretValue && !(precedenceALNS[presOfOp-1-startNodes.length][1]!=0 &&
-                            allFeasibleInsertions.get(precedenceALNS[presOfOp-1-startNodes.length][1])!=null)) {
-                        prevRegretValue = currentRegretValue;
-                        currentRegretValue=regretValueTemp;
-                        prevID=currentID;
-                        currentID = presOfOp;
+                        allFeasibleInsertions.put(ourID, new ArrayList<>() {{
+                            add(new InsertionValues(-100000, -1, -1, -1, -1));
+                        }});
                     }
                 }
                 else{
@@ -321,7 +273,7 @@ public class LargeNeighboorhoodSearchInsert {
                         regretValueTemp=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                     }
                     else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
-                        regretValueTemp=0;
+                        regretValueTemp=-100000;
                     }
                     else{
                         int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
@@ -346,7 +298,7 @@ public class LargeNeighboorhoodSearchInsert {
                     regretValueTemp=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                 }
                 else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
-                    regretValueTemp=0;
+                    regretValueTemp=-100000;
                 }
                 else{
                     int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
@@ -372,6 +324,9 @@ public class LargeNeighboorhoodSearchInsert {
             }
             System.out.println("previous best ID "+prevID);
             System.out.println("previous best value "+prevRegretValue);
+        }
+        if(currentRegretValue==-100000){
+            currentID=-1;
         }
         return currentID;
     }
@@ -426,28 +381,16 @@ public class LargeNeighboorhoodSearchInsert {
                         int ourBenefitIncrease=ourValues.getBenenefitIncrease();
                         if(ourBenefitIncrease==-100000) {
                             option.setBenenefitIncrease(-100000);
-                            allFeasibleInsertions.get(simA).remove(i);
-                            allFeasibleInsertions.get(simA).add(allFeasibleInsertions.get(simA).size(), option);
-                            if (currentID == presOfOp) {
-                                if (presOfOp != 0 && precedenceOverOperations.get(presOfOp) == null) {
-                                    InsertionValues correspondingPresOf = allFeasibleInsertions.get(presOfOp).get(i);
-                                    allFeasibleInsertions.get(presOfOp).remove(i);
-                                    allFeasibleInsertions.get(presOfOp).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOf);
-                                    if (simALNS[presOfOp - 1 - startNodes.length][0] != 0) {
-                                        InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).get(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).remove(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                                    }
-                                    if (simALNS[presOfOp - 1 - startNodes.length][1] != 0) {
-                                        InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).get(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).remove(i);
-                                        allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                                    }
-                                }
+                            if(currentID==simA){
+                                currentBestValue=prevBestValue;
+                                currentID=prevID;
+                            }
+                            if(prevID==simA){
+                                prevBestValue=-100000;
                             }
                         }
-                        else{
-                            if(allFeasibleInsertions.get(presOfOp)==null) {
+                        else {
+                            if (allFeasibleInsertions.get(presOfOp) == null) {
                                 int newBenefitIncrease = (option.getBenenefitIncrease() + ourBenefitIncrease) / 2;
                                 ourValues.setBenenefitIncrease(newBenefitIncrease);
                                 option.setBenenefitIncrease(newBenefitIncrease);
@@ -507,21 +450,6 @@ public class LargeNeighboorhoodSearchInsert {
                         int size = allFeasibleInsertions.get(ourID).size();
                         InsertionValues ourValues = allFeasibleInsertions.get(ourID).get(size - 1);
                         int ourBenefitIncrease = ourValues.getBenenefitIncrease();
-                        if (ourBenefitIncrease == -100000) {
-                            InsertionValues correspondingPresOf = allFeasibleInsertions.get(presOfOp).get(i);
-                            allFeasibleInsertions.get(presOfOp).remove(i);
-                            allFeasibleInsertions.get(presOfOp).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOf);
-                            if (simALNS[presOfOp - 1 - startNodes.length][0] != 0) {
-                                InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).get(i);
-                                allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).remove(i);
-                                allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][0]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                            }
-                            if (simALNS[presOfOp - 1 - startNodes.length][1] != 0) {
-                                InsertionValues correspondingPresOfSim = allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).get(i);
-                                allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).remove(i);
-                                allFeasibleInsertions.get(simALNS[presOfOp - 1 - startNodes.length][1]).add(allFeasibleInsertions.get(presOfOp).size(), correspondingPresOfSim);
-                            }
-                        }
                     }
                     int optionValue=allFeasibleInsertions.get(presOfOp).get(0).getBenenefitIncrease();
                     if(optionValue<currentBestValue && prevBestValue>optionValue){
@@ -554,6 +482,13 @@ public class LargeNeighboorhoodSearchInsert {
                     currentID=ourID;
                 }
             }
+            /*
+            for (Map.Entry<Integer, List<InsertionValues>> entry : allFeasibleInsertions.entrySet()) {
+                int evaluatedOperation=
+                if (precedenceALNS[][0]!= 0)
+            }
+
+             */
             System.out.println("ONE ITERATION calculate insertion values:");
             System.out.println("current best ID "+currentID);
             System.out.println("current best value "+currentBestValue);
@@ -563,6 +498,9 @@ public class LargeNeighboorhoodSearchInsert {
             }
             System.out.println("previous best ID "+prevID);
             System.out.println("previous best value "+prevBestValue);
+        }
+        if(currentBestValue==-100000){
+            currentID=-1;
         }
         return currentID;
     }
@@ -590,20 +528,20 @@ public class LargeNeighboorhoodSearchInsert {
             else if(method=="regret"){
                 insertID= calculateInsertionValuesRegretInsertion();
             }
-            if(insertID!=-1 && unroutedTasks.size()!=0){
-                System.out.println("UNROUTED ALL FEASIBLE DICTIONARY AFTER ONE ROUTE OF CALCULATIONS");
-                for (Map.Entry<Integer, List<InsertionValues>> entry : allFeasibleInsertions.entrySet()) {
-                    int key = entry.getKey();
-                    System.out.println("Evaluating operation "+key+" precedenceOver: "+precedenceALNS[key-1-startNodes.length][0]
-                            +" precedenceOf: "+precedenceALNS[key-1-startNodes.length][1]+" simOver: "+simALNS[key-1-startNodes.length][0]
-                            +" simOf: "+precedenceALNS[key-1-startNodes.length][1]);
-                    List<InsertionValues> iValues = entry.getValue();
-                    for (InsertionValues iv : iValues){
-                        System.out.println("Benefit "+iv.getBenenefitIncrease());
-                    }
-                    System.out.println(" ");
+            System.out.println("UNROUTED ALL FEASIBLE DICTIONARY AFTER ONE ROUTE OF CALCULATIONS");
+            for (Map.Entry<Integer, List<InsertionValues>> entry : allFeasibleInsertions.entrySet()) {
+                int key = entry.getKey();
+                System.out.println("Evaluating operation "+key+" precedenceOver: "+precedenceALNS[key-1-startNodes.length][0]
+                        +" precedenceOf: "+precedenceALNS[key-1-startNodes.length][1]+" simOver: "+simALNS[key-1-startNodes.length][0]
+                        +" simOf: "+precedenceALNS[key-1-startNodes.length][1]);
+                List<InsertionValues> iValues = entry.getValue();
+                for (InsertionValues iv : iValues){
+                    System.out.println("Benefit "+iv.getBenenefitIncrease());
                 }
+                System.out.println(" ");
+            }
 
+            if(insertID!=-1 && unroutedTasks.size()!=0){
                 OperationInRoute insertOR=null;
                 for (int i=0;i<unroutedTasks.size();i++){
                     if (unroutedTasks.get(i).getID()==insertID){
@@ -644,17 +582,12 @@ public class LargeNeighboorhoodSearchInsert {
                         }
                         insertOperation(connectedSimID, insertValuesORConnected.getEarliest(), insertValuesORConnected.getLatest(), insertValuesORConnected.getIndexInRoute(), insertValuesORConnected.getRouteIndex());
                     }
-
                 }
             }
             if(insertID==-1 || unroutedTasks.size()==0){
                 continueInsert=false;
             }
         }
-    }
-
-    public void regretInsertion(){
-
     }
 
     public int checkprecedenceOfEarliestLNS(int o, int earliestTemp, int earliestPO, int routeConnectedPrecedence){
@@ -880,6 +813,9 @@ public class LargeNeighboorhoodSearchInsert {
                                                     indexInRoute = n + 1;
                                                     earliest = earliestTemp;
                                                     latest = latestTemp;
+                                                    System.out.println("earliest: "+earliest+" latest: "+latest);
+                                                    System.out.println("SIM ROUTE "+routeConnectedSimultaneous+ " Sim index "+simAIndex+
+                                                            " sim earliest: "+earliestSO+" sim latest: "+latestSO);
                                                 }
                                             }
                                         }
@@ -946,6 +882,8 @@ public class LargeNeighboorhoodSearchInsert {
                                                         indexInRoute = n + 1;
                                                         earliest = earliestTemp;
                                                         latest = latestTemp;
+                                                        System.out.println("SIM ROUTE "+routeConnectedSimultaneous+ " Sim index "+simAIndex+
+                                                                " sim earliest: "+earliestSO+" sim latest: "+latestSO);
                                                     }
                                                 }
                                             }
@@ -1081,10 +1019,10 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
     public Boolean checkPOverFeasibleLNS(Map<Integer,PrecedenceValues> precedenceOver, int o, int insertIndex,int earliest,
-                                             int []startNodes, int[][][] TimeVesselUseOnOperation, int nTimePeriods,
-                                             int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes,
-                                             Map<Integer,PrecedenceValues> precedenceOfOperations,
-                                             List<Map<Integer,PrecedenceValues>> precedenceOverRoutes) {
+                                         int []startNodes, int[][][] TimeVesselUseOnOperation, int nTimePeriods,
+                                         int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes,
+                                         Map<Integer,PrecedenceValues> precedenceOfOperations,
+                                         List<Map<Integer,PrecedenceValues>> precedenceOverRoutes) {
         if(precedenceOver!=null) {
             for (PrecedenceValues pValues : precedenceOver.values()) {
                 int route = pValues.getRoute();
@@ -1133,7 +1071,7 @@ public class LargeNeighboorhoodSearchInsert {
 
 
     public void runLNSInsert(){
-        insertionByMethod("regret");
+        insertionByMethod("best");
         ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                 EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
     }
@@ -1240,9 +1178,9 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
     public Boolean checkSimultaneousFeasibleLNS(Map<Integer,ConnectedValues> simOps, int o, int v, int insertIndex, int earliestTemp,
-                                                    int latestTemp, Map<Integer, ConnectedValues> simultaneousOp, int [][] simALNS,
-                                                    int [] startNodes, int [][][][] SailingTimes, int [][][] TimeVesselUseOnOperation,
-                                                    List<List<OperationInRoute>> vesselroutes, int simARoute, int simAIndex){
+                                                int latestTemp, Map<Integer, ConnectedValues> simultaneousOp, int [][] simALNS,
+                                                int [] startNodes, int [][][][] SailingTimes, int [][][] TimeVesselUseOnOperation,
+                                                List<List<OperationInRoute>> vesselroutes, int simARoute, int simAIndex){
         if(simOps!=null) {
             for (ConnectedValues op : simOps.values()) {
                 //System.out.println("trying to insert operation " + o + " in position " + insertIndex+ " , " +op.getOperationObject().getID() + " simultaneous operation in route " +v);
@@ -1259,11 +1197,14 @@ public class LargeNeighboorhoodSearchInsert {
                         //System.out.println(conOp.getOperationObject().getID() + " Con op operation ID " + conOp.getRoute() + " route index");
                         if(simALNS[o-startNodes.length-1][1] != 0 &&
                                 simARoute == conOp.getRoute()){
+                            System.out.println("Sim a route: "+simARoute+" conOp route: "+conOp.getRoute());
                             //System.out.println(simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getRoute() + " Con op of o ID" );
                             //System.out.println(conOp.getIndex());
+                            System.out.println("Sim a index: "+ simAIndex + " conOP index: "+conOp.getIndex() + " insertindex: "+
+                                    insertIndex+ " op index: "+op.getIndex());
                             if((simAIndex - conOp.getIndex() > 0 &&
                                     insertIndex - op.getIndex() < 0) || (simAIndex -
-                                    conOp.getIndex() < 0 && insertIndex - op.getIndex() > 0)){
+                                    conOp.getIndex() <= 0 && insertIndex - op.getIndex() > 0)){
                                 //System.out.println("Sim infeasible");
                                 return false;
                             }
@@ -1287,8 +1228,8 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1,2,3,4};
-        int[] startnodes=new int[]{1,2,3,4};
+        int[] vesseltypes = new int[]{1,2,3,4,5};
+        int[] startnodes=new int[]{1,2,3,4,5};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
                 "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
                 "results.txt", "weather_files/weather_normal.txt");

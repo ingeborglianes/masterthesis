@@ -230,7 +230,7 @@ public class LargeNeighboorhoodSearchRemoval {
         ArrayList<Integer> sortedOperationsByRelatednessTemp=new ArrayList<>();
         //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
         for (int r=0;r< vesselRoutes.size();r++) {
-            if(vesselRoutes.get(r).size()>0) {
+            if(vesselRoutes.get(r)!= null && vesselRoutes.get(r).size()>0) {
                 for (int i = 0; i < vesselRoutes.get(r).size(); i++) {
                     //System.out.println((g+1+startNodes.length)+" "+operationGain[0][g][0]);
                     //Key value (= operation number) in savingValues is not null indexed
@@ -713,7 +713,7 @@ public class LargeNeighboorhoodSearchRemoval {
         int[] vesseltypes = new int[]{1,2,3,4};
         int[] startnodes=new int[]{1,2,3,4};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/test_LNS.txt",
+                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
@@ -732,7 +732,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),15,21,dg.getDistOperationsInInstance(),
+                dg.getOperationGain(),dg.getBigTasksALNS(),10,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
         LNS.runLNSRemoval();
