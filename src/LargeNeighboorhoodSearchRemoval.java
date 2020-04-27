@@ -133,7 +133,7 @@ public class LargeNeighboorhoodSearchRemoval {
 
     public void worstRemoval(){
         sortOperationsProfitDecrease();
-        while (removedOperations.size()<numberOfRemoval){
+        while (removedOperations.size()<numberOfRemoval && sortedOperationsByProfitDecrease.size()>0){
             int selectedTaskID=sortedOperationsByProfitDecrease.get(0);
             routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
             OperationInRoute selectedTask = properties.getOr();
@@ -279,7 +279,7 @@ public class LargeNeighboorhoodSearchRemoval {
         Map<Integer,Integer> profitDecrease = new TreeMap<Integer,Integer>();
         //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
         for (int r=0;r< vesselRoutes.size();r++) {
-            if(vesselRoutes.get(r).size()>0) {
+            if(vesselRoutes.get(r)!=null && vesselRoutes.get(r).size()>0) {
                 for (int i = 0; i < vesselRoutes.get(r).size(); i++) {
                     //System.out.println((g+1+startNodes.length)+" "+operationGain[0][g][0]);
                     //Key value (= operation number) in savingValues is not null indexed
@@ -432,21 +432,6 @@ public class LargeNeighboorhoodSearchRemoval {
         }
         unroutedTasks.add(selectedTask);
         System.out.println("Operation to remove: "+selectedTaskID);
-        /*
-        System.out.println("STATUS BEFORE REMOVAL");
-        for(int r=0;r<vesselRoutes.size();r++) {
-            System.out.println("VESSEL " + r);
-            if(vesselRoutes.get(r) != null) {
-                for (int n = 0; n < vesselRoutes.get(r).size(); n++) {
-                    System.out.println("Number in order: " + n);
-                    System.out.println("ID " + vesselRoutes.get(r).get(n).getID());
-                    System.out.println("Earliest starting time " + vesselRoutes.get(r).get(n).getEarliestTime());
-                    System.out.println("latest starting time " + vesselRoutes.get(r).get(n).getLatestTime());
-                    System.out.println(" ");
-                }
-            }
-        }
-         */
         vesselRoutes.get(route).remove(index);
         ConstructionHeuristic.updateIndexesRemoval(route, index, vesselRoutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
         if(simOp!=null){
@@ -563,7 +548,7 @@ public class LargeNeighboorhoodSearchRemoval {
     public void updateAllTimesAfterRemoval(){
         System.out.println("UPDATE TIMES AFTER ALL REMOVALS");
         for(int r=0;r<vesselRoutes.size();r++) {
-            if(vesselRoutes.get(r).size()>0) {
+            if(vesselRoutes.get(r)!= null && vesselRoutes.get(r).size()>0) {
                 System.out.println("Updating route: " + r);
                 int earliest = Math.max(SailingTimes[r][EarliestStartingTimeForVessel[r]][startNodes[r] - 1][vesselRoutes.get(r).get(0).getID() - 1] + 1,
                         twIntervals[vesselRoutes.get(r).get(0).getID() - 1 - startNodes.length][0]);

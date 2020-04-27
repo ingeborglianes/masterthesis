@@ -75,8 +75,7 @@ public class BasicModel {
             GRBEnv env = new GRBEnv();
             GRBModel model = new GRBModel(env);
             model.set(GRB.StringAttr.ModelName, filepath);
-            model.set(GRB.DoubleParam.TimeLimit, 3600.0);
-
+            //model.set(GRB.DoubleParam.TimeLimit, 3600.0);
 
             // Sailing decision variable, x[vijt]=1 if vessel v sails from i to j in time period t
             GRBVar[][][][] x = new GRBVar[nVessels][2*nTimePeriods][nOperations][nOperations];
@@ -245,9 +244,6 @@ public class BasicModel {
                     }
                 }
             }
-
-
-
 
             // Following sail constraint
             for (int v = 0; v < nVessels; ++v) {
