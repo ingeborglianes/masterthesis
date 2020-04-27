@@ -1,6 +1,5 @@
 public class ParameterFile {
-    //Insert your parameters and then run with either the basic model from the BasicModel class or the extended model from
-    //the ExtendedModel class
+    //Insert your parameters and then run with the basic model from the BasicModel class
 
     //Insert the number of locations for the test instance file used
     public static int loc=15;
@@ -10,7 +9,7 @@ public class ParameterFile {
     public static String weatherFile= "weather_files/weather_normal.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
-    public static String testInstance ="test_instances/test_instance_15_locations_SIMtest1.txt";
+    public static String testInstance ="test_instances/test_LNS.txt";
 
     // Insert the name of your result-routing-file. In this file the different variables are printed for the results
     // for each test instance you run on one of the models

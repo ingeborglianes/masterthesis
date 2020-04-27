@@ -593,8 +593,8 @@ public class LargeNeighboorhoodSearchRemoval {
             //randomRemoval();
             //synchronizedRemoval();
             //routeRemoval();
-            //worstRemoval();
-            relatedRemoval();
+            worstRemoval();
+            //relatedRemoval();
             ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                     EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
             updateAllTimesAfterRemoval();
@@ -747,7 +747,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
+                dg.getOperationGain(),dg.getBigTasksALNS(),15,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
         LNS.runLNSRemoval();
