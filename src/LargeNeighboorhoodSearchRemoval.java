@@ -367,13 +367,14 @@ public class LargeNeighboorhoodSearchRemoval {
                         precedenceOfOperations.get(dependentOperation), dependentOperation, simultaneousOp.get(dependentOperation).getOperationObject(),
                         removalType);
                 if (precedenceALNS[dependentOperation - startNodes.length - 1][0] != 0) {
-                    if(precedenceOverOperations.get(dependentOperation)!=null) {
+                    if(precedenceOverOperations.get(precedenceALNS[dependentOperation - startNodes.length - 1][0])!=null) {
                         removeDependentOperations(dependentOperation, removalType);
                     }
                 }
             }
         }
         if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 ) {
+            System.out.println("REMOVE DEPENDENT OPERATION "+simALNS[selectedTaskID-startNodes.length-1][1]);
             int dependentOperation= simALNS[selectedTaskID-startNodes.length-1][1];
             if(simultaneousOp.get(dependentOperation)!=null) {
                 System.out.println("Remove operation sim"+dependentOperation);
@@ -382,7 +383,7 @@ public class LargeNeighboorhoodSearchRemoval {
                         precedenceOfOperations.get(dependentOperation), dependentOperation, simultaneousOp.get(dependentOperation).getOperationObject(),
                         removalType);
                 if (precedenceALNS[dependentOperation - startNodes.length - 1][0] != 0) {
-                    if(precedenceOverOperations.get(dependentOperation)!=null) {
+                    if(precedenceOverOperations.get(precedenceALNS[dependentOperation - startNodes.length - 1][0])!=null) {
                         removeDependentOperations(dependentOperation, removalType);
                     }
                 }
@@ -397,8 +398,18 @@ public class LargeNeighboorhoodSearchRemoval {
                         precedenceOverOperations.get(dependentOperation),
                         precedenceOfOperations.get(dependentOperation),dependentOperation,
                         precedenceOfOperations.get(dependentOperation).getOperationObject(),removalType);
-                if(precedenceALNS[dependentOperation-startNodes.length-1][0] != 0){
-                    if(precedenceOverOperations.get(dependentOperation)!=null) {
+                if(precedenceALNS[dependentOperation-startNodes.length-1][0] !=0){
+                    if(precedenceOverOperations.get(precedenceALNS[dependentOperation-startNodes.length-1][0])!=null) {
+                        removeDependentOperations(dependentOperation, removalType);
+                    }
+                }
+                if(simALNS[dependentOperation-startNodes.length-1][1] != 0){
+                    if(simultaneousOp.get(simALNS[dependentOperation-startNodes.length-1][1])!=null){
+                        removeDependentOperations(dependentOperation, removalType);
+                    }
+                }
+                if(simALNS[dependentOperation-startNodes.length-1][0] != 0){
+                    if(simultaneousOp.get(simALNS[dependentOperation-startNodes.length-1][0])!=null){
                         removeDependentOperations(dependentOperation, removalType);
                     }
                 }
@@ -430,7 +441,28 @@ public class LargeNeighboorhoodSearchRemoval {
             route=precedenceOfOp.getRoute();
             index=precedenceOfOp.getIndex();
         }
-        unroutedTasks.add(selectedTask);
+        if(bigTasksALNS[selectedTask.getID()-1-startNodes.length]==null){
+            unroutedTasks.add(selectedTask);
+        }
+        else{
+            int bigTaskID=bigTasksALNS[selectedTaskID-1-startNodes.length][0];
+            OperationInRoute bigOP=null;
+            for(OperationInRoute oir: unroutedTasks){
+                if (oir.getID()==bigTaskID){
+                    bigOP=oir;
+                }
+            }
+            if(!unroutedTasks.contains(bigOP)){
+                unroutedTasks.add(selectedTask);
+                unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][0],0,0));
+                if(selectedTaskID==bigTasksALNS[selectedTask.getID()-1-startNodes.length][1]){
+                    unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][2],0,0));
+                }
+                else{
+                    unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][1],0,0));
+                }
+            }
+        }
         System.out.println("Operation to remove: "+selectedTaskID);
         vesselRoutes.get(route).remove(index);
         ConstructionHeuristic.updateIndexesRemoval(route, index, vesselRoutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
@@ -466,7 +498,14 @@ public class LargeNeighboorhoodSearchRemoval {
                     new ConsolidatedValues(false, false, 0, 0, 0));
         }
         removedOperations.add(selectedTask.getID());
-        unroutedTasks.add(selectedTask);
+        if(bigTasksALNS[selectedTask.getID()-1-startNodes.length]==null){
+            unroutedTasks.add(selectedTask);
+        }
+        else{
+            unroutedTasks.add(selectedTask);
+            unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][1],0,0));
+            unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][2],0,0));
+        }
         if(removalType=="worstRemoval"){
             sortedOperationsByProfitDecrease.remove(Integer.valueOf(selectedTask.getID()));
         }
@@ -578,13 +617,12 @@ public class LargeNeighboorhoodSearchRemoval {
             //randomRemoval();
             //synchronizedRemoval();
             //routeRemoval();
-            worstRemoval();
-            //relatedRemoval();
+            //worstRemoval();
+            relatedRemoval();
             ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                     EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
             updateAllTimesAfterRemoval();
         }
-
     }
 
     public void printLNSSolution(int[] vessseltypes){
@@ -710,8 +748,8 @@ public class LargeNeighboorhoodSearchRemoval {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1,2,3,4};
-        int[] startnodes=new int[]{1,2,3,4};
+        int[] vesseltypes = new int[]{1,2,3,4,5};
+        int[] startnodes=new int[]{1,2,3,4,5};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
                 "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
                 "results.txt", "weather_files/weather_normal.txt");
@@ -732,7 +770,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),10,21,dg.getDistOperationsInInstance(),
+                dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
         LNS.runLNSRemoval();
