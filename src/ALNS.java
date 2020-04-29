@@ -39,8 +39,8 @@ public class ALNS {
             locStart = new int[]{1, 2, 3, 4, 5, 6};
         }
         else if (loc == 30) {
-            vessels = new int[]{1, 2, 3, 4, 5, 6,2,4};
-            locStart = new int[]{1, 2, 3, 4, 5, 6,7,8};
+            vessels = new int[]{1, 2, 3, 4, 5, 6,2};
+            locStart = new int[]{1, 2, 3, 4, 5, 6,7};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -80,7 +80,7 @@ public class ALNS {
                 relatednessWeightDistance,relatednessWeightDuration,relatednessWeightTimewindows,relatednessWeightPrecedenceOver,
                 relatednessWeightPrecedenceOf,relatednessWeightSimultaneous);
         //for run removal, insert method, alternatives: worst, synchronized, route, related, random
-        LNSR.runLNSRemoval("worst");
+        LNSR.runLNSRemoval("route");
         System.out.println("-----------------");
         LNSR.printLNSSolution(vessels);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
@@ -95,7 +95,7 @@ public class ALNS {
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
         //for run insertion, insert method, alternatives: best, regret
-        LNSI.runLNSInsert("best");
+        LNSI.runLNSInsert("regret");
         LNSI.switchConsolidated();
         LNSI.printLNSInsertSolution(vessels);
     }

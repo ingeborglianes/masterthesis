@@ -312,9 +312,6 @@ public class LargeNeighboorhoodSearchInsert {
                 InsertionValues small1InsertionValues = null;
                 InsertionValues small2InsertionValues = null;
                 InsertionValues bigTaskInsertionValues = null;
-                OperationInRoute bigOpObject = null;
-                OperationInRoute small1Object = null;
-                OperationInRoute small2Object = null;
                 if(conVals.getConsolidated()){
                     int routeBigTask=conVals.getConsolidatedRoute();
                     int index=-1;
@@ -331,6 +328,7 @@ public class LargeNeighboorhoodSearchInsert {
                     bigTaskInsertionValues=new InsertionValues(benefitIncreaseBigTask,index,routeBigTask,earliest,latest);
                     removeNormalOp(vesselRoutes.get(routeBigTask).get(index),routeBigTask,index);
                     updateAllTimesAfterRemoval();
+                    System.out.println("finished remove operations");
                     //Start to evaluate and insert the simultaneous small tasks
                     if (precedenceALNS[small1-startNodes.length-1][1]!=0) {
                         int presOfOp=precedenceALNS[small1-startNodes.length-1][1];
@@ -342,16 +340,17 @@ public class LargeNeighboorhoodSearchInsert {
                         findInsertionCosts(new OperationInRoute(small1,0,0),-1,-1,
                                 -1,-1,-1,-1,-1);
                     }
+                    System.out.println("insertion possibilities found for sim a");
                     for (int i=0;i<allFeasibleInsertions.get(small1).size();i++){
                         InsertionValues option =allFeasibleInsertions.get(small1).get(i);
                         if(option.getBenenefitIncrease()==-100000){
-                            if(allFeasibleInsertions.get(small1)==null){
-                                allFeasibleInsertions.put(small1, new ArrayList<>() {{
+                            if(allFeasibleInsertions.get(small2)==null){
+                                allFeasibleInsertions.put(small2, new ArrayList<>() {{
                                     add(new InsertionValues(-100000, -1, -1, -1, -1));
                                 }});
                             }
                             else{
-                                allFeasibleInsertions.get(small1).
+                                allFeasibleInsertions.get(small2).
                                         add(new InsertionValues(-100000, -1, -1, -1, -1));
                             }
                         }
@@ -380,7 +379,7 @@ public class LargeNeighboorhoodSearchInsert {
                                         allFeasibleInsertions.get(small1).remove(i);
                                         allFeasibleInsertions.get(small1).add(0, option);
                                         allFeasibleInsertions.get(small2).remove(size - 1);
-                                        allFeasibleInsertions.get(small2).add(0, option);
+                                        allFeasibleInsertions.get(small2).add(0, ourValues);
                                     } else if (!(benefitIncreaseBothOperations < allFeasibleInsertions.get(small1).get(allFeasibleInsertions.get(small1).size() - 1).getBenenefitIncrease())) {
                                         for (int s = 1; s < allFeasibleInsertions.get(small1).size(); s++) {
                                             if (benefitIncreaseBothOperations < allFeasibleInsertions.get(small1).get(s - 1).getBenenefitIncrease() &&
@@ -388,7 +387,7 @@ public class LargeNeighboorhoodSearchInsert {
                                                 allFeasibleInsertions.get(small1).remove(i);
                                                 allFeasibleInsertions.get(small1).add(s, option);
                                                 allFeasibleInsertions.get(small2).remove(size - 1);
-                                                allFeasibleInsertions.get(small2).add(s, option);
+                                                allFeasibleInsertions.get(small2).add(s, ourValues);
                                                 break;
                                             }
                                         }
@@ -442,6 +441,9 @@ public class LargeNeighboorhoodSearchInsert {
                     insertOperation(bigTask,bigTaskInsertionValues.getEarliest(),bigTaskInsertionValues.getLatest(),bigTaskInsertionValues.getIndexInRoute(),
                             bigTaskInsertionValues.getRouteIndex());
                     unroutedTasks.removeIf(unrouted -> unrouted.getID() == bigTask || unrouted.getID() == small1 || unrouted.getID() == small2);
+                    consolidatedOperations.put(bigTask,new ConsolidatedValues(
+                            true,false,0,0,
+                            bigTaskInsertionValues.getRouteIndex()));
                 }
                 else if(benefitIncreaseBigTask<benefitIncreaseSmall && benefitIncreaseSmall>0){
                     insertOperation(small1,small1InsertionValues.getEarliest(),small1InsertionValues.getLatest(),small1InsertionValues.getIndexInRoute(),
@@ -449,9 +451,13 @@ public class LargeNeighboorhoodSearchInsert {
                     insertOperation(small2,small2InsertionValues.getEarliest(),small2InsertionValues.getLatest(),small2InsertionValues.getIndexInRoute(),
                             small2InsertionValues.getRouteIndex());
                     unroutedTasks.removeIf(unrouted -> unrouted.getID() == bigTask || unrouted.getID() == small1 || unrouted.getID() == small2);
+                    consolidatedOperations.put(bigTask,new ConsolidatedValues(
+                            false,true,small1InsertionValues.getRouteIndex(),small2InsertionValues.getRouteIndex(),
+                            0));
                 }
             }
         }
+        System.out.println("Finished switch method");
     }
 
     public Boolean checkIfPrecedenceOverOpInUnrouted(int presOfOp){
@@ -527,7 +533,7 @@ public class LargeNeighboorhoodSearchInsert {
                                     allFeasibleInsertions.get(simA).remove(i);
                                     allFeasibleInsertions.get(simA).add(0, option);
                                     allFeasibleInsertions.get(ourID).remove(size - 1);
-                                    allFeasibleInsertions.get(ourID).add(0, option);
+                                    allFeasibleInsertions.get(ourID).add(0, ourValues);
                                 } else if (!(newBenefitIncrease < allFeasibleInsertions.get(simA).get(allFeasibleInsertions.get(simA).size() - 1).getBenenefitIncrease())) {
                                     for (int s = 1; s < allFeasibleInsertions.get(simA).size(); s++) {
                                         if (newBenefitIncrease < allFeasibleInsertions.get(simA).get(s - 1).getBenenefitIncrease() &&
@@ -535,7 +541,7 @@ public class LargeNeighboorhoodSearchInsert {
                                             allFeasibleInsertions.get(simA).remove(i);
                                             allFeasibleInsertions.get(simA).add(s, option);
                                             allFeasibleInsertions.get(ourID).remove(size - 1);
-                                            allFeasibleInsertions.get(ourID).add(s, option);
+                                            allFeasibleInsertions.get(ourID).add(s, ourValues);
                                             break;
                                         }
                                     }
@@ -684,6 +690,7 @@ public class LargeNeighboorhoodSearchInsert {
                         findInsertionCosts(our,option.getEarliest(),option.getLatest(),earliestP,precedenceRoute,option.getRouteIndex(),precedenceIndex,option.getIndexInRoute());
                         int size=allFeasibleInsertions.get(ourID).size();
                         InsertionValues ourValues=allFeasibleInsertions.get(ourID).get(size-1);
+                        //System.out.println("ROUTE OUR VALUES "+ourValues.getRouteIndex());
                         int ourBenefitIncrease=ourValues.getBenenefitIncrease();
                         if(ourBenefitIncrease==-100000) {
                             option.setBenenefitIncrease(-100000);
@@ -704,7 +711,7 @@ public class LargeNeighboorhoodSearchInsert {
                                     allFeasibleInsertions.get(simA).remove(i);
                                     allFeasibleInsertions.get(simA).add(0, option);
                                     allFeasibleInsertions.get(ourID).remove(size - 1);
-                                    allFeasibleInsertions.get(ourID).add(0, option);
+                                    allFeasibleInsertions.get(ourID).add(0, ourValues);
                                 } else if (!(newBenefitIncrease < allFeasibleInsertions.get(simA).get(allFeasibleInsertions.get(simA).size() - 1).getBenenefitIncrease())) {
                                     for (int s = 1; s < allFeasibleInsertions.get(simA).size(); s++) {
                                         if (newBenefitIncrease < allFeasibleInsertions.get(simA).get(s - 1).getBenenefitIncrease() &&
@@ -712,7 +719,7 @@ public class LargeNeighboorhoodSearchInsert {
                                             allFeasibleInsertions.get(simA).remove(i);
                                             allFeasibleInsertions.get(simA).add(s, option);
                                             allFeasibleInsertions.get(ourID).remove(size - 1);
-                                            allFeasibleInsertions.get(ourID).add(s, option);
+                                            allFeasibleInsertions.get(ourID).add(s, ourValues);
                                             break;
                                         }
                                     }
@@ -942,7 +949,6 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
     public boolean checkPPlacementLNS(int o, int n, int v, int pOFRoute, int pOFIndex){
-        //FIRST THING THUESDAY: FIX THIS IN LSNINSERT!
         int precedenceOf=precedenceALNS[o-startNodes.length-1][1];
         if(precedenceOf!=0 && pOFRoute!=-1){
             //PrecedenceValues pOver=precedenceOverOperations.get(precedenceOf);
@@ -977,9 +983,9 @@ public class LargeNeighboorhoodSearchInsert {
                                    int routeConnectedPrecedence, int routeConnectedSimultaneous, int pOFIndex, int simAIndex){
         int o=operationToInsert.getID();
         int benefitIncrease=-100000;
-        int indexInRoute=0;
-        int routeIndex=0;
-        int earliest=0;
+        int indexInRoute=-1;
+        int routeIndex=-1;
+        int earliest=-1;
         int latest=nTimePeriods-1;
         System.out.println("On operation: "+o);
         for (int v = 0; v < nVessels; v++) {
@@ -1577,6 +1583,7 @@ public class LargeNeighboorhoodSearchInsert {
                 if(conop != null) {
                     if (conop.getEarliestTime() < op.getOperationObject().getEarliestTime() + TimeVesselUseOnOperation[op.getRoute()]
                             [op.getOperationObject().getID() - 1-startNodes.length][op.getOperationObject().getEarliestTime()]) {
+                        System.out.println("Precedence infeasible, op: "+op.getOperationObject().getID()+ " and "+conop.getID());
                         return false;
                     }
                 }

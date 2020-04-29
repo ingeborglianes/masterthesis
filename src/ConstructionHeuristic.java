@@ -585,7 +585,7 @@ public class ConstructionHeuristic {
             }
             System.out.println("OBJ: "+objValue);
         }
-
+        System.out.println("finished calculating objective");
     }
 
     public static void updatePrecedenceOver(Map<Integer,PrecedenceValues> precedenceOver, int insertIndex,
@@ -1578,10 +1578,10 @@ public class ConstructionHeuristic {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1, 2, 3, 4, 4, 5};
-        int[] startnodes = new int[]{1, 2, 3, 4, 5,6};
+        int[] vesseltypes = new int[]{1, 2, 3, 4, 5, 6,2};
+        int[] startnodes = new int[]{1, 2, 3, 4, 5,6,7,8};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/20_locations_normalOpGenerator.txt",
+                "test_instances/30_locations_normalOpGenerator.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),

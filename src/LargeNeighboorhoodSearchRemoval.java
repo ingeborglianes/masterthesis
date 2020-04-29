@@ -486,8 +486,14 @@ public class LargeNeighboorhoodSearchRemoval {
         }
         if(precedenceOfOp!=null){
             System.out.println("operation removed pres of: "+selectedTaskID);
+            int presOverOp=precedenceOfOp.getConnectedOperationObject().getID();
+            if(precedenceOverOperations.get(presOverOp)!=null){
+                precedenceOverOperations.get(presOverOp).setConnectedRoute(-1);
+                precedenceOverOperations.get(presOverOp).setConnectedOperationObject(null);
+            }
             precedenceOfOperations.remove(selectedTaskID);
             precedenceOfRoutes.get(route).remove(selectedTaskID);
+
         }
     }
 
