@@ -29,8 +29,8 @@ results/
 hs_err_pid*
 
 #java classes
-ParameterFile.java
-InstanceGenerator.java
+src/ParameterFile.java
+src/InstanceGenerator.java
 
 # other
 results.txt
