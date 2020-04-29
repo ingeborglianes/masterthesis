@@ -21,4 +21,13 @@ public class ParameterFile {
 
     //Insert the filepath of the positions.csv file which has all instances between all locations used
     public static String filePathPositionFile= "Positions.csv";
+
+    public static int numberOfRemoval;
+    public static int randomSeed;
+    public static double relatednessWeightDistance;
+    public static double relatednessWeightDuration;
+    public static double relatednessWeightTimewindows;
+    public static double relatednessWeightPrecedenceOver;
+    public static double relatednessWeightPrecedenceOf;
+    public static double relatednessWeightSimultaneous;
 }

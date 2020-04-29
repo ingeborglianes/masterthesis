@@ -420,7 +420,7 @@ public class LargeNeighboorhoodSearchRemoval {
     public void removeSynchronizedOp(ConnectedValues simOp, PrecedenceValues precedenceOverOp, PrecedenceValues precedenceOfOp,int selectedTaskID,
                                      OperationInRoute selectedTask, String removalType){
         removedOperations.add(selectedTaskID);
-        if(removalType=="worstRemoval"){
+        if(removalType.equals("worstRemoval")){
             sortedOperationsByProfitDecrease.remove(Integer.valueOf(selectedTaskID));
         }
         System.out.println("SIM dict: "+simultaneousOp.get(selectedTaskID));
@@ -506,7 +506,7 @@ public class LargeNeighboorhoodSearchRemoval {
             unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][1],0,0));
             unroutedTasks.add(new OperationInRoute(bigTasksALNS[selectedTask.getID()-1-startNodes.length][2],0,0));
         }
-        if(removalType=="worstRemoval"){
+        if(removalType.equals("worstRemoval")){
             sortedOperationsByProfitDecrease.remove(Integer.valueOf(selectedTask.getID()));
         }
         System.out.println("REMOVE NORMAL OP: "+selectedTask.getID());
@@ -609,16 +609,26 @@ public class LargeNeighboorhoodSearchRemoval {
     //Insertion methods
 
 
-    public void runLNSRemoval(){
-        if(numberOfRemoval>simALNS.length){
+    public void runLNSRemoval(String method){
+        if(numberOfRemoval>simALNS.length-unroutedTasks.size()){
             System.out.println("Not possible, number of removal is larger than the number of tasks");
         }
         else{
-            //randomRemoval();
-            //synchronizedRemoval();
-            //routeRemoval();
-            //worstRemoval();
-            relatedRemoval();
+            if(method.equals("random")){
+                randomRemoval();
+            }
+            if(method.equals("synchronized")){
+                synchronizedRemoval();
+            }
+            if(method.equals("route")){
+                routeRemoval();
+            }
+            if(method.equals("worst")){
+                worstRemoval();
+            }
+            if(method.equals("related")){
+                relatedRemoval();
+            }
             ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                     EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
             updateAllTimesAfterRemoval();
@@ -773,7 +783,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
-        LNS.runLNSRemoval();
+        LNS.runLNSRemoval("related");
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());

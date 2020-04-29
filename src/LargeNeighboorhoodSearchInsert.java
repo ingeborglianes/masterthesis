@@ -71,9 +71,6 @@ public class LargeNeighboorhoodSearchInsert {
         this.removedOperations=removedOperations;
         Collections.sort(removedOperations);
         unroutedTasks.sort(Comparator.comparing(OperationInRoute::getID));
-        for (int i=0;i<this.unroutedTasks.size();i++){
-            System.out.println(unroutedTasks.get(i).getID());
-        }
     }
 
     public int calculateProfitIncrease(int r, int i){
@@ -799,10 +796,10 @@ public class LargeNeighboorhoodSearchInsert {
         }
         while(continueInsert){
             int insertID=0;
-            if(method=="best"){
+            if(method.equals("best")){
                 insertID= calculateInsertionValuesBestInsertion();
             }
-            else if(method=="regret"){
+            else if(method.equals("regret")){
                 insertID= calculateInsertionValuesRegretInsertion();
             }
             System.out.println("UNROUTED ALL FEASIBLE DICTIONARY AFTER ONE ROUTE OF CALCULATIONS");
@@ -1381,10 +1378,60 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
 
-    public void runLNSInsert(){
-        insertionByMethod("regret");
+    public void runLNSInsert(String method){
+        insertionByMethod("method");
         ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                 EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
+    }
+
+    public Boolean checkSimultaneousFeasibleLNS(Map<Integer,ConnectedValues> simOps, int o, int v, int insertIndex, int earliestTemp,
+                                                int latestTemp, Map<Integer, ConnectedValues> simultaneousOp, int [][] simALNS,
+                                                int [] startNodes, int [][][][] SailingTimes, int [][][] TimeVesselUseOnOperation,
+                                                List<List<OperationInRoute>> vesselroutes, int simARoute, int simAIndex){
+        if(simOps!=null) {
+            for (ConnectedValues op : simOps.values()) {
+                //System.out.println("trying to insert operation " + o + " in position " + insertIndex+ " , " +op.getOperationObject().getID() + " simultaneous operation in route " +v);
+                ArrayList<ArrayList<Integer>> earliest_change = ConstructionHeuristic.checkChangeEarliestSim(earliestTemp,insertIndex,v,o,op.getOperationObject().getID(),startNodes,
+                        SailingTimes, TimeVesselUseOnOperation, simultaneousOp, vesselroutes);
+                if (!earliest_change.isEmpty()) {
+                    for (ArrayList<Integer> connectedTimes : earliest_change) {
+                        //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " earliest change");
+                        if (connectedTimes.get(0) > connectedTimes.get(1)) {
+                            //System.out.println("Sim infeasible");
+                            return false;
+                        }
+                        ConnectedValues conOp = simultaneousOp.get(op.getConnectedOperationID());
+                        //System.out.println(conOp.getOperationObject().getID() + " Con op operation ID " + conOp.getRoute() + " route index");
+                        if(simALNS[o-startNodes.length-1][1] != 0 &&
+                                simARoute == conOp.getRoute()){
+                            System.out.println("Sim a route: "+simARoute+" conOp route: "+conOp.getRoute());
+                            //System.out.println(simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getRoute() + " Con op of o ID" );
+                            //System.out.println(conOp.getIndex());
+                            System.out.println("Sim a index: "+ simAIndex + " conOP index: "+conOp.getIndex() + " insertindex: "+
+                                    insertIndex+ " op index: "+op.getIndex());
+                            if((simAIndex - conOp.getIndex() > 0 &&
+                                    insertIndex - op.getIndex() < 0) || (simAIndex -
+                                    conOp.getIndex() <= 0 && insertIndex - op.getIndex() > 0)){
+                                //System.out.println("Sim infeasible");
+                                return false;
+                            }
+                        }
+                    }
+                }
+                ArrayList<ArrayList<Integer>> latest_change = ConstructionHeuristic.checkChangeLatestSim(latestTemp,insertIndex,v,o,op.getOperationObject().getID(),startNodes,
+                        SailingTimes,TimeVesselUseOnOperation,simultaneousOp,vesselroutes);
+                if(!latest_change.isEmpty()){
+                    for(ArrayList<Integer> connectedTimes : latest_change){
+                        //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " latest change");
+                        if(connectedTimes.get(0) > connectedTimes.get(1)){
+                            //System.out.println("Sim infeasible");
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public void printLNSInsertSolution(int[] vessseltypes){
@@ -1501,56 +1548,6 @@ public class LargeNeighboorhoodSearchInsert {
         return true;
     }
 
-    public Boolean checkSimultaneousFeasibleLNS(Map<Integer,ConnectedValues> simOps, int o, int v, int insertIndex, int earliestTemp,
-                                                int latestTemp, Map<Integer, ConnectedValues> simultaneousOp, int [][] simALNS,
-                                                int [] startNodes, int [][][][] SailingTimes, int [][][] TimeVesselUseOnOperation,
-                                                List<List<OperationInRoute>> vesselroutes, int simARoute, int simAIndex){
-        if(simOps!=null) {
-            for (ConnectedValues op : simOps.values()) {
-                //System.out.println("trying to insert operation " + o + " in position " + insertIndex+ " , " +op.getOperationObject().getID() + " simultaneous operation in route " +v);
-                ArrayList<ArrayList<Integer>> earliest_change = ConstructionHeuristic.checkChangeEarliestSim(earliestTemp,insertIndex,v,o,op.getOperationObject().getID(),startNodes,
-                        SailingTimes, TimeVesselUseOnOperation, simultaneousOp, vesselroutes);
-                if (!earliest_change.isEmpty()) {
-                    for (ArrayList<Integer> connectedTimes : earliest_change) {
-                        //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " earliest change");
-                        if (connectedTimes.get(0) > connectedTimes.get(1)) {
-                            //System.out.println("Sim infeasible");
-                            return false;
-                        }
-                        ConnectedValues conOp = simultaneousOp.get(op.getConnectedOperationID());
-                        //System.out.println(conOp.getOperationObject().getID() + " Con op operation ID " + conOp.getRoute() + " route index");
-                        if(simALNS[o-startNodes.length-1][1] != 0 &&
-                                simARoute == conOp.getRoute()){
-                            System.out.println("Sim a route: "+simARoute+" conOp route: "+conOp.getRoute());
-                            //System.out.println(simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getRoute() + " Con op of o ID" );
-                            //System.out.println(conOp.getIndex());
-                            System.out.println("Sim a index: "+ simAIndex + " conOP index: "+conOp.getIndex() + " insertindex: "+
-                                    insertIndex+ " op index: "+op.getIndex());
-                            if((simAIndex - conOp.getIndex() > 0 &&
-                                    insertIndex - op.getIndex() < 0) || (simAIndex -
-                                    conOp.getIndex() <= 0 && insertIndex - op.getIndex() > 0)){
-                                //System.out.println("Sim infeasible");
-                                return false;
-                            }
-                        }
-                    }
-                }
-                ArrayList<ArrayList<Integer>> latest_change = ConstructionHeuristic.checkChangeLatestSim(latestTemp,insertIndex,v,o,op.getOperationObject().getID(),startNodes,
-                        SailingTimes,TimeVesselUseOnOperation,simultaneousOp,vesselroutes);
-                if(!latest_change.isEmpty()){
-                    for(ArrayList<Integer> connectedTimes : latest_change){
-                        //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " latest change");
-                        if(connectedTimes.get(0) > connectedTimes.get(1)){
-                            //System.out.println("Sim infeasible");
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     public static void main(String[] args) throws FileNotFoundException {
         int[] vesseltypes = new int[]{1, 2, 3,4,5,6};
         int[] startnodes = new int[]{1, 2, 3,4,5,6};
@@ -1577,7 +1574,7 @@ public class LargeNeighboorhoodSearchInsert {
                 dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
-        LNSR.runLNSRemoval();
+        LNSR.runLNSRemoval("worst");
         System.out.println("-----------------");
         LNSR.printLNSSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
@@ -1591,7 +1588,7 @@ public class LargeNeighboorhoodSearchInsert {
         System.out.println("-----------------");
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
-        LNSI.runLNSInsert();
+        LNSI.runLNSInsert("best");
         LNSI.switchConsolidated();
         LNSI.printLNSInsertSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),2,dg.getSimultaneousALNS().length,dg.getStartNodes().length);
