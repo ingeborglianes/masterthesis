@@ -30,6 +30,7 @@ hs_err_pid*
 
 #java classes
 ParameterFile.java
+InstanceGenerator.java
 
 # other
 results.txt
