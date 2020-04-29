@@ -39,8 +39,8 @@ public class ALNS {
             locStart = new int[]{1, 2, 3, 4, 5, 6};
         }
         else if (loc == 30) {
-            vessels = new int[]{1, 2, 3, 4, 5, 6,2};
-            locStart = new int[]{1, 2, 3, 4, 5, 6,7};
+            vessels = new int[]{1, 2, 3, 4, 5, 6,2,4};
+            locStart = new int[]{1, 2, 3, 4, 5, 6,7,8};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};

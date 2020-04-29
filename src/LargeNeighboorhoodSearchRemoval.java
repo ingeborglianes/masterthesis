@@ -758,10 +758,10 @@ public class LargeNeighboorhoodSearchRemoval {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1,2,3,4,5};
-        int[] startnodes=new int[]{1,2,3,4,5};
+        int[] vesseltypes = new int[]{1,2,3,4,5,6,2};
+        int[] startnodes=new int[]{1,2,3,4,5,6,7};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/test_instance_15_locations_PRECEDENCEtest4.txt",
+                "test_instances/30_locations_normalOpGenerator.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
@@ -780,7 +780,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 a.getConsolidatedOperations(),a.getUnroutedTasks(),a.getVesselroutes(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),5,21,dg.getDistOperationsInInstance(),
+                dg.getOperationGain(),dg.getBigTasksALNS(),15,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
         LNS.runLNSRemoval("related");

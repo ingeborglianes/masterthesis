@@ -1,4 +1,6 @@
+import javax.swing.plaf.synth.SynthOptionPaneUI;
 import java.io.FileNotFoundException;
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -652,6 +654,10 @@ public class LargeNeighboorhoodSearchInsert {
                 }
                 int simA=simALNS[ourID-startNodes.length-1][1];
                 int presOfOp=precedenceALNS[ourID-1-startNodes.length][1];
+                System.out.println("VALUES SIM OPERATION BEFORE SIM B IS EVALUATED");
+                for (InsertionValues iv : allFeasibleInsertions.get(simA)){
+                    System.out.println("Benefit "+iv.getBenenefitIncrease()+" Route "+iv.getRouteIndex()+" Index "+iv.getIndexInRoute());
+                }
                 for (int i=0;i<allFeasibleInsertions.get(simA).size();i++){
                     InsertionValues option =allFeasibleInsertions.get(simA).get(i);
                     if(option.getBenenefitIncrease()==-100000){
@@ -713,6 +719,15 @@ public class LargeNeighboorhoodSearchInsert {
                                 }
                             }
                         }
+                    }
+                    System.out.println("STATUS SIM A");
+                    for (InsertionValues iv : allFeasibleInsertions.get(simA)){
+                        System.out.println("Benefit "+iv.getBenenefitIncrease()+" Route "+iv.getRouteIndex()+" Index "+iv.getIndexInRoute());
+                    }
+                    System.out.println(" ");
+                    System.out.println("STATUS SIM B");
+                    for (InsertionValues iv : allFeasibleInsertions.get(ourID)){
+                        System.out.println("Benefit "+iv.getBenenefitIncrease()+" Route "+iv.getRouteIndex()+" Index "+iv.getIndexInRoute());
                     }
                 }
                 int optionValue=allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
@@ -795,9 +810,10 @@ public class LargeNeighboorhoodSearchInsert {
             System.out.println("route consolidated task "+cv.getConsolidatedRoute()+"\n");
         }
         while(continueInsert){
-            int insertID=0;
+            int insertID=-1;
             if(method.equals("best")){
                 insertID= calculateInsertionValuesBestInsertion();
+                System.out.println("test, within insertion");
             }
             else if(method.equals("regret")){
                 insertID= calculateInsertionValuesRegretInsertion();
@@ -810,7 +826,7 @@ public class LargeNeighboorhoodSearchInsert {
                         +" simOf: "+precedenceALNS[key-1-startNodes.length][1]);
                 List<InsertionValues> iValues = entry.getValue();
                 for (InsertionValues iv : iValues){
-                    System.out.println("Benefit "+iv.getBenenefitIncrease());
+                    System.out.println("Benefit "+iv.getBenenefitIncrease()+" Route "+iv.getRouteIndex()+" Index "+iv.getIndexInRoute());
                 }
                 System.out.println(" ");
             }
@@ -870,6 +886,7 @@ public class LargeNeighboorhoodSearchInsert {
                                         0));
                             }
                         }
+                        System.out.println("connected sim id "+connectedSimID);
                         insertOperation(connectedSimID, insertValuesORConnected.getEarliest(), insertValuesORConnected.getLatest(), insertValuesORConnected.getIndexInRoute(), insertValuesORConnected.getRouteIndex());
                     }
                 }
@@ -882,7 +899,7 @@ public class LargeNeighboorhoodSearchInsert {
 
     public int checkprecedenceOfEarliestLNS(int o, int earliestTemp, int earliestPO, int routeConnectedPrecedence){
         int precedenceOf=precedenceALNS[o-1-startNodes.length][1];
-        if(precedenceOf!=0) {
+        if(precedenceOf!=0 && routeConnectedPrecedence!=-1) {
             earliestTemp = Math.max(earliestTemp, earliestPO + TimeVesselUseOnOperation[routeConnectedPrecedence][precedenceOf - 1 - startNodes.length][earliestPO-1]);
         }
         return earliestTemp;
@@ -927,14 +944,14 @@ public class LargeNeighboorhoodSearchInsert {
     public boolean checkPPlacementLNS(int o, int n, int v, int pOFRoute, int pOFIndex){
         //FIRST THING THUESDAY: FIX THIS IN LSNINSERT!
         int precedenceOf=precedenceALNS[o-startNodes.length-1][1];
-        if(precedenceOf!=0){
-            PrecedenceValues pOver=precedenceOverOperations.get(precedenceOf);
+        if(precedenceOf!=0 && pOFRoute!=-1){
+            //PrecedenceValues pOver=precedenceOverOperations.get(precedenceOf);
             int precedenceOverOver=precedenceALNS[precedenceOf-startNodes.length-1][1];
             PrecedenceValues pOverOver=precedenceOverOperations.get(precedenceOverOver);
             int pOverSim=simALNS[precedenceOf-1-startNodes.length][1];
             ConnectedValues pOverSimValues= simultaneousOp.get(pOverSim);
-            if(pOver.getRoute()==v){
-                if(pOver.getIndex()>=n){
+            if(pOFRoute==v){
+                if(pOFIndex>=n){
                     return false;
                 }
             }
@@ -970,6 +987,7 @@ public class LargeNeighboorhoodSearchInsert {
             boolean precedenceOfFeasible;
             boolean simultaneousFeasible;
             System.out.println("ROUTE CONNECTED SIM: "+routeConnectedSimultaneous);
+            System.out.println("route connected simultaneous "+routeConnectedSimultaneous);
             if (DataGenerator.containsElement(o, OperationsForVessel[v]) && v!= routeConnectedSimultaneous) {
                 System.out.println("Try vessel "+v);
                 if (vesselRoutes.get(v) == null || vesselRoutes.get(v).isEmpty()) {
@@ -1205,7 +1223,11 @@ public class LargeNeighboorhoodSearchInsert {
             }
         }
         if(simALNS[o-startNodes.length-1][1]!=0){
-            System.out.println("Benefit increase for presOf or simOf "+benefitIncrease);
+            System.out.println("Benefit increase for simOf "+benefitIncrease);
+            System.out.println("index for simOf "+indexInRoute);
+            System.out.println("route for simOf "+routeIndex);
+            System.out.println("earliest for simOf "+earliest);
+            System.out.println("latest for simOf "+latest);
             int finalBenefitIncrease = benefitIncrease;
             int finalIndexInRoute = indexInRoute;
             int finalRouteIndex = routeIndex;
@@ -1232,6 +1254,21 @@ public class LargeNeighboorhoodSearchInsert {
                 }});
             }
         }
+        /*
+        for(int r=0;r<nVessels;r++) {
+            System.out.println("VESSEL " + r);
+            if(vesselRoutes.get(r) != null) {
+                for (int n = 0; n < vesselRoutes.get(r).size(); n++) {
+                    System.out.println("Number in order: " + n);
+                    System.out.println("ID " + vesselRoutes.get(r).get(n).getID());
+                    System.out.println("Earliest starting time " + vesselRoutes.get(r).get(n).getEarliestTime());
+                    System.out.println("latest starting time " + vesselRoutes.get(r).get(n).getLatestTime());
+                    System.out.println(" ");
+                }
+            }
+        }
+
+         */
     }
 
     public void insertOperation(int o, int earliest, int latest, int indexInRoute, int routeIndex){
@@ -1379,7 +1416,7 @@ public class LargeNeighboorhoodSearchInsert {
 
 
     public void runLNSInsert(String method){
-        insertionByMethod("method");
+        insertionByMethod(method);
         ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                 EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
     }
@@ -1549,10 +1586,10 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1, 2, 3,4,5,6};
-        int[] startnodes = new int[]{1, 2, 3,4,5,6};
+        int[] vesseltypes = new int[]{1, 2, 3,4,5,6,2};
+        int[] startnodes = new int[]{1, 2, 3,4,5,6,7};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
-                "test_instances/20_locations_normalOpGenerator.txt",
+                "test_instances/30_locations_normalOpGenerator.txt",
                 "results.txt", "weather_files/weather_normal.txt");
         dg.generateData();
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
@@ -1589,7 +1626,7 @@ public class LargeNeighboorhoodSearchInsert {
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
         LNSI.runLNSInsert("best");
-        LNSI.switchConsolidated();
+        //LNSI.switchConsolidated();
         LNSI.printLNSInsertSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),2,dg.getSimultaneousALNS().length,dg.getStartNodes().length);
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);

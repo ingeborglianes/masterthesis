@@ -169,11 +169,14 @@ public class DataGenerator {
         for (List<OperationType> opLoc:logOperations.values()){
             System.out.println("New sorted list");
             int numberOfOperations=opLoc.size();
+            opLoc.sort(Comparator.comparing(OperationType::getNumber));
+            /*
             for(int i =1;i<numberOfOperations;i++){
                 if (opLoc.get(i).getNumber()<opLoc.get(i-1).getNumber()){
                     Collections.swap(opLoc, i-1, i);
                 }
             }
+             */
             for(int i =0;i<numberOfOperations;i++){
                 System.out.println("Type: "+opLoc.get(i).getNumber());
             }
@@ -634,7 +637,7 @@ public class DataGenerator {
         int[] vessels=new int[]{2,3,5};
         int[] locStart = new int[]{1,2,3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
-                "test_instances/test_LNS.txt",
+                "test_instances/30_locations_normalOpGenerator.txt",
                 "routing","weather_files/weather_september.txt");
         dg.generateData();
         dg.printAllData();
