@@ -5,8 +5,8 @@ import java.util.stream.IntStream;
 public class ALNS {
     private ConstructionHeuristic ch;
     private DataGenerator dg;
-    private int[] vessels=new int[]{1,2,4,5,5,6};
-    private int[] locStart = new int[]{1,2,3,4,5,6};
+    private int[] vessels=new int[]{1,2,4,5,5,6,2,4};
+    private int[] locStart = new int[]{1,2,3,4,5,6,7,8};
     private int numberOfRemoval;
     private int randomSeed;
     private double relatednessWeightDistance;

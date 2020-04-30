@@ -75,7 +75,7 @@ public class BasicModel {
             GRBEnv env = new GRBEnv();
             GRBModel model = new GRBModel(env);
             model.set(GRB.StringAttr.ModelName, filepath);
-            //model.set(GRB.DoubleParam.TimeLimit, 3600.0);
+            model.set(GRB.DoubleParam.TimeLimit, 9000);
 
             // Sailing decision variable, x[vijt]=1 if vessel v sails from i to j in time period t
             GRBVar[][][][] x = new GRBVar[nVessels][2*nTimePeriods][nOperations][nOperations];
@@ -503,6 +503,7 @@ public class BasicModel {
                 System.out.println("Model is unbounded");
                 //return routing;
             } else {
+                objval = model.get(GRB.DoubleAttr.ObjVal);
                 System.out.println("Optimization was stopped with status = "
                         + optimstatus);
                 //return routing;
@@ -599,8 +600,8 @@ public class BasicModel {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vessels=new int[]{1,2,4,5,5,6};
-        int[] locStart = new int[]{1,2,3,4,5,6};
+        int[] vessels=new int[]{1,2,4,5,5,6,2,4};
+        int[] locStart = new int[]{1,2,3,4,5,6,7,8};
         int loc = ParameterFile.loc;
         String nameResultFile =ParameterFile.nameResultFile;
         String testInstance=ParameterFile.testInstance;
@@ -629,15 +630,19 @@ public class BasicModel {
             vessels = new int[]{1 , 2 , 4,5};
             locStart = new int[]{1, 2, 3,4};
         }
-        DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
-        dg.generateData();
         //dg.printAllData();
-        BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
-                dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
-                dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel());
-        List<String> routing = m.runModel(testInstance);
-        m.writeToFile(routing, nameResultFile);
+        for(int i =2;i<5;i++){
+            testInstance="test_instances/35_"+i+"_locations_normalOpGenerator.txt";
+            DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
+            dg.generateData();
+            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
+                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel());
+            List<String> routing = m.runModel(testInstance);
+            m.writeToFile(routing, nameResultFile);
+        }
+
     }
 }
 
