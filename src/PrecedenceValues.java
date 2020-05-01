@@ -44,6 +44,8 @@ public class PrecedenceValues {
         return route;
     }
 
+    public void setRoute(int route) { this.route = route; }
+
     public int getIndex() {
         return index;
     }

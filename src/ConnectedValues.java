@@ -36,12 +36,17 @@ public class ConnectedValues {
         return connectedRoute;
     }
 
+
     public void setConnectedRoute(int connectedRoute) {
         this.connectedRoute = connectedRoute;
     }
 
     public int getRoute() {
         return route;
+    }
+
+    public void setRoute(int route) {
+        this.route = route;
     }
 
     public int getIndex() {
