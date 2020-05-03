@@ -337,8 +337,59 @@ public class ALNS {
         }
     }
 
+    public void runLocalSearch(){
+        //while improvement, choose an operator
+        //if operator = switch, call method runSwitchConsolidated
+        //if operator = relocate insert, call method runRelocateInsert
+        //else (if operator is something else), call runLocalSearchNormalOperators and the selected operator
+        Boolean improvement=true;
+        while(improvement){
+            runRelocateInsert();
+            runLocalSearchNormalOperators();
+            runSwitchConsolidated();
+            /*
+            if(solution has not improved){
+                improvement=false;
+            }
+             */
+        }
+    }
 
-    public void runALNS(){
+    public void runSwitchConsolidated(){
+        SwitchConsolidated sc = new SwitchConsolidated(precedenceOverOperations, precedenceOfOperations,
+                simultaneousOp, simOpRoutes, precedenceOfRoutes, precedenceOverRoutes,
+                consolidatedOperations, bestUnrouted, bestRoutes, dg.getTwIntervals(),
+        dg.getPrecedenceALNS(), dg.getSimultaneousALNS(), dg.getStartNodes(), dg.getSailingTimes(),
+        dg.getTimeVesselUseOnOperation(), dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(),
+        dg.getOperationGain(), dg.getBigTasksALNS(), dg.getOperationsForVessel());
+        sc.runSwitchConsolidated();
+
+    }
+
+    public void runRelocateInsert(){
+        /*
+        RelocateInsert RI = new RelocateInsert(dg.getOperationsForVessel(), vessels, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),
+                dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), a.getRouteSailingCost(), a.getRouteOperationGain(),
+                a.getObjValue(), dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), a.getOperationGain(),
+                a.getUnroutedTasks(), new_vesselroutes, a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(), a.getSimultaneousOp(),
+                a.getSimOpRoutes(), a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
+        RI.relocateAll();
+        RI.insertPrecedenceOf();
+         */
+    }
+
+    public void runLocalSearchNormalOperators(){
+        /*
+        LS_operators LSO = new LS_operators(dg.getOperationsForVessel(),vesseltypes,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
+                dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),a.getRouteSailingCost(),a.getRouteOperationGain(),
+                dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getBigTasksALNS(), a.getOperationGain(),
+                a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),
+                a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
+        List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes, a.getUnroutedTasks());
+         */
+    }
+
+    public void runDestroyRepair(){
         LargeNeighboorhoodSearchRemoval LNSR = new LargeNeighboorhoodSearchRemoval(precedenceOverOperations,precedenceOfOperations,
                 simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,
                 consolidatedOperations,bestUnrouted,bestRoutes, dg.getTwIntervals(),
@@ -358,7 +409,7 @@ public class ALNS {
                 simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,bestUnrouted,bestRoutes,
                 LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),randomSeed);
+                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel());
 
         //for run insertion, insert method, alternatives: best, regret
         String insertionMethod = chooseInsertionMethod();
@@ -382,7 +433,7 @@ public class ALNS {
         ALNS alns = new ALNS();
         for (int i = 0; i < 100; i++) {
             System.out.println("Iteration nr: " + i);
-            alns.runALNS();
+            alns.runDestroyRepair();
         }
     }
 }
