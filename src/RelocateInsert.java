@@ -36,7 +36,7 @@ public class RelocateInsert {
 
     public RelocateInsert(int [][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes,
                         int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int [] EarliestStartingTimeForVessel,
-                        int [][] twIntervals, int [] routeSailingCost, int[] routeOperationGain,int objValue, int[] startNodes, int[][] simALNS,
+                        int [][] twIntervals, int [] routeSailingCost, int[] routeOperationGain, int[] startNodes, int[][] simALNS,
                         int[][] precedenceALNS,
                         int [][] bigTasksALNS, int [][][] operationGain, List<OperationInRoute> unroutedTasks, List<List<OperationInRoute>> vesselRoutes,
                         Map<Integer,PrecedenceValues> precedenceOverOperations,Map<Integer,PrecedenceValues> precedenceOfOperations,
@@ -52,7 +52,7 @@ public class RelocateInsert {
         this.twIntervals = twIntervals;
         this.routeSailingCost = routeSailingCost;
         this.routeOperationGain = routeOperationGain;
-        this.objValue = objValue;
+        this.objValue = IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
         this.vesselRoutes = vesselRoutes;
         this.unroutedTasks = unroutedTasks;
         this.startNodes = startNodes;
@@ -1284,27 +1284,27 @@ public class RelocateInsert {
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
-/*
+
         LS_operators LSO = new LS_operators(dg.getOperationsForVessel(), vesseltypes, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),
                 dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), a.getRouteSailingCost(), a.getRouteOperationGain(),
-                dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getBigTasksALNS(), a.getOperationGain(),
+                dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getPrecedenceALNS(), dg.getBigTasksALNS(), a.getOperationGain(), a.getVesselroutes(),a.getUnroutedTasks(),
                 a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(), a.getSimultaneousOp(),
                 a.getSimOpRoutes(), a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
         //List<List<OperationInRoute>> new_vesselroutes = LSO.two_relocate(a.vesselroutes,1,3,4,0,startnodes,a.getUnroutedTasks());
-        List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes, a.getUnroutedTasks());
-        LSO.printLSOSolution(vesseltypes, new_vesselroutes, a.getUnroutedTasks());
+        //List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes, a.getUnroutedTasks());
+        LSO.printLSOSolution(vesseltypes);
 
         RelocateInsert RI = new RelocateInsert(dg.getOperationsForVessel(), vesseltypes, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),
                 dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), a.getRouteSailingCost(), a.getRouteOperationGain(),
-                a.getObjValue(), dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), a.getOperationGain(),
-                a.getUnroutedTasks(), new_vesselroutes, a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(), a.getSimultaneousOp(),
+                dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), a.getOperationGain(),
+                a.getUnroutedTasks(), a.getVesselroutes(), a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(), a.getSimultaneousOp(),
                 a.getSimOpRoutes(), a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
 
         //RI.relocateInsert(new_vesselroutes,startnodes,a.getUnroutedTasks());
         RI.relocateAll();
         RI.insertPrecedenceOf();
 
- */
+
     }
 }
 

@@ -385,15 +385,19 @@ public class ALNS {
     }
 
     public void runRelocateInsert(){
-        /*
         RelocateInsert RI = new RelocateInsert(dg.getOperationsForVessel(), vessels, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),
-                dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), a.getRouteSailingCost(), a.getRouteOperationGain(),
-                a.getObjValue(), dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), a.getOperationGain(),
-                a.getUnroutedTasks(), new_vesselroutes, a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(), a.getSimultaneousOp(),
-                a.getSimOpRoutes(), a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
-        RI.relocateAll();
-        RI.insertPrecedenceOf();
-         */
+                dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), bestRouteSailingCost, bestRouteOperationGain,
+                dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), dg.getOperationGain(),
+                bestUnrouted, bestRoutes, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
+                simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,consolidatedOperations);
+        String method = "relocate"; //chooseMethod
+        if(method.equals("relocate")) {
+            RI.relocateAll();
+        }else if(method.equals("precedence")){
+            RI.insertPrecedenceOf();
+        }else if(method.equals("simultaneous")){
+            RI.insertSimultaneous();
+        }
     }
 
     public void runLocalSearchNormalOperators(){
@@ -465,10 +469,12 @@ public class ALNS {
 
     public static void main(String[] args) throws FileNotFoundException {
         ALNS alns = new ALNS();
+        alns.runRelocateInsert();
         for (int i = 0; i < 100; i++) {
             System.out.println("Iteration nr: " + i);
             alns.runDestroyRepair();
         }
         alns.runLocalSearchNormalOperators();
+        alns.runRelocateInsert();
     }
 }
