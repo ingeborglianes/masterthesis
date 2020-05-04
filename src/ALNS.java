@@ -11,9 +11,10 @@ public class ALNS {
     private int numberOfRemoval;
     private int randomSeed;
     private int[] insertionWeights = new int[]{1,1};
-    private int[] removalWeights = new int[]{1,1,1,1,1};
+    private int[] removalWeights = new int[]{1,1,1,1,1,1};
+    private int[] LSOweights = new int[]{1,1,1,1};
     private int[] insertionScore = new int[]{0,0};
-    private int[] removalScore = new int[]{0,0,0,0,0};
+    private int[] removalScore = new int[]{0,0,0,0,0,0};
     private double relatednessWeightDistance;
     private double relatednessWeightDuration;
     private double relatednessWeightTimewindows;
@@ -208,6 +209,23 @@ public class ALNS {
         }
     }
 
+    public String chooseLSO() {
+        double totalWeight = 0.0d;
+        for (int i : LSOweights) {
+            totalWeight += i;
+        }
+        int randomIndex = -1;
+        double random = Math.random() * totalWeight;
+        for (int i = 0; i < LSOweights.length; ++i) {
+            random -= LSOweights[i];
+            if (random <= 0.0d) {
+                randomIndex = i;
+                break;
+            }
+        }
+        List<String> LSOs = new ArrayList<>(Arrays.asList("1RL", "2RL", "1EX", "2EX"));
+        return LSOs.get(randomIndex);
+    }
 
     public String chooseRemovalMethod() {
         double totalWeight = 0.0d;
@@ -223,7 +241,7 @@ public class ALNS {
                 break;
             }
         }
-        List<String> removalMethods = new ArrayList<>(Arrays.asList("random", "synchronized", "route", "worst", "related"));
+        List<String> removalMethods = new ArrayList<>(Arrays.asList("random", "synchronized", "route", "worst", "related","worst_sailing"));
         return removalMethods.get(randomIndex);
     }
 
@@ -379,14 +397,30 @@ public class ALNS {
     }
 
     public void runLocalSearchNormalOperators(){
-        /*
-        LS_operators LSO = new LS_operators(dg.getOperationsForVessel(),vesseltypes,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
-                dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),a.getRouteSailingCost(),a.getRouteOperationGain(),
-                dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getBigTasksALNS(), a.getOperationGain(),
-                a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),
-                a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
-        List<List<OperationInRoute>> new_vesselroutes = LSO.searchAll(a.vesselroutes, a.getUnroutedTasks());
-         */
+        LS_operators LSO = new LS_operators(dg.getOperationsForVessel(),vessels,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
+                dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),bestRouteSailingCost,bestRouteOperationGain,
+                dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getPrecedenceALNS(),dg.getBigTasksALNS(), dg.getOperationGain(), bestRoutes,bestUnrouted,
+                precedenceOverOperations, precedenceOfOperations,simultaneousOp,
+                simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, consolidatedOperations);
+        String method = "2RL"; //chooseLSO();
+        switch (method) {
+            case "1RL":
+                System.out.println("1-relocate chosen");
+                LSO.oneRelocateAll();
+                break;
+            case "2RL":
+                System.out.println("2-relocate chosen");
+                LSO.twoRelocateAll();
+                break;
+            case "1EX":
+                System.out.println("1-exchange chosen");
+                LSO.oneExchangeAll();
+                break;
+            case "2EX":
+                System.out.println("2-exchange chosen");
+                LSO.twoExchangeAll();
+                break;
+        }
     }
 
     public void runDestroyRepair(){
@@ -398,7 +432,7 @@ public class ALNS {
                 dg.getOperationGain(),dg.getBigTasksALNS(),numberOfRemoval,randomSeed,dg.getDistOperationsInInstance(),
                 relatednessWeightDistance,relatednessWeightDuration,relatednessWeightTimewindows,relatednessWeightPrecedenceOver,
                 relatednessWeightPrecedenceOf,relatednessWeightSimultaneous);
-        //for run removal, insert method, alternatives: worst, synchronized, route, related, random
+        //for run removal, insert method, alternatives: worst, synchronized, route, related, random, worst_sailing
         String removalMethod = chooseRemovalMethod();
         LNSR.runLNSRemoval(removalMethod);
         System.out.println("------Removal method " + removalMethod+ " -----------");
@@ -435,5 +469,6 @@ public class ALNS {
             System.out.println("Iteration nr: " + i);
             alns.runDestroyRepair();
         }
+        alns.runLocalSearchNormalOperators();
     }
 }

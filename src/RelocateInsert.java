@@ -1284,7 +1284,7 @@ public class RelocateInsert {
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
-
+/*
         LS_operators LSO = new LS_operators(dg.getOperationsForVessel(), vesseltypes, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),
                 dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), a.getRouteSailingCost(), a.getRouteOperationGain(),
                 dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getBigTasksALNS(), a.getOperationGain(),
@@ -1303,6 +1303,8 @@ public class RelocateInsert {
         //RI.relocateInsert(new_vesselroutes,startnodes,a.getUnroutedTasks());
         RI.relocateAll();
         RI.insertPrecedenceOf();
+
+ */
     }
 }
 
