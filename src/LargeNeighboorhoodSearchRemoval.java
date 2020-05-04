@@ -132,7 +132,24 @@ public class LargeNeighboorhoodSearchRemoval {
     }
 
     public void worstRemoval(){
-        sortOperationsProfitDecrease();
+        sortOperationsProfitDecrease("benefit");
+        while (removedOperations.size()<numberOfRemoval && sortedOperationsByProfitDecrease.size()>0){
+            int selectedTaskID=sortedOperationsByProfitDecrease.get(0);
+            routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
+            OperationInRoute selectedTask = properties.getOr();
+            int route=properties.getRoute();
+            int index=0;
+            for (int i=0;i<vesselRoutes.get(route).size();i++){
+                if(vesselRoutes.get(route).get(i).getID()==selectedTaskID){
+                    index=i;
+                }
+            }
+            removeOperations(selectedTask,route,index,"worstRemoval");
+        }
+    }
+
+    public void worstRemovalSailing(){
+        sortOperationsProfitDecrease("sailing");
         while (removedOperations.size()<numberOfRemoval && sortedOperationsByProfitDecrease.size()>0){
             int selectedTaskID=sortedOperationsByProfitDecrease.get(0);
             routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
@@ -274,7 +291,108 @@ public class LargeNeighboorhoodSearchRemoval {
         sortedOperationsByRelatedness=sortedOperationsByRelatednessTemp;
     }
 
-    public void sortOperationsProfitDecrease(){
+   /*
+    public static Integer checkChangeEarliestLastOperation(int earliestInsertionOperation, int earliestLastOperation, int indexInRoute, int routeIndex,int o,List<List<OperationInRoute>> vesselroutes,
+                                                           int[][][] TimeVesselUseOnOperation, int[] startNodes, int [][][][] SailingTimes){
+        if(indexInRoute==vesselroutes.get(routeIndex).size()){
+            return 0;
+        }
+        int lastEarliest=earliestInsertionOperation;
+        for(int f=indexInRoute;f<vesselroutes.get(routeIndex).size();f++){
+            int sailingtime;
+            int operationtime;
+            if (f==indexInRoute){
+                operationtime=TimeVesselUseOnOperation[routeIndex][o-startNodes.length-1][lastEarliest-1];
+                sailingtime= SailingTimes[routeIndex][lastEarliest+operationtime-1][o-1]
+                        [vesselroutes.get(routeIndex).get(f).getID()-1];
+            }
+            else{
+                operationtime=TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f-1).getID()-startNodes.length-1][lastEarliest-1];
+                sailingtime=SailingTimes[routeIndex][lastEarliest+operationtime-1][vesselroutes.get(routeIndex).get(f-1).getID()-1]
+                        [vesselroutes.get(routeIndex).get(f).getID()-1];
+            }
+            int newTime=Math.max(vesselroutes.get(routeIndex).get(f).getEarliestTime(),lastEarliest+
+                    sailingtime +operationtime);
+            if(newTime==vesselroutes.get(routeIndex).get(f).getEarliestTime()){
+                return 0;
+            }
+            lastEarliest=newTime;
+        }
+        return lastEarliest-earliestLastOperation;
+    }
+
+    */
+
+
+    public Integer checkChangeEarliestLastOperation(int earliestInsertionOperation, int earliestLastOperation, int indexInRoute, int routeIndex,int o,List<List<OperationInRoute>> vesselroutes,
+                                                           int[][][] TimeVesselUseOnOperation, int[] startNodes, int [][][][] SailingTimes){
+        if(vesselroutes.get(routeIndex).size()==1){
+            return 0;
+        }
+        System.out.println("operation to remove: "+vesselroutes.get(routeIndex).get(indexInRoute+1).getID());
+        int lastEarliest=0;
+        if(indexInRoute!=-1) {
+            lastEarliest=earliestInsertionOperation;
+            System.out.println("Last earliest start "+lastEarliest);
+            for (int f = indexInRoute+2; f < vesselroutes.get(routeIndex).size(); f++) {
+                int sailingtime;
+                int operationtime;
+                if (f == indexInRoute+2) {
+                    if (indexInRoute == vesselroutes.get(routeIndex).size() - 2) {
+                        return earliestLastOperation - vesselroutes.get(routeIndex).get(indexInRoute).getEarliestTime();
+                    }
+                    operationtime = TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f - 2).getID() - startNodes.length - 1][lastEarliest - 1];
+                    sailingtime = SailingTimes[routeIndex][lastEarliest + operationtime - 1][vesselroutes.get(routeIndex).get(f - 2).getID() - 1]
+                            [vesselroutes.get(routeIndex).get(f).getID() - 1];
+                }
+                else{
+                    operationtime = TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f - 1).getID() - startNodes.length - 1][lastEarliest - 1];
+                    System.out.println("operation: "+ vesselroutes.get(routeIndex).get(f - 1).getID() );
+                    System.out.println("Last earliest: "+lastEarliest+ " operationTime "+operationtime);
+                    sailingtime = SailingTimes[routeIndex][lastEarliest + operationtime - 1][vesselroutes.get(routeIndex).get(f - 1).getID() - 1]
+                            [vesselroutes.get(routeIndex).get(f).getID() - 1];
+                }
+                int newTime = Math.max(vesselroutes.get(routeIndex).get(f).getEarliestTime(), lastEarliest +
+                        sailingtime + operationtime);
+                if (newTime == vesselroutes.get(routeIndex).get(f).getEarliestTime()) {
+                    return 0;
+                }
+                lastEarliest = newTime;
+                System.out.println("Operation "+vesselroutes.get(routeIndex).get(f).getID()+ "new earliest " + lastEarliest);
+            }
+        }
+        if(indexInRoute==-1){
+            OperationInRoute startIteratingOperation=vesselroutes.get(routeIndex).get(1);
+            lastEarliest=EarliestStartingTimeForVessel[routeIndex]+SailingTimes[routeIndex]
+                    [EarliestStartingTimeForVessel[routeIndex]][routeIndex][startIteratingOperation.getID()-1];
+            for (int f = 1; f < vesselroutes.get(routeIndex).size(); f++) {
+                int sailingtime;
+                int operationtime;
+                if (f == 1) {
+                    if (vesselroutes.get(routeIndex).size()==2) {
+                        return earliestLastOperation-lastEarliest;
+                    }
+                    operationtime = TimeVesselUseOnOperation[routeIndex][startIteratingOperation.getID() - startNodes.length - 1][lastEarliest - 1];
+                    sailingtime = SailingTimes[routeIndex][lastEarliest + operationtime - 1][startIteratingOperation.getID() - 1]
+                            [vesselroutes.get(routeIndex).get(f + 1).getID() - 1];
+                }
+                else {
+                    operationtime = TimeVesselUseOnOperation[routeIndex][vesselroutes.get(routeIndex).get(f - 1).getID() - startNodes.length - 1][lastEarliest - 1];
+                    sailingtime = SailingTimes[routeIndex][lastEarliest + operationtime - 1][vesselroutes.get(routeIndex).get(f - 1).getID() - 1]
+                            [vesselroutes.get(routeIndex).get(f).getID() - 1];
+                }
+                int newTime = Math.max(vesselroutes.get(routeIndex).get(f).getEarliestTime(), lastEarliest +
+                        sailingtime + operationtime);
+                if (newTime == vesselroutes.get(routeIndex).get(f).getEarliestTime()) {
+                    return 0;
+                }
+                lastEarliest = newTime;
+            }
+        }
+        return earliestLastOperation-lastEarliest;
+    }
+
+    public void sortOperationsProfitDecrease(String measurement){
         //want to remove the operations that causes the smallest profit decrease if it is removed
         Map<Integer,Integer> profitDecrease = new TreeMap<Integer,Integer>();
         //modelling choice per now: choose to not consider sync tasks - this is an approximation, discuss this next meeting
@@ -289,15 +407,18 @@ public class LargeNeighboorhoodSearchRemoval {
                     int sailingTimeCurrentToNext = 0;
                     int sailingTimePrevToNext = 0;
                     int profitDecreaseForOperation;
+                    int deltaOperationGainLastOperation=0;
                     if (vesselRoutes.get(r).size() == 1) {
                         sailingTimePrevToCurrent = SailingTimes[r][EarliestStartingTimeForVessel[r]][r][operationID - 1];
-                    } else {
+                    }
+                    else {
+                        OperationInRoute prevOr = null;
                         if (i!=0){
-                            OperationInRoute prevOr = vesselRoutes.get(r).get(i - 1);
+                            prevOr = vesselRoutes.get(r).get(i - 1);
                             int earliestPrev = prevOr.getEarliestTime();
                             int operationTimePrev = TimeVesselUseOnOperation[r][prevOr.getID() - 1 - startNodes.length][earliestPrev - 1];
                             int startTimeSailingTimePrev = earliestPrev + operationTimePrev;
-                            sailingTimePrevToCurrent = SailingTimes[r][startTimeSailingTimePrev - 1][prevOr.getID() - 1][or.getID() - 1];
+                            sailingTimePrevToCurrent = SailingTimes[r][startTimeSailingTimePrev - 1][prevOr.getID() - 1][operationID - 1];
                             if(i!=vesselRoutes.get(r).size()-1){
                                 OperationInRoute nextOr = vesselRoutes.get(r).get(i + 1);
                                 sailingTimePrevToNext = SailingTimes[r][startTimeSailingTimePrev - 1][prevOr.getID() - 1][nextOr.getID() - 1];
@@ -320,10 +441,34 @@ public class LargeNeighboorhoodSearchRemoval {
                             sailingTimeCurrentToNext = 0;
                             sailingTimePrevToNext = 0;
                         }
+                        /*
+                        OperationInRoute lastOperation = vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1);
+                        int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
+                        int changedTime;
+                        if(prevOr!=null){
+                            changedTime = checkChangeEarliestLastOperation(prevOr.getEarliestTime(), earliestTimeLastOperationInRoute,
+                                    i, r, prevOr.getID(),vesselRoutes, TimeVesselUseOnOperation,startNodes,SailingTimes);
+                        }
+                        else{
+                            changedTime = checkChangeEarliestLastOperation(0, earliestTimeLastOperationInRoute,
+                                    i-1, r, 0,vesselRoutes, TimeVesselUseOnOperation,startNodes,SailingTimes);
+                        }
+                        deltaOperationGainLastOperation = 0;
+                        if (changedTime > 0) {
+                            deltaOperationGainLastOperation = operationGain[r][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute - changedTime - 1]
+                                    - operationGain[r][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute - 1] ;
+                        }
+                         */
                     }
                     int sailingDiff = -sailingTimePrevToCurrent - sailingTimeCurrentToNext + sailingTimePrevToNext;
-                    profitDecreaseForOperation = operationGain[r][operationID - startNodes.length - 1][or.getEarliestTime()-1] +
-                            sailingDiff * SailingCostForVessel[r];
+                    profitDecreaseForOperation=0;
+                    if(measurement.equals("sailing")){
+                        profitDecreaseForOperation = sailingDiff * SailingCostForVessel[r]-deltaOperationGainLastOperation;
+                    }
+                    else if(measurement.equals("benefit")){
+                        profitDecreaseForOperation = operationGain[r][operationID - startNodes.length - 1][or.getEarliestTime()-1] +
+                                sailingDiff * SailingCostForVessel[r]-deltaOperationGainLastOperation;
+                    }
                     profitDecrease.put(or.getID(), profitDecreaseForOperation);
                     routeObjectDict.put(or.getID(), new routeIndexObjectForOperation(r, or));
                 }
@@ -338,6 +483,7 @@ public class LargeNeighboorhoodSearchRemoval {
             sortedOperationsByProfitDecrease.add(entry.getKey());
         }
     }
+
 
     public void removeOperations(OperationInRoute selectedTask,int route, int index, String removalType){
         int selectedTaskID=selectedTask.getID();
@@ -635,6 +781,9 @@ public class LargeNeighboorhoodSearchRemoval {
             if(method.equals("related")){
                 relatedRemoval();
             }
+            if(method.equals("worst_sailing")){
+                worstRemovalSailing();
+            }
             ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
                     EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
             updateAllTimesAfterRemoval();
@@ -789,7 +938,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 dg.getOperationGain(),dg.getBigTasksALNS(),15,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1);
-        LNS.runLNSRemoval("related");
+        LNS.runLNSRemoval("worst_sailing");
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
