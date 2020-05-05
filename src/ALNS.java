@@ -540,13 +540,43 @@ public class ALNS {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        long startTime = System.nanoTime();
         ALNS alns = new ALNS();
+        int constructionObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
+        List<Integer> unroutedList=new ArrayList<>();
+        for (OperationInRoute ur:alns.bestUnrouted){
+            unroutedList.add(ur.getID());
+        }
         //alns.runRelocateInsert();
-        for (int i = 0; i < 10; i++) {
+        int afterFirstLocalObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
+        for (int i = 0; i < 100; i++) {
             System.out.println("Iteration nr: " + i);
             alns.runDestroyRepair();
         }
-        //alns.runLocalSearchNormalOperators();
+        int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
+        //1alns.runLocalSearchNormalOperators();
         //alns.runRelocateInsert();
+        int bestObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
+        System.out.println("Construction Objective "+constructionObjective);
+        System.out.println("afterFirstLocalObjective "+afterFirstLocalObjective);
+        System.out.println("afterLarge "+afterLarge);
+        System.out.println("bestObjective "+bestObjective);
+        long endTime   = System.nanoTime();
+        long totalTime = endTime - startTime;
+        System.out.println("Time "+totalTime/1000000000);
+        //System.out.println(alns.generator.doubles());
+
+        System.out.println("Unrouted construction");
+        for (Integer urInt:unroutedList){
+            System.out.println(urInt);
+        }
+
+        System.out.println("Unrouted after all search");
+        for (OperationInRoute ur:alns.bestUnrouted){
+            System.out.println(ur.getID());
+        }
+        alns.printLNSInsertSolution(alns.vessels,alns.bestRouteSailingCost,alns.bestRouteOperationGain,alns.bestRoutes,alns.dg.getStartNodes(),alns.dg.getSailingTimes(),
+                alns.dg.getTimeVesselUseOnOperation(),alns.bestUnrouted,alns.precedenceOverOperations,alns.consolidatedOperations,
+                alns.precedenceOfOperations,alns.simultaneousOp,alns.simOpRoutes);
     }
 }

@@ -1104,8 +1104,8 @@ public class ConstructionHeuristic {
                             //System.out.println(simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getRoute() + " Con op of o ID" );
                             //System.out.println(conOp.getIndex());
                             if((simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() - conOp.getIndex() > 0 &&
-                                    insertIndex - op.getIndex() < 0) || (simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() -
-                                    conOp.getIndex() <= 0 && insertIndex - op.getIndex() > 0)){
+                                    insertIndex - op.getIndex() <= 0) || (simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getIndex() -
+                                    conOp.getIndex() < 0 && insertIndex - op.getIndex() > 0)){
                                 //System.out.println("Sim infeasible");
                                 return false;
                             }
