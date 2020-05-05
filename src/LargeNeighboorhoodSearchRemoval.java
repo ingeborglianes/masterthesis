@@ -765,7 +765,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 worstRemovalSailing();
             }
             ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
-                    EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
+                    EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue,simALNS,bigTasksALNS);
             updateAllTimesAfterRemoval();
         }
     }

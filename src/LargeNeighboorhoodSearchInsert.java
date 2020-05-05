@@ -1098,7 +1098,7 @@ public class LargeNeighboorhoodSearchInsert {
     public void runLNSInsert(String method){
         insertionByMethod(method);
         ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
-                EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue);
+                EarliestStartingTimeForVessel, operationGain, routeSailingCost,routeOperationGain,objValue, simALNS,bigTasksALNS);
     }
 
     public static Boolean checkSimultaneousFeasibleLNS(Map<Integer,ConnectedValues> simOps, int o, int v, int insertIndex, int earliestTemp,

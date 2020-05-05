@@ -551,13 +551,13 @@ public class ConstructionHeuristic {
         }
         //Calculate objective
         calculateObjective(vesselroutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
-                EarliestStartingTimeForVessel,operationGain,routeSailingCost,routeOperationGain,objValue);
+                EarliestStartingTimeForVessel,operationGain,routeSailingCost,routeOperationGain,objValue,simALNS,bigTasksALNS);
     }
 
     public static void calculateObjective(List<List<OperationInRoute>> vesselroutes, int [][][] TimeVesselUseOnOperation,
                                           int [] startNodes, int[][][][] SailingTimes, int [] SailingCostForVessel,
                                           int [] EarliestStartingTimeForVessel, int [][][] operationGain, int[] routeSailingCost,
-                                          int [] routeOperationGain, int objValue){
+                                          int [] routeOperationGain, int objValue, int [][] simALNS, int [][] bigTasksALNS){
         for (int r=0;r<vesselroutes.size();r++){
             if(vesselroutes.get(r)!= null && !vesselroutes.get(r).isEmpty()) {
                 OperationInRoute or = vesselroutes.get(r).get(0);
@@ -573,7 +573,13 @@ public class ConstructionHeuristic {
                     OperationInRoute orPrevious = vesselroutes.get(r).get(o - 1);
                     int opPreviousTime = TimeVesselUseOnOperation[r][orPrevious.getID() - 1 - startNodes.length][orPrevious.getEarliestTime()-1];
                     int costN = SailingTimes[r][orPrevious.getEarliestTime() + opPreviousTime-1][orPrevious.getID() - 1][orCurrent.getID() - 1]*SailingCostForVessel[r];
-                    int gainN = operationGain[r][orCurrent.getID() - 1 - startNodes.length][orCurrent.getEarliestTime()-1];
+                    int gainN;
+                    if(simALNS[orCurrent.getID() - 1 - startNodes.length][1]!=0 && bigTasksALNS[orCurrent.getID() - 1 - startNodes.length]==null){
+                        gainN=0;
+                    }
+                    else{
+                        gainN = operationGain[r][orCurrent.getID() - 1 - startNodes.length][orCurrent.getEarliestTime()-1];
+                    }
                     routeSailingCost[r] += costN;
                     routeOperationGain[r] += gainN;
                     objValue-=costN;
