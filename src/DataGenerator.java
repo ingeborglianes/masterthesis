@@ -1,4 +1,5 @@
 import java.io.*;
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -18,6 +19,7 @@ public class DataGenerator {
     private List<Integer> bigTasks=new ArrayList<Integer>();
     private int[] bigTasksArr;
     private int [][][] operationGain;
+    private int [][][] operationGainGurobi;
     private int [] sailingCostForVessel;
     private int [] earliestStartingTimeForVessel;
     private int[][][] edges;
@@ -487,20 +489,34 @@ public class DataGenerator {
 
     public void createOperationGain(){
         int[][][] gains= new int[vessels.length][this.operations.length][this.days*12];
+        int[][][] gainsGurobi = new int[vessels.length][this.operations.length][this.days*12];
         for(int v=0;v<this.vessels.length;v++) {
             for (Operation op : this.operations) {
                 for (int t = 0; t < op.getTimeWindow().length; t++) {
                     if (t + timeVesselUseOnOperation[v][op.getNumber()-1][t] < op.getTimeWindow().length) {
                         gains[v][op.getNumber()-1][t] = op.getOperationGain();
+                        if(simultaneousALNS[op.getNumber()-1][1]!=0 && bigTasksALNS[op.getNumber()-1]==null){
+                            gainsGurobi[v][op.getNumber()-1][t] = 0;
+                        }
+                        else{
+                            gainsGurobi[v][op.getNumber()-1][t] = op.getOperationGain();
+                        }
                     } else {
                         int work_time = op.getTimeWindow().length - t;
                         int op_duration = timeVesselUseOnOperation[v][op.getNumber()-1][t];
                         gains[v][op.getNumber()-1][t] = (int) Math.floor((op.getOperationGain() / op_duration) * work_time);
+                        if(simultaneousALNS[op.getNumber()-1][1]!=0 && bigTasksALNS[op.getNumber()-1]==null){
+                            gainsGurobi[v][op.getNumber()-1][t] = 0;
+                        }
+                        else{
+                            gainsGurobi[v][op.getNumber()-1][t] = (int) Math.floor((op.getOperationGain() / op_duration) * work_time);
+                        }
                     }
                 }
             }
         }
         this.operationGain=gains;
+        this.operationGainGurobi=gainsGurobi;
     }
 
     public void createTimeWindows(){
@@ -617,28 +633,38 @@ public class DataGenerator {
     public void printAllData(){
         //PrintData.printPrecedence(this.precedence);
         //PrintData.printSimultaneous(this.simultaneous);
-        //PrintData.printOperationGain(this.operationGain, this.nStartNodes);
+        System.out.println("Sim B tasks");
+        for (Operation op : this.operations){
+            if(simultaneousALNS[op.getNumber()-1][1]!= 0 && bigTasksALNS[op.getNumber()-1]==null){
+                System.out.println(op.getNumber()+this.vessels.length);
+            }
+        }
+        System.out.println("---------------------------------");
+        System.out.println("Normal OP GAIN");
+        PrintData.printOperationGain(this.operationGain, this.nStartNodes);
+        System.out.println("---------------------------------");
+        System.out.println("GUROBI OP GAIN");
+        PrintData.printOperationGain(this.operationGainGurobi, this.nStartNodes);
         //PrintData.timeVesselUseOnOperations(this.timeVesselUseOnOperation, this.nStartNodes);
         //PrintData.printSailingCostForVessel(this.sailingCostForVessel);
         //PrintData.printEarliestStartingTimes(this.earliestStartingTimeForVessel);
         //PrintData.printEndPenaltyForVessel(this.endPenaltyforVessel);
         //PrintData.printOperationsForVessel (this.operationsForVessel);
         //PrintData.printSailingTimes(this.sailingTimes, 1, this.operations.length, nStartNodes);
-        PrintData.printTimeWindows(this.timeWindowsForOperations);
-        PrintData.printTimeWindowsIntervals(this.twIntervals);
+        //PrintData.printTimeWindows(this.timeWindowsForOperations);
+        //PrintData.printTimeWindowsIntervals(this.twIntervals);
         //PrintData.printPrecedenceALNS(this.precedenceALNS);
         //PrintData.printSimALNS(this.simultaneousALNS);
-        PrintData.printBigTasksALNS(this.bigTasksALNS,operations.length);
+        //PrintData.printBigTasksALNS(this.bigTasksALNS,operations.length);
         //PrintData.printEarliestStartingTimes(earliestStartingTimeForVessel);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] loc = new int[]{1,2,9,10,11,12,13,14,15};
-        int[] vessels=new int[]{2,3,5};
-        int[] locStart = new int[]{1,2,3};
+        int[] vessels = new int[]{2, 3,4};
+        int[] locStart = new int[]{1, 2, 3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
                 "test_instances/30_locations_normalOpGenerator.txt",
-                "routing","weather_files/weather_september.txt");
+                "routing","weather_files/weather_normal.txt");
         dg.generateData();
         dg.printAllData();
 
@@ -682,6 +708,10 @@ public class DataGenerator {
 
     public int[] getSailingCostForVessel() {
         return sailingCostForVessel;
+    }
+
+    public int[][][] getOperationGainGurobi() {
+        return operationGainGurobi;
     }
 
     public int[] getBigTasksArr() {

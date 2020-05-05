@@ -457,7 +457,6 @@ public class BasicModel {
 
 
             // Solve
-
             model.optimize();
             // ---------  Se if model has returned any results ---------
             int optimstatus = model.get(GRB.IntAttr.Status);
@@ -637,7 +636,7 @@ public class BasicModel {
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                     dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
+                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel());
             List<String> routing = m.runModel(testInstance);
             m.writeToFile(routing, nameResultFile);
