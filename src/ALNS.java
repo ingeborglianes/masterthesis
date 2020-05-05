@@ -529,7 +529,7 @@ public class ALNS {
                 relatednessWeightPrecedenceOf,relatednessWeightSimultaneous);
 
         //for run removal, insert method, alternatives: worst, synchronized, route, related, random, worst_sailing
-        String removalMethod = "worst_sailing"; //chooseRemovalMethod();
+        String removalMethod = chooseRemovalMethod();
         LNSR.runLNSRemoval(removalMethod);
         System.out.println("------Removal method " + removalMethod+ " -----------");
         LNSR.printLNSSolution(vessels);
@@ -543,7 +543,7 @@ public class ALNS {
                 dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel());
 
         //for run insertion, insert method, alternatives: best, regret
-        String insertionMethod = "regret"; //chooseInsertionMethod();
+        String insertionMethod = chooseInsertionMethod();
         System.out.println("-------Insertion method " + insertionMethod + " ----------");
         LNSI.runLNSInsert(insertionMethod);
 
@@ -577,7 +577,7 @@ public class ALNS {
             alns.runDestroyRepair();
         }
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
-        //1alns.runLocalSearchNormalOperators();
+        alns.runLocalSearchNormalOperators();
         //alns.runRelocateInsert();
         int bestObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         System.out.println("Construction Objective "+constructionObjective);
