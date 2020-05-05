@@ -610,6 +610,7 @@ public class LS_operators {
         if(startingTimes == null){
             System.out.println("Infeasible insertion");
             vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
+            printLSOSolution(vesseltypes);
             return false;
         }
 
