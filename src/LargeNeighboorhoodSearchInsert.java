@@ -1002,14 +1002,14 @@ public class LargeNeighboorhoodSearchInsert {
             ConnectedValues sim2=new ConnectedValues(newOr,sValues.getOperationObject(),simA,indexInRoute,routeIndex,sValues.getRoute());
             simultaneousOp.put(o, sim2);
             simOpRoutes.get(routeIndex).put(o, sim2);
-        }
+        }/*
         System.out.println("INSERTION IS PERFORMED");
         System.out.println("NEW ADD: Vessel route "+routeIndex);
         System.out.println("Operation "+o);
         System.out.println("Earliest time "+ earliest);
         System.out.println("Latest time "+ latest);
         System.out.println("Route index "+indexInRoute);
-        System.out.println(" ");
+        System.out.println(" ");*/
         if (vesselRoutes.get(routeIndex) == null) {
             int finalIndexInRoute = indexInRoute;
             vesselRoutes.set(routeIndex, new ArrayList<>() {{
@@ -1029,7 +1029,7 @@ public class LargeNeighboorhoodSearchInsert {
                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselRoutes,simultaneousOp,SailingTimes);
         ConstructionHeuristic.updateSimultaneous(simOpRoutes,routeIndex,indexInRoute,simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,
                 startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,vesselRoutes);
-        for(int r=0;r<startNodes.length;r++) {
+        /*for(int r=0;r<startNodes.length;r++) {
             System.out.println("VESSEL " + r);
             if(vesselRoutes.get(r) != null) {
                 for (int n = 0; n < vesselRoutes.get(r).size(); n++) {
@@ -1040,7 +1040,7 @@ public class LargeNeighboorhoodSearchInsert {
                     System.out.println(" ");
                 }
             }
-        }
+        }*/
     }
 
     public static Boolean checkPOverFeasibleLNS(Map<Integer,PrecedenceValues> precedenceOver, int o, int insertIndex,int earliest,
@@ -1121,11 +1121,11 @@ public class LargeNeighboorhoodSearchInsert {
                         //System.out.println(conOp.getOperationObject().getID() + " Con op operation ID " + conOp.getRoute() + " route index");
                         if(simALNS[o-startNodes.length-1][1] != 0 &&
                                 simARoute == conOp.getRoute()){
-                            System.out.println("Sim a route: "+simARoute+" conOp route: "+conOp.getRoute());
+                            //System.out.println("Sim a route: "+simARoute+" conOp route: "+conOp.getRoute());
                             //System.out.println(simultaneousOp.get(simALNS[o-startNodes.length-1][1]).getRoute() + " Con op of o ID" );
                             //System.out.println(conOp.getIndex());
-                            System.out.println("Sim a index: "+ simAIndex + " conOP index: "+conOp.getIndex() + " insertindex: "+
-                                    insertIndex+ " op index: "+op.getIndex());
+                            //System.out.println("Sim a index: "+ simAIndex + " conOP index: "+conOp.getIndex() + " insertindex: "+
+                            //        insertIndex+ " op index: "+op.getIndex());
                             if((simAIndex - conOp.getIndex() > 0 &&
                                     insertIndex - op.getIndex() <= 0) || (simAIndex -
                                     conOp.getIndex() < 0 && insertIndex - op.getIndex() > 0)){

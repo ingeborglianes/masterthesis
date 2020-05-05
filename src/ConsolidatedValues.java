@@ -34,7 +34,12 @@ public class ConsolidatedValues {
         return consolidatedRoute;
     }
 
-    public void setConsolidatedRoute(int consolidatedRoute) {
-        this.consolidatedRoute = consolidatedRoute;
+    public void setConnectedRoute1(int connectedRoute1) { this.connectedRoute1 = connectedRoute1;
+    }
+
+    public void setConnectedRoute2(int connectedRoute2) { this.connectedRoute2 = connectedRoute2;
+    }
+
+    public void setConsolidatedRoute(int consolidatedRoute) { this.consolidatedRoute = consolidatedRoute;
     }
 }

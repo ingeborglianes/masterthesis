@@ -229,9 +229,34 @@ public class ALNS {
                         }
                     }
                 }
+                if (bigTaskALNS[taskID-nStartnodes-1] != null) {
+                    if (bigTaskALNS[taskID - nStartnodes - 1][0] == taskID) {
+                        consolidatedOperations.get(taskID).setConsolidatedRoute(vessel);
+                        consolidatedOperations.get(taskID).setConnectedRoute1(0);
+                        consolidatedOperations.get(taskID).setConnectedRoute2(0);
+                    } else if (bigTaskALNS[taskID - nStartnodes - 1][1] == taskID) {
+                        consolidatedOperations.get(taskID).setConnectedRoute1(vessel);
+                        consolidatedOperations.get(taskID).setConsolidatedRoute(0);
+                    } else if (bigTaskALNS[taskID - nStartnodes - 1][2] == taskID) {
+                        consolidatedOperations.get(taskID).setConnectedRoute2(vessel);
+                        consolidatedOperations.get(taskID).setConsolidatedRoute(0);
+                    }
+                }
             }
         }
+        for(OperationInRoute op : unroutedTasks){
+        if(simultaneousOp.get(op.getID())!=null){
+            simultaneousOp.remove(op.getID());
+        }
+        if(precedenceOfOperations.get(op.getID()) != null){
+            precedenceOfOperations.remove(op.getID());
+        }
+        if(precedenceOverOperations.get(op.getID()) != null){
+            precedenceOfOperations.remove(op.getID());
+        }
     }
+}
+
 
     public String chooseLSO() {
         double totalWeight = 0.0d;
@@ -377,7 +402,6 @@ public class ALNS {
         System.out.println("SIMULTANEOUS DICTIONARY");
         for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
             ConnectedValues simOp = entry.getValue();
-            System.out.println(simOp.getOperationObject());
             System.out.println("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
                     simOp.getRoute() + " with index: " + simOp.getIndex());
         }
@@ -385,7 +409,6 @@ public class ALNS {
         for(int v= 0;v<vesselRoutes.size();v++){
             for(Map.Entry<Integer, ConnectedValues> entry : simOpRoutes.get(v).entrySet()){
                 ConnectedValues simOp = entry.getValue();
-                System.out.println(simOp.getOperationObject());
                 System.out.println("In vesssel " + v+" Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
                         simOp.getRoute() + " with index: " + simOp.getIndex());
             }
