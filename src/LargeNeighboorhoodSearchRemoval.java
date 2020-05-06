@@ -831,11 +831,27 @@ public class LargeNeighboorhoodSearchRemoval {
             System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
                     presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
         }
+        System.out.println("Precedence over 2");
+        for(int v= 0;v<vesselRoutes.size();v++){
+            for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverRoutes.get(v).entrySet()){
+                PrecedenceValues simOp = entry.getValue();
+                System.out.println("In vessel " + v+" Precedence over operation: " + simOp.getOperationObject().getID() + " in route: " +
+                        simOp.getRoute() + " with index: " + simOp.getIndex());
+            }
+        }
         System.out.println("PRECEDENCE OF DICTIONARY");
         for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
             PrecedenceValues presOfOp = entry.getValue();
             System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
                     presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+        }
+        System.out.println("Precedence of 2");
+        for(int v= 0;v<vesselRoutes.size();v++){
+            for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfRoutes.get(v).entrySet()){
+                PrecedenceValues simOp = entry.getValue();
+                System.out.println("In vesssel " + v+" Precedence of operation: " + simOp.getOperationObject().getID() + " in route: " +
+                        simOp.getRoute() + " with index: " + simOp.getIndex());
+            }
         }
     }
 

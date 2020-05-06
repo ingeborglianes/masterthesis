@@ -6,8 +6,8 @@ import java.util.stream.IntStream;
 public class ALNS {
     private ConstructionHeuristic ch;
     private DataGenerator dg;
-    private int[] vessels=new int[]{1,2,4,5,5,6,2,4};
-    private int[] locStart = new int[]{1,2,3,4,5,6,7,8};
+    private int[] vessels=new int[]{1,2,4,5,5,6,2};
+    private int[] locStart = new int[]{1,2,3,4,5,6,7};
     private int numberOfRemoval;
     private int randomSeed;
     private int[] insertionWeights = new int[]{1,1};
@@ -59,9 +59,9 @@ public class ALNS {
             vessels = new int[]{1, 2, 3, 4, 5, 6};
             locStart = new int[]{1, 2, 3, 4, 5, 6};
         }
-        else if (loc == 30) {
-            vessels = new int[]{1, 2, 3, 4, 5, 6,2};
-            locStart = new int[]{1, 2, 3, 4, 5, 6,7};
+        else if (loc == 30 || loc == 35) {
+            vessels = new int[]{1, 2, 3, 4, 5,6,2};
+            locStart = new int[]{1, 2, 3, 4, 5,6,7};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -244,18 +244,22 @@ public class ALNS {
                 }
             }
         }
-        for(OperationInRoute op : unroutedTasks){
-        if(simultaneousOp.get(op.getID())!=null){
-            simultaneousOp.remove(op.getID());
-        }
-        if(precedenceOfOperations.get(op.getID()) != null){
-            precedenceOfOperations.remove(op.getID());
-        }
-        if(precedenceOverOperations.get(op.getID()) != null){
-            precedenceOfOperations.remove(op.getID());
+        for(OperationInRoute op : unroutedTasks) {
+            if (simultaneousOp.get(op.getID()) != null) {
+                simOpRoutes.get(simultaneousOp.get(op.getID()).getRoute()).remove(op.getID());
+                simultaneousOp.remove(op.getID());
+            }
+            if (precedenceOfOperations.get(op.getID()) != null) {
+                precedenceOfRoutes.get(precedenceOfOperations.get(op.getID()).getRoute()).remove(op.getID());
+                precedenceOfOperations.remove(op.getID());
+            }
+            if (precedenceOverOperations.get(op.getID()) != null) {
+                precedenceOverRoutes.get(precedenceOverOperations.get(op.getID()).getRoute()).remove(op.getID());
+                precedenceOverOperations.remove(op.getID());
+            }
         }
     }
-}
+
 
 
     public String chooseLSO() {
@@ -491,7 +495,7 @@ public class ALNS {
                 dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getPrecedenceALNS(),dg.getBigTasksALNS(), dg.getOperationGain(), bestRoutes,bestUnrouted,
                 precedenceOverOperations, precedenceOfOperations,simultaneousOp,
                 simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, consolidatedOperations);
-        String method = "2RL"; //chooseLSO();
+        String method = chooseLSO();
         switch (method) {
             case "1RL":
                 System.out.println("1-relocate chosen");
@@ -570,7 +574,7 @@ public class ALNS {
         for (OperationInRoute ur:alns.bestUnrouted){
             unroutedList.add(ur.getID());
         }
-        //alns.runRelocateInsert();
+        alns.runRelocateInsert();
         int afterFirstLocalObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         for (int i = 0; i < 100; i++) {
             System.out.println("Iteration nr: " + i);
@@ -578,7 +582,7 @@ public class ALNS {
         }
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         alns.runLocalSearchNormalOperators();
-        //alns.runRelocateInsert();
+        alns.runRelocateInsert();
         int bestObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         System.out.println("Construction Objective "+constructionObjective);
         System.out.println("afterFirstLocalObjective "+afterFirstLocalObjective);
