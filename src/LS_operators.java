@@ -327,8 +327,14 @@ public class LS_operators {
         updateEarliest(startingTimes[0], pos2, vessel, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes, twIntervals, "oneexchange");
         updateLatest(startingTimes[1], pos2, vessel, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes, twIntervals, "oneexchange");
 
-        updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
+        boolean feasible;
+        feasible = updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
                 SailingTimes, twIntervals, EarliestStartingTimeForVessel, startNodes, TimeVesselUseOnOperation);
+        if(!feasible){
+            System.out.println("Infeasible one-relocate");
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
+            return false;
+        }
 
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel), pos2, simOpRoutes, precedenceOfOperations, precedenceOverOperations,
                 TimeVesselUseOnOperation, startNodes, precedenceOverRoutes, precedenceOfRoutes, simultaneousOp,
@@ -609,8 +615,14 @@ public class LS_operators {
             add(vessel2);
         }};
 
-        updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel1, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
+        boolean feasible;
+        feasible = updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel1, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
                 SailingTimes, twIntervals, EarliestStartingTimeForVessel, startNodes, TimeVesselUseOnOperation);
+        if(!feasible) {
+            System.out.println("Infeasible two-relocate");
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
+            return false;
+        }
         ConstructionHeuristic.updateIndexesInsertion(vessel2, pos2, vesselroutes, simultaneousOp, precedenceOverOperations, precedenceOfOperations);
         ConstructionHeuristic.updateIndexesRemoval(vessel1, pos1, vesselroutes, simultaneousOp, precedenceOverOperations, precedenceOfOperations);
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel2), pos2, simOpRoutes, precedenceOfOperations, precedenceOverOperations,
@@ -866,9 +878,14 @@ public class LS_operators {
 
         updateEarliest(pos1earliest, pos1, vessel, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes, twIntervals, "oneexchange");
         updateLatest(pos2latest, pos2, vessel, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes, twIntervals, "oneexchange");*/
-
-        updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
+        boolean feasible;
+        feasible = updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
                 SailingTimes, twIntervals, EarliestStartingTimeForVessel, startNodes, TimeVesselUseOnOperation);
+        if(!feasible) {
+            System.out.println("Infeasible one-exchange");
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
+            return false;
+        }
 
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel), pos2, simOpRoutes, precedenceOfOperations, precedenceOverOperations,
                 TimeVesselUseOnOperation, startNodes, precedenceOverRoutes, precedenceOfRoutes, simultaneousOp, vesselroutes, SailingTimes);
@@ -1186,9 +1203,14 @@ public class LS_operators {
                     startNodes, SailingTimes, vesselroutes, twIntervals, "twoExchange");
         }
 */
-
-        updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel1, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
+        boolean feasible;
+        feasible = updateConRoutes(simOpRoutes, precedenceOfRoutes, precedenceOverRoutes, vessel1, vesselroutes, null, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
                 SailingTimes, twIntervals, EarliestStartingTimeForVessel, startNodes, TimeVesselUseOnOperation);
+        if(!feasible) {
+            System.out.println("Infeasible two-exchange");
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
+            return false;
+        }
 
         ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(vessel1), pos1, simOpRoutes, precedenceOfOperations, precedenceOverOperations,
                 TimeVesselUseOnOperation, startNodes, precedenceOverRoutes, precedenceOfRoutes, simultaneousOp, vesselroutes, SailingTimes);
@@ -1456,13 +1478,13 @@ public class LS_operators {
         }
     }
 
-    public static void updateSimultaneous(List<Map<Integer, ConnectedValues>> simOpRoutes, int routeIndex,
+    public static boolean updateSimultaneous(List<Map<Integer, ConnectedValues>> simOpRoutes, int routeIndex,
                                           Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
                                           List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, int[][][] TimeVesselUseOnOperation,
                                           int[] startNodes, int[][][][] SailingTimes, Map<Integer, PrecedenceValues> precedenceOverOperations,
                                           Map<Integer, PrecedenceValues> precedenceOfOperations, List<List<OperationInRoute>> vesselroutes,
                                           int pos1, int pos2, String function) {
-
+        boolean feasible = true;
         if (simOpRoutes.get(routeIndex) != null) {
             for (ConnectedValues sValues : simOpRoutes.get(routeIndex).values()) {
                 //System.out.println("Update caused by simultaneous " + sValues.getOperationObject().getID() + " in route " + routeIndex);
@@ -1512,13 +1534,18 @@ public class LS_operators {
                         sValues.getOperationObject().setEarliestTime(cur_earliestTemp);
                         //System.out.println("Setting earliest time of operation: " + sValues.getOperationObject().getID() + " to " + sValues.getOperationObject().getEarliestTime() +
                         //        " with index " + sValues.getIndex() + " index in route: " + indexInRoute);
-                        ConstructionHeuristic.updateEarliest(cur_earliestTemp, sValues.getIndex(), routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        feasible = ConstructionHeuristic.updateEarliest(cur_earliestTemp, sValues.getIndex(), routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        if(!feasible){
+                            return feasible;
+                        }
                     } else if (earliestTemp > earliestPO) {
                         simOp.getOperationObject().setEarliestTime(cur_earliestTemp);
                         //System.out.println("Setting earliest time of operation: " + simOp.getOperationObject().getID() + " to " + simOp.getOperationObject().getEarliestTime());
                         //System.out.println(simOp.getOperationObject().getEarliestTime() + " setting the earliest time of " + simOp.getOperationObject().getID() );
-                        ConstructionHeuristic.updateEarliest(cur_earliestTemp, simOp.getIndex(), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
-
+                        feasible = ConstructionHeuristic.updateEarliest(cur_earliestTemp, simOp.getIndex(), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        if(!feasible){
+                            return feasible;
+                        }
                         ConstructionHeuristic.updateSimultaneous(simOpRoutes, simOp.getRoute(), simOp.getIndex(), simultaneousOp, precedenceOverRoutes,
                                 precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations, precedenceOfOperations, vesselroutes);
 
@@ -1532,13 +1559,19 @@ public class LS_operators {
                         cur_latestTemp = latestTemp;
                         sValues.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println(sValues.getOperationObject().getLatestTime() + " setting the latest time of " + sValues.getOperationObject().getID() );
-                        ConstructionHeuristic.updateLatest(cur_latestTemp, sValues.getIndex(), routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        feasible = ConstructionHeuristic.updateLatest(cur_latestTemp, sValues.getIndex(), routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        if(!feasible){
+                            return feasible;
+                        }
                     } else if (latestTemp < latestPO) {
                         //System.out.println(latestTemp + " , " +latestPO + " , " + cur_latestTemp);
                         simOp.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println(simOp.getOperationObject().getLatestTime() + " setting the latest time of " + simOp.getOperationObject().getID() );
 
-                        ConstructionHeuristic.updateLatest(cur_latestTemp, simOp.getIndex(), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        feasible = ConstructionHeuristic.updateLatest(cur_latestTemp, simOp.getIndex(), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        if(!feasible){
+                            return feasible;
+                        }
                         ConstructionHeuristic.updateSimultaneous(simOpRoutes, simOp.getRoute(), simOp.getIndex(),
                                 simultaneousOp, precedenceOverRoutes, precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations,
                                 precedenceOfOperations, vesselroutes);
@@ -1550,16 +1583,18 @@ public class LS_operators {
                 }
             }
         }
+        return feasible;
     }
 
 
-    public static void updateConRoutes(List<Map<Integer, ConnectedValues>> simOpRoutes, List<Map<Integer, PrecedenceValues>> precedenceOfRoutes,
+    public static boolean updateConRoutes(List<Map<Integer, ConnectedValues>> simOpRoutes, List<Map<Integer, PrecedenceValues>> precedenceOfRoutes,
                                        List<Map<Integer, PrecedenceValues>> precedenceOverRoutes, int v,
                                        List<List<OperationInRoute>> vesselroutes, List<Integer> updatedRoutes, Map<Integer, PrecedenceValues> precedenceOverOperations,
                                        Map<Integer, PrecedenceValues> precedenceOfOperations, Map<Integer, ConnectedValues> simultaneousOp,
                                        int[][][][] SailingTimes, int[][] twIntervals, int[] EarliestStartingTimeForVessel,
                                        int[] startNodes, int[][][] TimeVesselUseOnOperation) {
         List<Integer> routesToUpdate = new ArrayList<>();
+        boolean feasible = true;
         /*
         if(!simOpRoutes.get(v).isEmpty()){
             for(ConnectedValues op : simOpRoutes.get(v).values()){
@@ -1612,15 +1647,22 @@ public class LS_operators {
                         startNodes, SailingTimes, vesselroutes, twIntervals, "oneexchange");
             }
         }
+
         for (int route : routesToUpdate) {
             if (vesselroutes.get(route) != null && vesselroutes.get(route).size() != 0) {
                 ConstructionHeuristic.updatePrecedenceOver(precedenceOverRoutes.get(route), 0, simOpRoutes, precedenceOfOperations, precedenceOverOperations, TimeVesselUseOnOperation, startNodes, precedenceOverRoutes,
                         precedenceOfRoutes, simultaneousOp, vesselroutes, SailingTimes);
                 ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(route), vesselroutes.get(route).size() - 1, TimeVesselUseOnOperation, startNodes, simOpRoutes, precedenceOverOperations, precedenceOfOperations,
                         precedenceOfRoutes, precedenceOverRoutes, vesselroutes, simultaneousOp, SailingTimes);
-                ConstructionHeuristic.updateSimultaneous(simOpRoutes, route, 0, simultaneousOp, precedenceOverRoutes, precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations, precedenceOfOperations, vesselroutes);
+                feasible = updateSimultaneous(simOpRoutes, route, simultaneousOp, precedenceOverRoutes, precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations, precedenceOfOperations,
+                        vesselroutes, 0, 0, "conRoutes");
+                if(!feasible){
+                    return feasible;
+                }
             }
         }
+
+        return feasible;
     }
 
 

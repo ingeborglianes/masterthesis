@@ -826,6 +826,12 @@ public class ConstructionHeuristic {
             //System.out.println("SIZE route: "+String.valueOf(vesselroutes.get(routeIndex).size()-2));
             //System.out.println("Index up dating: "+k);
             OperationInRoute objectK = vesselroutes.get(routeIndex).get(k);
+            if (local.equals("local")){
+                System.out.println("Infeasible in Construction.UpdateLatestTime");
+                if (objectK.getLatestTime() - 1 < 0) {
+                    return false;
+                }
+            }
             int opTimeK = TimeVesselUseOnOperation[routeIndex][objectK.getID() - startNodes.length - 1]
                     [objectK.getLatestTime() - 1];
             int updateSailingTime = 0;
@@ -842,6 +848,7 @@ public class ConstructionHeuristic {
             //      [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK)) ;
             //System.out.println(updateSailingTime);
             if (local.equals("local")){
+                System.out.println("Infeasible in Construction.UpdateLatestTime");
                 if (updateSailingTime - 1 < 0) {
                     return false;
                 }
