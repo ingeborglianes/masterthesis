@@ -630,8 +630,13 @@ public class BasicModel {
             locStart = new int[]{1, 2, 3,4};
         }
         //dg.printAllData();
-        for(int i =1;i<5;i++){
-            testInstance="test_instances/35_"+i+"_locations_normalOpGenerator.txt";
+        for(int i =0;i<5;i++){
+            if(i==0){
+                testInstance="test_instances/30_locations_normalOpGenerator.txt";
+            }
+            else{
+                testInstance="test_instances/35_"+i+"_locations_normalOpGenerator.txt";
+            }
             DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
@@ -641,7 +646,6 @@ public class BasicModel {
             List<String> routing = m.runModel(testInstance);
             m.writeToFile(routing, nameResultFile);
         }
-
     }
 }
 

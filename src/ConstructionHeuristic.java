@@ -506,8 +506,8 @@ public class ConstructionHeuristic {
                 allOperations.remove(Integer.valueOf(o));
                 updateIndexesInsertion(routeIndex,indexInRoute, vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
                 //Update all earliest starting times forward
-                updateEarliest(earliest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
-                updateLatest(latest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                updateEarliest(earliest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
+                updateLatest(latest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
                 updatePrecedenceOver(precedenceOverRoutes.get(routeIndex),indexInRoute,simOpRoutes,precedenceOfOperations,precedenceOverOperations,
                         TimeVesselUseOnOperation, startNodes,precedenceOverRoutes,precedenceOfRoutes,simultaneousOp,vesselroutes,SailingTimes);
                 updatePrecedenceOf(precedenceOfRoutes.get(routeIndex),indexInRoute,TimeVesselUseOnOperation,startNodes,simOpRoutes,
@@ -554,7 +554,7 @@ public class ConstructionHeuristic {
                 EarliestStartingTimeForVessel,operationGain,routeSailingCost,routeOperationGain,objValue,simALNS,bigTasksALNS);
     }
 
-    public static void calculateObjective(List<List<OperationInRoute>> vesselroutes, int [][][] TimeVesselUseOnOperation,
+    public static ObjectiveValues calculateObjective(List<List<OperationInRoute>> vesselroutes, int [][][] TimeVesselUseOnOperation,
                                           int [] startNodes, int[][][][] SailingTimes, int [] SailingCostForVessel,
                                           int [] EarliestStartingTimeForVessel, int [][][] operationGain, int[] routeSailingCost,
                                           int [] routeOperationGain, int objValue, int [][] simALNS, int [][] bigTasksALNS){
@@ -588,7 +588,7 @@ public class ConstructionHeuristic {
             }
             //System.out.println("OBJ: "+objValue);
         }
-        //System.out.println("finished calculating objective");
+        return new ObjectiveValues(objValue,routeSailingCost,routeOperationGain);
     }
 
     public static void updatePrecedenceOver(Map<Integer,PrecedenceValues> precedenceOver, int insertIndex,
@@ -630,7 +630,7 @@ public class ConstructionHeuristic {
                             //System.out.println(secondOr.getEarliestTime());
                             if (secondOr.getEarliestTime() < newESecondOr) {
                                 secondOr.setEarliestTime(newESecondOr);
-                                updateEarliest(newESecondOr, indexConnected, routeConnectedOp, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                                updateEarliest(newESecondOr, indexConnected, routeConnectedOp, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
                                 updatePrecedenceOver(precedenceOverRoutes.get(routeConnectedOp), connectedOpPValues.getIndex(), simOpRoutes, precedenceOfOperations,
                                         precedenceOverOperations, TimeVesselUseOnOperation, startNodes, precedenceOverRoutes,
                                         precedenceOfRoutes, simultaneousOp, vesselroutes, SailingTimes);
@@ -678,7 +678,7 @@ public class ConstructionHeuristic {
                     if (secondOr.getLatestTime() > newLSecondOr) {
                         secondOr.setLatestTime(newLSecondOr);
                         //System.out.println("index connected: "+indexConnected);
-                        updateLatest(newLSecondOr, indexConnected, pValues.getConnectedRoute(),TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                        updateLatest(newLSecondOr, indexConnected, pValues.getConnectedRoute(),TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
                         updatePrecedenceOf(precedenceOfRoutes.get(routeConnectedOp),connectedOpPValues.getIndex(),TimeVesselUseOnOperation,startNodes,
                                 simOpRoutes,precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,
                                 vesselroutes,simultaneousOp,SailingTimes);
@@ -816,31 +816,36 @@ public class ConstructionHeuristic {
         return new int[]{earliestTemp,breakValue};
     }
 
-    public static void updateLatest(int latest, int indexInRoute, int routeIndex, int [][][] TimeVesselUseOnOperation,
-                                    int [] startNodes, int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes){
+    public static Boolean updateLatest(int latest, int indexInRoute, int routeIndex, int [][][] TimeVesselUseOnOperation,
+                                    int [] startNodes, int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes, String local){
         int lastLatest=latest;
         //System.out.println("WITHIN UPDATE LATEST");
         //System.out.println("Last latest time: " + lastLatest);
-        for(int k=indexInRoute-1;k>-1;k--){
+        for(int k=indexInRoute-1;k>-1;k--) {
             //System.out.println("K: "+k);
             //System.out.println("SIZE route: "+String.valueOf(vesselroutes.get(routeIndex).size()-2));
             //System.out.println("Index up dating: "+k);
-            OperationInRoute objectK=vesselroutes.get(routeIndex).get(k);
-            int opTimeK=TimeVesselUseOnOperation[routeIndex][objectK.getID()-startNodes.length-1]
-                    [objectK.getLatestTime()-1];
-            int updateSailingTime=0;
+            OperationInRoute objectK = vesselroutes.get(routeIndex).get(k);
+            int opTimeK = TimeVesselUseOnOperation[routeIndex][objectK.getID() - startNodes.length - 1]
+                    [objectK.getLatestTime() - 1];
+            int updateSailingTime = 0;
             //System.out.println("ID operation "+ vesselroutes.get(routeIndex).get(k).getID() + " , " +"Route: "+ routeIndex);
 
-            if(k==vesselroutes.get(routeIndex).size()-2){
-                updateSailingTime=objectK.getLatestTime();
+            if (k == vesselroutes.get(routeIndex).size() - 2) {
+                updateSailingTime = objectK.getLatestTime();
             }
-            if(k<vesselroutes.get(routeIndex).size()-2){
-                updateSailingTime=objectK.getLatestTime()+opTimeK;
+            if (k < vesselroutes.get(routeIndex).size() - 2) {
+                updateSailingTime = objectK.getLatestTime() + opTimeK;
             }
             //System.out.println("Latest already assigned K: "+ objectK.getLatestTime() + " , " + "Potential update latest K: "+
             //(lastLatest- SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
             //      [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK)) ;
             //System.out.println(updateSailingTime);
+            if (local.equals("local")){
+                if (updateSailingTime - 1 < 0) {
+                    return false;
+                }
+            }
             int newTime=Math.min(objectK.getLatestTime(),lastLatest-
                     SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
                             [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK);
@@ -852,16 +857,23 @@ public class ConstructionHeuristic {
             //System.out.println(objectK.getLatestTime());
             lastLatest=newTime;
         }
+        return true;
     }
 
-    public static void updateEarliest(int earliest, int indexInRoute, int routeIndex, int [][][] TimeVesselUseOnOperation,
-                                      int[] startNodes, int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes){
+    public static Boolean updateEarliest(int earliest, int indexInRoute, int routeIndex, int [][][] TimeVesselUseOnOperation,
+                                      int[] startNodes, int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes,
+                                      String localSearch){
         int lastEarliest=earliest;
         for(int f=indexInRoute+1;f<vesselroutes.get(routeIndex).size();f++){
             OperationInRoute objectFMinus1=vesselroutes.get(routeIndex).get(f-1);
             OperationInRoute objectF=vesselroutes.get(routeIndex).get(f);
             int opTimeFMinus1=TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1]
                     [objectFMinus1.getLatestTime()-1];
+            if(localSearch.equals("local")){
+                if(objectFMinus1.getEarliestTime()+opTimeFMinus1-1>59){
+                    return false;
+                }
+            }
             int newTime=Math.max(vesselroutes.get(routeIndex).get(f).getEarliestTime(),lastEarliest+
                     SailingTimes[routeIndex][objectFMinus1.getEarliestTime()+opTimeFMinus1-1][objectFMinus1.getID()-1]
                             [objectF.getID()-1]
@@ -873,6 +885,7 @@ public class ConstructionHeuristic {
             lastEarliest=newTime;
 
         }
+        return true;
     }
 
     public static Integer checkChangeEarliest(int earliestInsertionOperation, int indexInRoute, int routeIndex, int precedenceIndex, int earliestPrecedenceOperation,int o,
@@ -1033,12 +1046,12 @@ public class ConstructionHeuristic {
                         //System.out.println("kjører her 1");
                         sValues.getOperationObject().setEarliestTime(cur_earliestTemp);
                         //System.out.println("oppdaterer: " + sValues.getOperationObject().getID() + " med ny earliest tid " + sValues.getOperationObject().getEarliestTime());
-                        updateEarliest(cur_earliestTemp,sValues.getIndex(),sValues.getRoute(),TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes);
+                        updateEarliest(cur_earliestTemp,sValues.getIndex(),sValues.getRoute(),TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,"notLocal");
                     }else if(earliestTemp>earliestPO){
                         //System.out.println("kjører her 2");
                         ConnectedValues simOpObj = simultaneousOp.get(simOp.getID());
                         simOpObj.getOperationObject().setEarliestTime(cur_earliestTemp);
-                        updateEarliest(cur_earliestTemp,simOpObj.getIndex(),simOpObj.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                        updateEarliest(cur_earliestTemp,simOpObj.getIndex(),simOpObj.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
                         updateSimultaneous(simOpRoutes,simOpObj.getRoute(),simOpObj.getIndex(),simultaneousOp,precedenceOverRoutes,
                                 precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,vesselroutes);
                         updatePrecedenceOver(precedenceOverRoutes.get(simOpObj.getRoute()),simOpObj.getIndex(),simOpRoutes,precedenceOfOperations,
@@ -1050,7 +1063,7 @@ public class ConstructionHeuristic {
                         //System.out.println("kjører her 3");
                         sValues.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println("oppdaterer: " + sValues.getOperationObject().getID() + " med ny latest tid " + sValues.getOperationObject().getLatestTime());
-                        updateLatest(cur_latestTemp,sValues.getIndex(),sValues.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                        updateLatest(cur_latestTemp,sValues.getIndex(),sValues.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
                     }else if(latestTemp<latestPO){
                         //System.out.println("kjører her 4");
                         //System.out.println(latestTemp + " , "+latestPO);
@@ -1058,7 +1071,7 @@ public class ConstructionHeuristic {
                         //System.out.println(simOpObj.getOperationObject().getID() + " , " + simOpObj.getOperationObject().getLatestTime());
                         simOpObj.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println("oppdaterer: " + simOpObj.getOperationObject().getID() + " med ny latest tid " + simOpObj.getOperationObject().getLatestTime());
-                        updateLatest(cur_latestTemp,simOpObj.getIndex(),simOpObj.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes);
+                        updateLatest(cur_latestTemp,simOpObj.getIndex(),simOpObj.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal");
                         updateSimultaneous(simOpRoutes,simOpObj.getRoute(),simOpObj.getIndex(),
                                 simultaneousOp,precedenceOverRoutes, precedenceOfRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,precedenceOverOperations,
                                 precedenceOfOperations,vesselroutes);

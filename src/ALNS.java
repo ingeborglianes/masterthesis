@@ -103,8 +103,6 @@ public class ALNS {
         simOpRoutes = ch.getSimOpRoutes();
         vesselroutes = ch.getVesselroutes();
         unroutedTasks = ch.getUnroutedTasks();
-
-
     }
 
     public List<List<OperationInRoute>> copyVesselroutes(List<List<OperationInRoute>> vesselroutes) {
@@ -602,8 +600,15 @@ public class ALNS {
         for (OperationInRoute ur:alns.bestUnrouted){
             System.out.println(ur.getID());
         }
+        ObjectiveValues ov= ConstructionHeuristic.calculateObjective(alns.bestRoutes,alns.dg.getTimeVesselUseOnOperation(),alns.dg.getSailingCostForVessel(),
+                alns.dg.getSailingTimes(),alns.dg.getSailingCostForVessel(),alns.dg.getEarliestStartingTimeForVessel(),alns.dg.getOperationGain(),
+                new int[alns.vesselroutes.size()],new int[alns.vesselroutes.size()],0,alns.dg.getSimultaneousALNS(),alns.dg.getBigTasksALNS());
+        System.out.println("Recalculated obj: "+ov.getObjvalue());
+        /*
         alns.printLNSInsertSolution(alns.vessels,alns.bestRouteSailingCost,alns.bestRouteOperationGain,alns.bestRoutes,alns.dg.getStartNodes(),alns.dg.getSailingTimes(),
                 alns.dg.getTimeVesselUseOnOperation(),alns.bestUnrouted,alns.precedenceOverOperations,alns.consolidatedOperations,
                 alns.precedenceOfOperations,alns.simultaneousOp,alns.simOpRoutes);
+
+         */
     }
 }
