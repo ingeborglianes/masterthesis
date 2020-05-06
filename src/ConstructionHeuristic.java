@@ -586,7 +586,7 @@ public class ConstructionHeuristic {
                     objValue+=gainN;
                 }
             }
-            //System.out.println("OBJ: "+objValue);
+            System.out.println("OBJ: "+objValue);
         }
         return new ObjectiveValues(objValue,routeSailingCost,routeOperationGain);
     }
