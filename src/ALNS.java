@@ -1,7 +1,9 @@
 import java.io.FileNotFoundException;
 import java.sql.SQLOutput;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.Random;
 
 public class ALNS {
     private ConstructionHeuristic ch;
@@ -34,9 +36,7 @@ public class ALNS {
     private List<Map<Integer, PrecedenceValues>> precedenceOverRoutes;
     private List<Map<Integer, PrecedenceValues>> precedenceOfRoutes;
     private List<Map<Integer, ConnectedValues>> simOpRoutes;
-
-
-
+    private Random generator;
 
     public ALNS(){
         int loc = ParameterFile.loc;
@@ -60,8 +60,8 @@ public class ALNS {
             locStart = new int[]{1, 2, 3, 4, 5, 6};
         }
         else if (loc == 30 || loc == 35) {
-            vessels = new int[]{1, 2, 3, 4, 5,6,2};
-            locStart = new int[]{1, 2, 3, 4, 5,6,7};
+            vessels = new int[]{1, 3, 4, 5,6};
+            locStart = new int[]{1, 2, 3, 4, 5};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -85,15 +85,18 @@ public class ALNS {
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(),dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
         ch.createSortedOperations();
         ch.constructionHeuristic();
         ch.printInitialSolution(vessels);
 
         bestRouteSailingCost = ch.getRouteSailingCost();
         bestRouteOperationGain = ch.getRouteOperationGain();
-        bestRoutes = copyVesselroutes(ch.getVesselroutes());
+
+        //CopyValues cv= copyVesselRoutesAndSynchronization(ch.getVesselroutes());
+        bestRoutes=copyVesselRoutes(ch.getVesselroutes());
         bestUnrouted = copyUnrouted(ch.getUnroutedTasks());
+
         precedenceOverOperations = ch.getPrecedenceOverOperations();
         precedenceOfOperations = ch.getPrecedenceOfOperations();
         simultaneousOp = ch.getSimultaneousOp();
@@ -101,23 +104,156 @@ public class ALNS {
         precedenceOverRoutes = ch.getPrecedenceOverRoutes();
         precedenceOfRoutes = ch.getPrecedenceOfRoutes();
         simOpRoutes = ch.getSimOpRoutes();
+
         vesselroutes = ch.getVesselroutes();
         unroutedTasks = ch.getUnroutedTasks();
+        generator=new Random(randomSeed);
     }
 
-    public List<List<OperationInRoute>> copyVesselroutes(List<List<OperationInRoute>> vesselroutes) {
-        List<List<OperationInRoute>> old_vesselroutes = new ArrayList<List<OperationInRoute>>();
-        for (List<OperationInRoute> vesselroute : vesselroutes) {
+    public List<List<OperationInRoute>> copyVesselRoutes(List<List<OperationInRoute>> vesselroutes){
+        List<List<OperationInRoute>> old_vesselroutes = new ArrayList<>();
+        for (int vessel=0; vessel<vesselroutes.size();vessel++) {
             List<OperationInRoute> route = new ArrayList<>();
-            if (vesselroute != null) {
-                for (OperationInRoute operationInRoute : vesselroute) {
-                    OperationInRoute op = new OperationInRoute(operationInRoute.getID(), operationInRoute.getEarliestTime(), operationInRoute.getLatestTime());
+            if (vesselroutes.get(vessel) != null) {
+                for (int s=0;s<vesselroutes.get(vessel).size();s++) {
+                    OperationInRoute operationInRoute = vesselroutes.get(vessel).get(s);
+                    int ID = operationInRoute.getID();
+                    int matrixIndex=ID-1-dg.getStartNodes().length;
+                    OperationInRoute op = new OperationInRoute(ID, operationInRoute.getEarliestTime(), operationInRoute.getLatestTime());
                     route.add(op);
                 }
             }
             old_vesselroutes.add(route);
         }
         return old_vesselroutes;
+    }
+
+    public CopyValues copyVesselRoutesAndSynchronization(List<List<OperationInRoute>> vesselroutes) {
+        List<List<OperationInRoute>> old_vesselroutes = new ArrayList<>();
+        Map<Integer, PrecedenceValues> precedenceOverOperationsCopy=new HashMap<>();
+        Map<Integer, PrecedenceValues> precedenceOfOperationsCopy=new HashMap<>();
+        Map<Integer, ConnectedValues> simultaneousOpCopy=new HashMap<>();
+        List<Map<Integer, PrecedenceValues>> precedenceOverRoutesCopy=new ArrayList<>();
+        List<Map<Integer, PrecedenceValues>> precedenceOfRoutesCopy=new ArrayList<>();
+        List<Map<Integer, ConnectedValues>> simOpRoutesCopy=new ArrayList<>();
+        int[][] simALNS = dg.getSimultaneousALNS();
+        int[][] precALNS = dg.getPrecedenceALNS();
+        int[][] bigTaskALNS = dg.getBigTasksALNS();
+        for(int i=0;i<vesselroutes.size();i++){
+            precedenceOverRoutesCopy.add(new HashMap<>());
+            precedenceOfRoutesCopy.add(new HashMap<>());
+            simOpRoutesCopy.add(new HashMap<>());
+        }
+        for (int vessel=0; vessel<vesselroutes.size();vessel++) {
+            List<OperationInRoute> route = new ArrayList<>();
+            if (vesselroutes.get(vessel) != null) {
+                for (int s=0;s<vesselroutes.get(vessel).size();s++) {
+                    OperationInRoute operationInRoute = vesselroutes.get(vessel).get(s);
+                    int ID = operationInRoute.getID();
+                    int matrixIndex=ID-1-dg.getStartNodes().length;
+                    OperationInRoute op = new OperationInRoute(ID, operationInRoute.getEarliestTime(), operationInRoute.getLatestTime());
+                    route.add(op);
+                    if(simALNS[matrixIndex][0]!=0){
+                        int connectedID = simALNS[matrixIndex][0];
+                        OperationInRoute connectedObject;
+                        int connectedRoute;
+                        if(simultaneousOpCopy.get(connectedID)!=null){
+                            connectedObject=simultaneousOpCopy.get(connectedID).getOperationObject();
+                            connectedRoute=simultaneousOpCopy.get(connectedID).getRoute();
+                            simultaneousOpCopy.get(connectedID).setConnectedOperationObject(op);
+                            simultaneousOpCopy.get(connectedID).setConnectedRoute(vessel);
+                        }
+                        else{
+                            connectedObject=null;
+                            connectedRoute=0;
+                        }
+                        ConnectedValues newCV=new ConnectedValues(op,connectedObject,connectedID,s,vessel,connectedRoute);
+                        simultaneousOpCopy.put(ID,newCV);
+                        simOpRoutesCopy.get(vessel).put(ID,newCV);
+                    }
+                    if(simALNS[matrixIndex][1]!=0){
+                        int connectedID = simALNS[matrixIndex][1];
+                        OperationInRoute connectedObject;
+                        int connectedRoute;
+                        if(simultaneousOpCopy.get(connectedID)!=null){
+                            connectedObject=simultaneousOpCopy.get(connectedID).getOperationObject();
+                            connectedRoute=simultaneousOpCopy.get(connectedID).getRoute();
+                            simultaneousOpCopy.get(connectedID).setConnectedOperationObject(op);
+                            simultaneousOpCopy.get(connectedID).setConnectedRoute(vessel);
+                        }
+                        else{
+                            connectedObject=null;
+                            connectedRoute=0;
+                        }
+                        ConnectedValues newCV=new ConnectedValues(op,connectedObject,connectedID,s,vessel,connectedRoute);
+                        simultaneousOpCopy.put(ID,newCV);
+                        simOpRoutesCopy.get(vessel).put(ID,newCV);
+                    }
+                    if(precALNS[matrixIndex][0]!=0){
+                        int connectedID = precALNS[matrixIndex][0];
+                        OperationInRoute connectedObject;
+                        int connectedRoute;
+                        if(precedenceOfOperationsCopy.get(connectedID)!=null){
+                            connectedObject=precedenceOfOperationsCopy.get(connectedID).getOperationObject();
+                            connectedRoute=precedenceOfOperationsCopy.get(connectedID).getRoute();
+                            precedenceOfOperationsCopy.get(connectedID).setConnectedOperationObject(op);
+                            precedenceOfOperationsCopy.get(connectedID).setConnectedRoute(vessel);
+                        }
+                        else{
+                            connectedObject=null;
+                            connectedRoute=0;
+                        }
+                        PrecedenceValues newPV=new PrecedenceValues(op,connectedObject,connectedID,s,vessel,connectedRoute);
+                        precedenceOverOperationsCopy.put(ID,newPV);
+                        precedenceOverRoutesCopy.get(vessel).put(ID,newPV);
+                    }
+                    if(precALNS[matrixIndex][1]!=0){
+                        int connectedID = precALNS[matrixIndex][1];
+                        OperationInRoute connectedObject;
+                        int connectedRoute;
+                        if(precedenceOverOperationsCopy.get(connectedID)!=null){
+                            connectedObject=precedenceOverOperationsCopy.get(connectedID).getOperationObject();
+                            connectedRoute=precedenceOverOperationsCopy.get(connectedID).getRoute();
+                            precedenceOverOperationsCopy.get(connectedID).setConnectedOperationObject(op);
+                            precedenceOverOperationsCopy.get(connectedID).setConnectedRoute(vessel);
+                        }
+                        else{
+                            connectedObject=null;
+                            connectedRoute=0;
+                        }
+                        PrecedenceValues newPV=new PrecedenceValues(op,connectedObject,connectedID,s,vessel,connectedRoute);
+                        precedenceOfOperationsCopy.put(ID,newPV);
+                        precedenceOfRoutesCopy.get(vessel).put(ID,newPV);
+                    }
+                    if (bigTaskALNS[matrixIndex] != null) {
+                        if (bigTaskALNS[matrixIndex][0] == ID) {
+                            consolidatedOperations.get(ID).setConsolidatedRoute(vessel);
+                            consolidatedOperations.get(ID).setConnectedRoute1(0);
+                            consolidatedOperations.get(ID).setConnectedRoute2(0);
+                        } else if (bigTaskALNS[matrixIndex][1] == ID) {
+                            consolidatedOperations.get(bigTaskALNS[matrixIndex][0]).setConnectedRoute1(vessel);
+                            consolidatedOperations.get(bigTaskALNS[matrixIndex][0]).setConsolidatedRoute(0);
+                        } else if (bigTaskALNS[matrixIndex][2] == ID) {
+                            consolidatedOperations.get(bigTaskALNS[matrixIndex][0]).setConnectedRoute2(vessel);
+                            consolidatedOperations.get(bigTaskALNS[matrixIndex][0]).setConsolidatedRoute(0);
+                        }
+                    }
+                }
+            }
+            old_vesselroutes.add(route);
+        }
+        for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperationsCopy.entrySet()){
+            int taskID=entry.getKey();
+            PrecedenceValues pvOf=entry.getValue();
+            int connectedPOverTaskID=precALNS[taskID-1-dg.getStartNodes().length][1];
+            if(pvOf.getConnectedOperationObject()==null){
+                PrecedenceValues pvOver = precedenceOverOperationsCopy.get(connectedPOverTaskID);
+                pvOf.setConnectedOperationObject(pvOver.getOperationObject());
+                pvOf.setConnectedRoute(pvOver.getRoute());
+            }
+        }
+        return new CopyValues(old_vesselroutes,precedenceOverOperationsCopy,precedenceOfOperationsCopy,simultaneousOpCopy,
+                precedenceOverRoutesCopy,precedenceOfRoutesCopy,simOpRoutesCopy);
     }
 
     public List<OperationInRoute> copyUnrouted(List<OperationInRoute> unroutedTasks) {
@@ -130,132 +266,15 @@ public class ALNS {
     }
 
     public void retainOldSolution(){
-        vesselroutes = copyVesselroutes(bestRoutes);
+        CopyValues copyRoutes= copyVesselRoutesAndSynchronization(bestRoutes);
+        vesselroutes = copyRoutes.getVesselRoutes();
         unroutedTasks = copyUnrouted(bestUnrouted);
-
-        int[][] simALNS = dg.getSimultaneousALNS();
-        int[][] precALNS = dg.getPrecedenceALNS();
-        int[][] bigTaskALNS = dg.getBigTasksALNS();
-        int nStartnodes = dg.getStartNodes().length;
-        for(int vessel = 0; vessel < vesselroutes.size(); vessel++){
-            for(int task = 0; task < vesselroutes.get(vessel).size(); task++) {
-                int taskID = vesselroutes.get(vessel).get(task).getID();
-                if (simALNS[taskID - nStartnodes - 1][0] != 0 || simALNS[taskID - nStartnodes - 1][1] != 0) {
-                    if (simultaneousOp.get(taskID) != null) {
-                        simOpRoutes.get(simultaneousOp.get(taskID).getRoute()).remove(taskID);
-                        simultaneousOp.get(taskID).setIndex(task);
-                        simultaneousOp.get(taskID).setRoute(vessel);
-                        simultaneousOp.get(taskID).getOperationObject().setEarliestTime(vesselroutes.get(vessel).get(task).getEarliestTime());
-                        simultaneousOp.get(taskID).getOperationObject().setLatestTime(vesselroutes.get(vessel).get(task).getLatestTime());
-                        simOpRoutes.get(simultaneousOp.get(taskID).getRoute()).put(taskID,simultaneousOp.get(taskID));
-                    } else {
-                        int simOp = Math.max(simALNS[taskID - 1 - nStartnodes][0], simALNS[taskID - 1 - nStartnodes][1]);
-                        if (simultaneousOp.get(simOp) == null) {
-                            ConnectedValues sValue = new ConnectedValues(vesselroutes.get(vessel).get(task), null, simOp, task, vessel, -1);
-                            simultaneousOp.put(taskID, sValue);
-                            simOpRoutes.get(vessel).put(taskID, sValue);
-                        } else {
-                            ConnectedValues sValues = simultaneousOp.get(simOp);
-                            if (sValues.getConnectedOperationObject() == null) {
-                                ConnectedValues cValuesReplace = new ConnectedValues(sValues.getOperationObject(), vesselroutes.get(vessel).get(task), sValues.getConnectedOperationID(),
-                                        sValues.getIndex(), sValues.getRoute(), vessel);
-                                simultaneousOp.replace(simOp, sValues, cValuesReplace);
-                                simOpRoutes.get(sValues.getRoute()).replace(simOp, sValues, cValuesReplace);
-                            } else {
-                                ConnectedValues cValuesPut1 = new ConnectedValues(sValues.getOperationObject(), vesselroutes.get(vessel).get(task), sValues.getConnectedOperationID(),
-                                        sValues.getIndex(), sValues.getRoute(), vessel);
-                                simultaneousOp.put(simOp, cValuesPut1);
-                                simOpRoutes.get(sValues.getRoute()).put(simOp, cValuesPut1);
-                            }
-                            ConnectedValues sim2 = new ConnectedValues(vesselroutes.get(vessel).get(task), sValues.getOperationObject(), simOp, task, vessel, sValues.getRoute());
-                            simultaneousOp.put(taskID, sim2);
-                            simOpRoutes.get(vessel).put(taskID, sim2);
-                        }
-                    }
-                }
-                if (precALNS[taskID - nStartnodes - 1][0] != 0) {
-                    if (precedenceOverOperations.get(taskID) != null) {
-                        precedenceOverRoutes.get(precedenceOverOperations.get(taskID).getRoute()).remove(taskID);
-                        precedenceOverOperations.get(taskID).setIndex(task);
-                        precedenceOverOperations.get(taskID).setRoute(vessel);
-                        precedenceOverOperations.get(taskID).getOperationObject().setEarliestTime(vesselroutes.get(vessel).get(task).getEarliestTime());
-                        precedenceOverOperations.get(taskID).getOperationObject().setLatestTime(vesselroutes.get(vessel).get(task).getLatestTime());
-                        precedenceOverRoutes.get(precedenceOverOperations.get(taskID).getRoute()).put(taskID,precedenceOverOperations.get(taskID));
-                    } else {
-                        int precOver = precALNS[taskID - nStartnodes - 1][0];
-                        if(precedenceOfOperations.get(precOver)==null) {
-                            PrecedenceValues pValues = new PrecedenceValues(vesselroutes.get(vessel).get(task), null, precOver, task, vessel, -1);
-                            precedenceOverOperations.put(taskID, pValues);
-                            precedenceOverRoutes.get(vessel).put(taskID,pValues);
-                        }
-                        if(precedenceOfOperations.get(precOver) != null) {
-                            PrecedenceValues pValues = precedenceOfOperations.get(precOver);
-                            PrecedenceValues pValuesReplace = new PrecedenceValues(pValues.getOperationObject(),
-                                    vesselroutes.get(vessel).get(task), pValues.getConnectedOperationID(), pValues.getIndex(), pValues.getRoute(), vessel);
-                            PrecedenceValues pValuesPut = new PrecedenceValues(vesselroutes.get(vessel).get(task), pValues.getOperationObject(), precOver, task, vessel, pValues.getRoute());
-                            precedenceOfOperations.put(precOver, pValuesReplace);
-                            precedenceOverOperations.put(taskID, pValuesPut);
-                            precedenceOfRoutes.get(pValues.getRoute()).put(precOver, pValuesReplace);
-                            precedenceOverRoutes.get(vessel).put(taskID, pValuesPut);
-
-                        }
-                    }
-                }
-                if (precALNS[taskID - nStartnodes - 1][1] != 0) {
-                    if (precedenceOfOperations.get(taskID) != null) {
-                        precedenceOfRoutes.get(precedenceOfOperations.get(taskID).getRoute()).remove(taskID);
-                        precedenceOfOperations.get(taskID).setIndex(task);
-                        precedenceOfOperations.get(taskID).setRoute(vessel);
-                        precedenceOfOperations.get(taskID).getOperationObject().setEarliestTime(vesselroutes.get(vessel).get(task).getEarliestTime());
-                        precedenceOfOperations.get(taskID).getOperationObject().setLatestTime(vesselroutes.get(vessel).get(task).getLatestTime());
-                        precedenceOfRoutes.get(precedenceOfOperations.get(taskID).getRoute()).put(taskID,precedenceOfOperations.get(taskID));
-                    } else {
-                        int precOf = precALNS[taskID - nStartnodes - 1][1];
-                        if(precedenceOverOperations.get(precOf) != null) {
-                            PrecedenceValues pValues = precedenceOverOperations.get(precOf);
-                            PrecedenceValues pValuesReplace = new PrecedenceValues(pValues.getOperationObject(),
-                                    vesselroutes.get(vessel).get(task), pValues.getConnectedOperationID(), pValues.getIndex(), pValues.getRoute(), vessel);
-                            PrecedenceValues pValuesPut = new PrecedenceValues(vesselroutes.get(vessel).get(task), pValues.getOperationObject(), precOf, task, vessel, pValues.getRoute());
-                            precedenceOverOperations.put(precOf, pValuesReplace);
-                            precedenceOfOperations.put(taskID, pValuesPut);
-                            precedenceOverRoutes.get(pValues.getRoute()).put(precOf, pValuesReplace);
-                            precedenceOfRoutes.get(vessel).put(taskID, pValuesPut);
-                        }else if(precedenceOverOperations.get(precOf)==null){
-                            PrecedenceValues pValues = new PrecedenceValues(vesselroutes.get(vessel).get(task), null, precOf, task, vessel, -1);
-                            precedenceOfOperations.put(taskID, pValues);
-                            precedenceOfRoutes.get(vessel).put(taskID, pValues);
-                        }
-                    }
-                }
-                if (bigTaskALNS[taskID-nStartnodes-1] != null) {
-                    if (bigTaskALNS[taskID - nStartnodes - 1][0] == taskID) {
-                        consolidatedOperations.get(taskID).setConsolidatedRoute(vessel);
-                        consolidatedOperations.get(taskID).setConnectedRoute1(0);
-                        consolidatedOperations.get(taskID).setConnectedRoute2(0);
-                    } else if (bigTaskALNS[taskID - nStartnodes - 1][1] == taskID) {
-                        consolidatedOperations.get(taskID).setConnectedRoute1(vessel);
-                        consolidatedOperations.get(taskID).setConsolidatedRoute(0);
-                    } else if (bigTaskALNS[taskID - nStartnodes - 1][2] == taskID) {
-                        consolidatedOperations.get(taskID).setConnectedRoute2(vessel);
-                        consolidatedOperations.get(taskID).setConsolidatedRoute(0);
-                    }
-                }
-            }
-        }
-        for(OperationInRoute op : unroutedTasks) {
-            if (simultaneousOp.get(op.getID()) != null) {
-                simOpRoutes.get(simultaneousOp.get(op.getID()).getRoute()).remove(op.getID());
-                simultaneousOp.remove(op.getID());
-            }
-            if (precedenceOfOperations.get(op.getID()) != null) {
-                precedenceOfRoutes.get(precedenceOfOperations.get(op.getID()).getRoute()).remove(op.getID());
-                precedenceOfOperations.remove(op.getID());
-            }
-            if (precedenceOverOperations.get(op.getID()) != null) {
-                precedenceOverRoutes.get(precedenceOverOperations.get(op.getID()).getRoute()).remove(op.getID());
-                precedenceOverOperations.remove(op.getID());
-            }
-        }
+        simultaneousOp=copyRoutes.getSimultaneousOp();
+        precedenceOfOperations=copyRoutes.getPrecedenceOfOperations();
+        precedenceOverOperations=copyRoutes.getPrecedenceOverOperations();
+        simOpRoutes=copyRoutes.getSimOpRoutes();
+        precedenceOfRoutes=copyRoutes.getPrecedenceOfRoutes();
+        precedenceOverRoutes=copyRoutes.getPrecedenceOverRoutes();
     }
 
 
@@ -266,7 +285,7 @@ public class ALNS {
             totalWeight += i;
         }
         int randomIndex = -1;
-        double random = Math.random() * totalWeight;
+        double random = generator.nextDouble() * totalWeight;
         for (int i = 0; i < LSOweights.length; ++i) {
             random -= LSOweights[i];
             if (random <= 0.0d) {
@@ -284,7 +303,7 @@ public class ALNS {
             totalWeight += i;
         }
         int randomIndex = -1;
-        double random = Math.random() * totalWeight;
+        double random = generator.nextDouble() * totalWeight;
         for (int i = 0; i < removalWeights.length; ++i) {
             random -= removalWeights[i];
             if (random <= 0.0d) {
@@ -302,7 +321,7 @@ public class ALNS {
             totalWeight += i;
         }
         int randomIndex = -1;
-        double random = Math.random() * totalWeight;
+        double random = generator.nextDouble() * totalWeight;
         for (int i = 0; i < insertionWeights.length; ++i) {
             random -= insertionWeights[i];
             if (random <= 0.0d) {
@@ -320,12 +339,13 @@ public class ALNS {
         if(newObj > bestObj ){
             bestRouteSailingCost = routeSailingCost;
             bestRouteOperationGain = routeOperationGain;
-            bestRoutes = copyVesselroutes(vesselroutes);
+            bestRoutes = copyVesselRoutes(vesselroutes);
             bestUnrouted = copyUnrouted(unroutedTasks);
             return true;
         }
         else{
             System.out.println("Solution not accepted");
+            /*
             for (int i=0;i<bestRoutes.size();i++){
                 int totalTime=0;
                 System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessels[i]);
@@ -350,10 +370,14 @@ public class ALNS {
                 System.out.println("TOTAL DURATION FOR ROUTE: "+totalTime);
             }
 
-            retainOldSolution();
+             */
 
+            retainOldSolution();
+/*
             printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
                                 consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
+
+ */
             return false;
         }
     }
@@ -365,7 +389,7 @@ public class ALNS {
                                        Map<Integer, PrecedenceValues> precedenceOfOperations,Map<Integer, ConnectedValues> simultaneousOp,
                                        List<Map<Integer, ConnectedValues>> simOpRoutes){
 
-        System.out.println("SOLUTION AFTER RESTORE");
+        System.out.println("Print Solution ALNS class");
 
         System.out.println("Sailing cost per route: "+ Arrays.toString(routeSailingCost));
         System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
@@ -405,8 +429,10 @@ public class ALNS {
         for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
             ConnectedValues simOp = entry.getValue();
             System.out.println("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
-                    simOp.getRoute() + " with index: " + simOp.getIndex());
+                    simOp.getRoute() + " with index: " + simOp.getIndex() + " earliest "+simOp.getOperationObject().getEarliestTime()
+                    + " earliest "+simOp.getOperationObject().getLatestTime()+ " connected ID "+simOp.getConnectedOperationObject().getID() + " connected route "+simOp.getConnectedRoute());
         }
+        /*
         System.out.println("Simultaneous 2");
         for(int v= 0;v<vesselRoutes.size();v++){
             for(Map.Entry<Integer, ConnectedValues> entry : simOpRoutes.get(v).entrySet()){
@@ -415,31 +441,94 @@ public class ALNS {
                         simOp.getRoute() + " with index: " + simOp.getIndex());
             }
         }
+
+         */
         System.out.println("PRECEDENCE OVER DICTIONARY");
         for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverOperations.entrySet()){
             PrecedenceValues presOverOp = entry.getValue();
-            System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
-                    presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
+            if(presOverOp.getConnectedOperationObject()!=null){
+                System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                        presOverOp.getRoute() + " with index: " + presOverOp.getIndex()+ " connected ID "+presOverOp.getConnectedOperationObject().getID() + " connected route "+presOverOp.getConnectedRoute());
+            }
+            else{
+                System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                        presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
+            }
+
         }
         System.out.println("PRECEDENCE OF DICTIONARY");
         for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
             PrecedenceValues presOfOp = entry.getValue();
-            System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
-                    presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+            if(presOfOp.getConnectedOperationObject()!=null){
+                System.out.println("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                        presOfOp.getRoute() + " with index: " + presOfOp.getIndex()+ " connected ID "+presOfOp.getConnectedOperationObject().getID() + " connected route "+presOfOp.getConnectedRoute());
+            }
+            else{
+                System.out.println("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                        presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+            }
         }
         System.out.println("\nCONSOLIDATED DICTIONARY:");
-        for(Map.Entry<Integer, ConsolidatedValues> entry : consolidatedOperations.entrySet()){
-            ConsolidatedValues cv = entry.getValue();
-            int key = entry.getKey();
-            System.out.println("new entry in consolidated dictionary:");
-            System.out.println("Key "+key);
-            System.out.println("big task placed? "+cv.getConsolidated());
-            System.out.println("small tasks placed? "+cv.getSmallTasks());
-            System.out.println("small route 1 "+cv.getConnectedRoute1());
-            System.out.println("small route 2 "+cv.getConnectedRoute2());
-            System.out.println("route consolidated task "+cv.getConsolidatedRoute()+"\n");
+        if(consolidatedOperations!=null) {
+            for (Map.Entry<Integer, ConsolidatedValues> entry : consolidatedOperations.entrySet()) {
+                ConsolidatedValues cv = entry.getValue();
+                int key = entry.getKey();
+                System.out.println("new entry in consolidated dictionary:");
+                System.out.println("Key " + key);
+                System.out.println("big task placed? " + cv.getConsolidated());
+                System.out.println("small tasks placed? " + cv.getSmallTasks());
+                System.out.println("small route 1 " + cv.getConnectedRoute1());
+                System.out.println("small route 2 " + cv.getConnectedRoute2());
+                System.out.println("route consolidated task " + cv.getConsolidatedRoute() + "\n");
 
+            }
         }
+        System.out.println("Is solution feasible? "+checkSolution(vesselRoutes));
+    }
+
+    public Boolean checkSolution(List<List<OperationInRoute>> vesselroutes){
+        for(List<OperationInRoute> route : vesselroutes){
+            if(route != null) {
+                for (OperationInRoute operation : route) {
+                    if (operation.getEarliestTime() > operation.getLatestTime()) {
+                        System.out.println("Earliest time is larger than latest time, infeasible move");
+                        return false;
+                    }
+                }
+            }
+        }
+        if(simultaneousOp!=null && !simultaneousOp.isEmpty()){
+            for(ConnectedValues op : simultaneousOp.values()){
+                OperationInRoute conOp = op.getConnectedOperationObject();
+                /*
+                System.out.println("Op ID "+op.getOperationObject().getID());
+                System.out.println("conOp ID "+conOp.getID());
+                System.out.println("Op earliest "+op.getOperationObject().getEarliestTime());
+                System.out.println("Op latest "+op.getOperationObject().getLatestTime());
+                System.out.println("ConOp earliest "+conOp.getEarliestTime());
+                System.out.println("ConOp latest "+conOp.getLatestTime());
+
+                 */
+                if(op.getOperationObject().getEarliestTime() != conOp.getEarliestTime() ||
+                        op.getOperationObject().getLatestTime() != conOp.getLatestTime()){
+                    System.out.println("Earliest and/or latest time for simultaneous op do not match, infeasible move");
+                    return false;
+                }
+            }
+        }
+        if(precedenceOverRoutes!=null && !precedenceOverOperations.isEmpty()){
+            for(PrecedenceValues op : precedenceOverOperations.values()){
+                OperationInRoute conop = op.getConnectedOperationObject();
+                if(conop != null) {
+                    if (conop.getEarliestTime() < op.getOperationObject().getEarliestTime() + dg.getTimeVesselUseOnOperation()[op.getRoute()]
+                            [op.getOperationObject().getID() - 1-dg.getStartNodes().length][op.getOperationObject().getEarliestTime()]) {
+                        System.out.println("Precedence infeasible, op: "+op.getOperationObject().getID()+ " and "+conop.getID());
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public void runLocalSearch(){
@@ -466,7 +555,7 @@ public class ALNS {
                 consolidatedOperations, bestUnrouted, bestRoutes, dg.getTwIntervals(),
         dg.getPrecedenceALNS(), dg.getSimultaneousALNS(), dg.getStartNodes(), dg.getSailingTimes(),
         dg.getTimeVesselUseOnOperation(), dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(),
-        dg.getOperationGain(), dg.getBigTasksALNS(), dg.getOperationsForVessel());
+        dg.getOperationGain(), dg.getBigTasksALNS(), dg.getOperationsForVessel(),dg.getOperationGainGurobi(),vessels);
         sc.runSwitchConsolidated();
 
     }
@@ -476,7 +565,7 @@ public class ALNS {
                 dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), bestRouteSailingCost, bestRouteOperationGain,
                 dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), dg.getOperationGain(),
                 bestUnrouted, bestRoutes, precedenceOverOperations, precedenceOfOperations, simultaneousOp,
-                simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,consolidatedOperations);
+                simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,consolidatedOperations,dg.getOperationGainGurobi());
         String method = "relocate"; //chooseMethod
         if(method.equals("relocate")) {
             RI.relocateAll();
@@ -492,7 +581,7 @@ public class ALNS {
                 dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),bestRouteSailingCost,bestRouteOperationGain,
                 dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getPrecedenceALNS(),dg.getBigTasksALNS(), dg.getOperationGain(), bestRoutes,bestUnrouted,
                 precedenceOverOperations, precedenceOfOperations,simultaneousOp,
-                simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, consolidatedOperations);
+                simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, consolidatedOperations,dg.getOperationGainGurobi());
         String method = chooseLSO();
         switch (method) {
             case "1RL":
@@ -516,11 +605,9 @@ public class ALNS {
 
     public void runDestroyRepair(){
         System.out.println(" ");
-        System.out.println("Print før kjøring");
-        printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
-                consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
-
-
+        //System.out.println("Print før kjøring");
+        //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
+                //consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
         LargeNeighboorhoodSearchRemoval LNSR = new LargeNeighboorhoodSearchRemoval(precedenceOverOperations,precedenceOfOperations,
                 simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,
                 consolidatedOperations,unroutedTasks,vesselroutes, dg.getTwIntervals(),
@@ -528,40 +615,40 @@ public class ALNS {
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
                 dg.getOperationGain(),dg.getBigTasksALNS(),numberOfRemoval,randomSeed,dg.getDistOperationsInInstance(),
                 relatednessWeightDistance,relatednessWeightDuration,relatednessWeightTimewindows,relatednessWeightPrecedenceOver,
-                relatednessWeightPrecedenceOf,relatednessWeightSimultaneous);
+                relatednessWeightPrecedenceOf,relatednessWeightSimultaneous,dg.getOperationGainGurobi(),vessels);
 
         //for run removal, insert method, alternatives: worst, synchronized, route, related, random, worst_sailing
         String removalMethod = chooseRemovalMethod();
         LNSR.runLNSRemoval(removalMethod);
-        System.out.println("------Removal method " + removalMethod+ " -----------");
-        LNSR.printLNSSolution(vessels);
-
+        System.out.println("---------- Removal method " + removalMethod+ " -----------");
+        System.out.println("removal class");
+        System.out.println("ALNS class");
+        printLNSInsertSolution(vessels, bestRouteSailingCost, bestRouteOperationGain, vesselroutes, dg.getStartNodes(), dg.getSailingTimes(),
+                dg.getTimeVesselUseOnOperation(), unroutedTasks, precedenceOverOperations, consolidatedOperations,
+                precedenceOfOperations, simultaneousOp, simOpRoutes);
+        //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,vesselroutes,dg.getStartNodes(),dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
+                //unroutedTasks,precedenceOverOperations,consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),dg.getStartNodes().length);
         LargeNeighboorhoodSearchInsert LNSI = new LargeNeighboorhoodSearchInsert(precedenceOverOperations,precedenceOfOperations,
                 simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,unroutedTasks,vesselroutes,
                 LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel());
+                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),vessels);
 
         //for run insertion, insert method, alternatives: best, regret
         String insertionMethod = chooseInsertionMethod();
         System.out.println("-------Insertion method " + insertionMethod + " ----------");
         LNSI.runLNSInsert(insertionMethod);
-
-
+        System.out.println("LNSI before retain");
+        //LNSI.printLNSInsertSolution(vessels);
         if(acceptSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks())){
-            LNSI.printLNSInsertSolution(vessels);
+            //LNSI.printLNSInsertSolution(vessels);
             System.out.println("New objective value: " + (IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum()));
         }else{
             System.out.println("Same objective value: " + (IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum()));
 
         }
-
-        //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,dg.getStartNodes(),dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
-        //                       consolidatedOperations,precedenceOfOperations,simultaneousOp);
-        //LNSI.switchConsolidated();
-
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -572,15 +659,19 @@ public class ALNS {
         for (OperationInRoute ur:alns.bestUnrouted){
             unroutedList.add(ur.getID());
         }
-        alns.runRelocateInsert();
+        //alns.runRelocateInsert();
         int afterFirstLocalObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         for (int i = 0; i < 100; i++) {
             System.out.println("Iteration nr: " + i);
             alns.runDestroyRepair();
+            alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.vesselroutes,
+                    alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                    alns.precedenceOverOperations, alns.consolidatedOperations,
+                    alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
         }
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
-        alns.runLocalSearchNormalOperators();
-        alns.runRelocateInsert();
+        //alns.runLocalSearchNormalOperators();
+        //alns.runRelocateInsert();
         int bestObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         System.out.println("Construction Objective "+constructionObjective);
         System.out.println("afterFirstLocalObjective "+afterFirstLocalObjective);
@@ -601,14 +692,8 @@ public class ALNS {
             System.out.println(ur.getID());
         }
         ObjectiveValues ov= ConstructionHeuristic.calculateObjective(alns.bestRoutes,alns.dg.getTimeVesselUseOnOperation(),alns.dg.getSailingCostForVessel(),
-                alns.dg.getSailingTimes(),alns.dg.getSailingCostForVessel(),alns.dg.getEarliestStartingTimeForVessel(),alns.dg.getOperationGain(),
+                alns.dg.getSailingTimes(),alns.dg.getSailingCostForVessel(),alns.dg.getEarliestStartingTimeForVessel(),alns.dg.getOperationGainGurobi(),
                 new int[alns.vesselroutes.size()],new int[alns.vesselroutes.size()],0,alns.dg.getSimultaneousALNS(),alns.dg.getBigTasksALNS());
         System.out.println("Recalculated obj: "+ov.getObjvalue());
-        /*
-        alns.printLNSInsertSolution(alns.vessels,alns.bestRouteSailingCost,alns.bestRouteOperationGain,alns.bestRoutes,alns.dg.getStartNodes(),alns.dg.getSailingTimes(),
-                alns.dg.getTimeVesselUseOnOperation(),alns.bestUnrouted,alns.precedenceOverOperations,alns.consolidatedOperations,
-                alns.precedenceOfOperations,alns.simultaneousOp,alns.simOpRoutes);
-
-         */
     }
 }

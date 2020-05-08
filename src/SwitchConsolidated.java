@@ -21,12 +21,15 @@ public class SwitchConsolidated {
     private int[] SailingCostForVessel;
     private int[] EarliestStartingTimeForVessel;
     private int[][][] operationGain;
+    private int[][][] operationGainGurobi;
     private int[] routeSailingCost;
     private int[] routeOperationGain;
     private int objValue;
     private int nVessels;
     private int nTimePeriods;
     private int [][] OperationsForVessel;
+    private int [] vesselTypes;
+
     Map<Integer,List<InsertionValues>> allFeasibleInsertions = new HashMap<>();
 
     public SwitchConsolidated(Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, PrecedenceValues> precedenceOfOperations,
@@ -36,7 +39,7 @@ public class SwitchConsolidated {
                               List<List<OperationInRoute>> vesselRoutes, int[][] twIntervals,
                               int[][] precedenceALNS, int[][] simALNS, int[] startNodes, int[][][][] SailingTimes,
                               int[][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int[] EarliestStartingTimeForVessel,
-                              int[][][] operationGain, int[][] bigTasksALNS, int[][] OperationsForVessel){
+                              int[][][] operationGain, int[][] bigTasksALNS, int[][] OperationsForVessel, int[][][] operationGainGurobi, int[] vesselTypes){
         this.precedenceOverOperations = precedenceOverOperations;
         this.precedenceOfOperations = precedenceOfOperations;
         this.simultaneousOp = simultaneousOp;
@@ -63,6 +66,8 @@ public class SwitchConsolidated {
         this.nTimePeriods=TimeVesselUseOnOperation[0][0].length;
         this.OperationsForVessel=OperationsForVessel;
         unroutedTasks.sort(Comparator.comparing(OperationInRoute::getID));
+        this.operationGainGurobi=operationGainGurobi;
+        this.vesselTypes=vesselTypes;
     }
 
     public int calculateProfitIncrease(int r, int i){
@@ -271,22 +276,29 @@ public class SwitchConsolidated {
 
     public void updateAllTimesAfterRemoval(){
         //System.out.println("UPDATE TIMES AFTER ALL REMOVALS");
-        for(int r=0;r<vesselRoutes.size();r++) {
-            if(vesselRoutes.get(r)!= null && vesselRoutes.get(r).size()>0) {
-                //System.out.println("Updating route: " + r);
-                int earliest = Math.max(SailingTimes[r][EarliestStartingTimeForVessel[r]][startNodes[r] - 1][vesselRoutes.get(r).get(0).getID() - 1] + 1,
-                        twIntervals[vesselRoutes.get(r).get(0).getID() - 1 - startNodes.length][0]);
-                int latest = Math.min(SailingTimes[0].length, twIntervals[vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1).getID() - 1 - startNodes.length][1]);
-                vesselRoutes.get(r).get(0).setEarliestTime(earliest);
-                vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1).setLatestTime(latest);
-                ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, r, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes, twIntervals);
-                ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(r).size() - 1, r, vesselRoutes, TimeVesselUseOnOperation,
-                        startNodes, SailingTimes, twIntervals);
-                ConstructionHeuristic.updateSimultaneous(simOpRoutes, r, 0, simultaneousOp, precedenceOverRoutes,
+        List<Integer> updatedRoutes = new ArrayList<Integer>();
+        for (int route : updatedRoutes) {
+            if (vesselRoutes.get(route) != null && vesselRoutes.get(route).size() != 0) {
+                //System.out.println("Updating route: " + route);
+                int earliest = Math.max(SailingTimes[route][EarliestStartingTimeForVessel[route]][startNodes[route] - 1]
+                        [vesselRoutes.get(route).get(0).getID() - 1] + 1, twIntervals[vesselRoutes.get(route).get(0).getID() - startNodes.length - 1][0]);
+                int latest = Math.min(SailingTimes[0].length, twIntervals
+                        [vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1).getID() - 1 - startNodes.length][1]);
+                vesselRoutes.get(route).get(0).setEarliestTime(earliest);
+                vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1).setLatestTime(latest);
+                ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,twIntervals);
+                ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(route).size() - 1, route, vesselRoutes, TimeVesselUseOnOperation,
+                        startNodes, SailingTimes,twIntervals);
+            }
+        }
+
+        for (int route : updatedRoutes) {
+            if (vesselRoutes.get(route) != null && vesselRoutes.get(route).size() != 0) {
+                ConstructionHeuristic.updateSimultaneous(simOpRoutes, route, 0, simultaneousOp, precedenceOverRoutes,
                         precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations, precedenceOfOperations,
                         vesselRoutes);
-                updatePrecedenceOverAfterRemovals(precedenceOverRoutes.get(r));
-                updatePrecedenceOfAfterRemovals(precedenceOfRoutes.get(r));
+                updatePrecedenceOverAfterRemovals(precedenceOverRoutes.get(route));
+                updatePrecedenceOfAfterRemovals(precedenceOfRoutes.get(route));
             }
         }
     }
@@ -328,7 +340,7 @@ public class SwitchConsolidated {
                                 ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
                     }
                     else{
                         LargeNeighboorhoodSearchInsert.findInsertionCosts(new OperationInRoute(small1,0,0),-1,-1,
@@ -336,7 +348,7 @@ public class SwitchConsolidated {
                                 ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
                     }
                     //System.out.println("insertion possibilities found for sim a");
                     for (int i=0;i<allFeasibleInsertions.get(small1).size();i++){
@@ -368,7 +380,7 @@ public class SwitchConsolidated {
                                     ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                     SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                     operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                    simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks);
+                                    simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
                             int size=allFeasibleInsertions.get(small2).size();
                             InsertionValues ourValues=allFeasibleInsertions.get(small2).get(size-1);
                             int ourBenefitIncrease=ourValues.getBenenefitIncrease();
@@ -439,7 +451,7 @@ public class SwitchConsolidated {
                             ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                             SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                             operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                            simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks);
+                            simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
                     bigTaskInsertionValues=allFeasibleInsertions.get(bigTask).get(0);
 
                 }
@@ -468,6 +480,12 @@ public class SwitchConsolidated {
                 }
             }
         }
+        ObjectiveValues ov= ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
+                EarliestStartingTimeForVessel, operationGainGurobi, new int[vesselRoutes.size()],new int[vesselRoutes.size()],0, simALNS,bigTasksALNS);
+        this.objValue=ov.getObjvalue();
+        this.routeSailingCost=ov.getRouteSailingCost();
+        this.routeOperationGain=ov.getRouteBenefitGain();
         //System.out.println("Finished switch method");
     }
+
 }

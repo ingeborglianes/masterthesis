@@ -26,6 +26,7 @@ public class LargeNeighboorhoodSearchRemoval {
     private int[] SailingCostForVessel;
     private int[] EarliestStartingTimeForVessel;
     private int[][][] operationGain;
+    private int[][][] operationGainGurobi;
     private int[] routeSailingCost;
     private int[] routeOperationGain;
     private ArrayList<Integer> sortedOperationsByProfitDecrease;
@@ -41,7 +42,9 @@ public class LargeNeighboorhoodSearchRemoval {
     private double relatednessWeightPrecedenceOver;
     private double relatednessWeightPrecedenceOf;
     private double relatednessWeightSimultaneous;
+    private List<Integer> randomIntStream;
     Random generator;
+    private int[] vesseltypes;
 
     public LargeNeighboorhoodSearchRemoval(Map<Integer,PrecedenceValues> precedenceOverOperations, Map<Integer,PrecedenceValues> precedenceOfOperations,
                                         Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
@@ -53,7 +56,7 @@ public class LargeNeighboorhoodSearchRemoval {
                                         int[][][] operationGain, int[][] bigTasksALNS, int numberOfRemoval, int randomSeed,
                                     int[][] distOperationsInInstance,double relatednessWeightDistance, double relatednessWeightDuration,
                                     double relatednessWeightTimewindows, double relatednessWeightPrecedenceOver, double relatednessWeightPrecedenceOf,
-                                    double relatednessWeightSimultaneous){
+                                    double relatednessWeightSimultaneous, int[][][] operationGainGurobi,int[]vesseltypes){
         this.precedenceOverOperations=precedenceOverOperations;
         this.precedenceOfOperations=precedenceOfOperations;
         this.simultaneousOp=simultaneousOp;
@@ -86,6 +89,8 @@ public class LargeNeighboorhoodSearchRemoval {
         this.relatednessWeightPrecedenceOver=relatednessWeightPrecedenceOver;
         this.relatednessWeightPrecedenceOf=relatednessWeightPrecedenceOf;
         this.relatednessWeightSimultaneous=relatednessWeightSimultaneous;
+        this.operationGainGurobi=operationGainGurobi;
+        this.vesseltypes=vesseltypes;
     }
     //removal methods
 
@@ -199,6 +204,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 int selectedTaskID=i+startNodes.length+1;
                 if(precedenceOverOperations.get(selectedTaskID)!=null){
                     PrecedenceValues pv= precedenceOverOperations.get(selectedTaskID);
+                    System.out.println("Remove pres");
                     removeSynchronizedOp(simultaneousOp.get(selectedTaskID), precedenceOverOperations.get(selectedTaskID),
                             precedenceOfOperations.get(selectedTaskID), selectedTaskID, pv.getOperationObject(),"syncRemoval");
                     removeDependentOperations(selectedTaskID, "syncRemoval");
@@ -211,6 +217,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 int selectedTaskID=i+startNodes.length+1;
                 if(simultaneousOp.get(selectedTaskID)!=null){
                     ConnectedValues cv= simultaneousOp.get(selectedTaskID);
+                    System.out.println("Remove sim");
                     removeSynchronizedOp(simultaneousOp.get(selectedTaskID), precedenceOverOperations.get(selectedTaskID),
                             precedenceOfOperations.get(selectedTaskID), selectedTaskID, cv.getOperationObject(),"syncRemoval");
                     removeDependentOperations(selectedTaskID,"syncRemoval");
@@ -469,8 +476,39 @@ public class LargeNeighboorhoodSearchRemoval {
         int selectedTaskID=selectedTask.getID();
         if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 || simALNS[selectedTaskID-startNodes.length-1][0] != 0
                 || precedenceALNS[selectedTaskID-startNodes.length-1][1] != 0 || precedenceALNS[selectedTaskID-startNodes.length-1][0] != 0) {
-            //System.out.println("Remove synchronized task: "+selectedTask.getID());
-            //System.out.println("remove synchronized op "+selectedTaskID);
+            System.out.println("remove synchronized op "+selectedTaskID);
+            System.out.println("SIMULTANEOUS DICTIONARY");
+            for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
+                ConnectedValues simOp = entry.getValue();
+                System.out.println("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
+                        simOp.getRoute() + " with index: " + simOp.getIndex() + " connected ID "+
+                        simOp.getConnectedOperationObject().getID() + " connected route "+simOp.getConnectedRoute());
+            }
+            System.out.println("PRECEDENCE OVER DICTIONARY");
+            for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverOperations.entrySet()){
+                PrecedenceValues presOverOp = entry.getValue();
+                if(presOverOp.getConnectedOperationObject()!=null){
+                    System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                            presOverOp.getRoute() + " with index: " + presOverOp.getIndex()+ " connected ID "+presOverOp.getConnectedOperationObject().getID() + " connected route "+presOverOp.getConnectedRoute());
+                }
+                else{
+                    System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                            presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
+                }
+
+            }
+            System.out.println("PRECEDENCE OF DICTIONARY");
+            for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
+                PrecedenceValues presOfOp = entry.getValue();
+                if(presOfOp.getConnectedOperationObject()!=null){
+                    System.out.println("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                            presOfOp.getRoute() + " with index: " + presOfOp.getIndex()+ " connected ID "+presOfOp.getConnectedOperationObject().getID() + " connected route "+presOfOp.getConnectedRoute());
+                }
+                else{
+                    System.out.println("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                            presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+                }
+            }
             removeSynchronizedOp(simultaneousOp.get(selectedTaskID),precedenceOverOperations.get(selectedTaskID),
                     precedenceOfOperations.get(selectedTaskID),selectedTaskID, selectedTask,removalType);
             removeDependentOperations(selectedTaskID,removalType);
@@ -590,6 +628,7 @@ public class LargeNeighboorhoodSearchRemoval {
             }
         }
         //System.out.println("Operation to remove: "+selectedTaskID);
+        /*
         System.out.println("SIMULTANEOUS DICTIONARY");
         for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
             ConnectedValues simOpC = entry.getValue();
@@ -608,6 +647,9 @@ public class LargeNeighboorhoodSearchRemoval {
             System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
                     presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
         }
+
+         */
+        /*
         for(int r=0;r<startNodes.length;r++) {
             System.out.println("VESSEL " + r);
             if(vesselRoutes.get(r) != null) {
@@ -620,6 +662,8 @@ public class LargeNeighboorhoodSearchRemoval {
                 }
             }
         }
+
+         */
         System.out.println("route "+route+" index "+index + "task "+selectedTaskID);
         vesselRoutes.get(route).remove(index);
         ConstructionHeuristic.updateIndexesRemoval(route, index, vesselRoutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
@@ -749,22 +793,28 @@ public class LargeNeighboorhoodSearchRemoval {
 
     public void updateAllTimesAfterRemoval(){
         //System.out.println("UPDATE TIMES AFTER ALL REMOVALS");
-        for(int r=0;r<vesselRoutes.size();r++) {
-            if(vesselRoutes.get(r)!= null && vesselRoutes.get(r).size()>0) {
-                //System.out.println("Updating route: " + r);
-                int earliest = Math.max(SailingTimes[r][EarliestStartingTimeForVessel[r]][startNodes[r] - 1][vesselRoutes.get(r).get(0).getID() - 1] + 1,
-                        twIntervals[vesselRoutes.get(r).get(0).getID() - 1 - startNodes.length][0]);
-                int latest = Math.min(SailingTimes[0].length, twIntervals[vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1).getID() - 1 - startNodes.length][1]);
-                vesselRoutes.get(r).get(0).setEarliestTime(earliest);
-                vesselRoutes.get(r).get(vesselRoutes.get(r).size() - 1).setLatestTime(latest);
-                ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, r, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes, twIntervals);
-                ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(r).size() - 1, r, vesselRoutes, TimeVesselUseOnOperation,
-                        startNodes, SailingTimes, twIntervals);
-                ConstructionHeuristic.updateSimultaneous(simOpRoutes, r, 0, simultaneousOp, precedenceOverRoutes,
+        for (int route=0;route<vesselRoutes.size();route++) {
+            if (vesselRoutes.get(route) != null && vesselRoutes.get(route).size() != 0) {
+                //System.out.println("Updating route: " + route);
+                int earliest = Math.max(SailingTimes[route][EarliestStartingTimeForVessel[route]][startNodes[route] - 1]
+                        [vesselRoutes.get(route).get(0).getID() - 1] + 1, twIntervals[vesselRoutes.get(route).get(0).getID() - startNodes.length - 1][0]);
+                int latest = Math.min(SailingTimes[0].length, twIntervals
+                        [vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1).getID() - 1 - startNodes.length][1]);
+                vesselRoutes.get(route).get(0).setEarliestTime(earliest);
+                vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1).setLatestTime(latest);
+                ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,twIntervals);
+                ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(route).size() - 1, route, vesselRoutes, TimeVesselUseOnOperation,
+                        startNodes, SailingTimes,twIntervals);
+            }
+        }
+
+        for (int route=0;route<vesselRoutes.size();route++) {
+            if (vesselRoutes.get(route) != null && vesselRoutes.get(route).size() != 0) {
+                updatePrecedenceOverAfterRemovals(precedenceOverRoutes.get(route));
+                updatePrecedenceOfAfterRemovals(precedenceOfRoutes.get(route));
+                ConstructionHeuristic.updateSimultaneous(simOpRoutes, route, 0, simultaneousOp, precedenceOverRoutes,
                         precedenceOfRoutes, TimeVesselUseOnOperation, startNodes, SailingTimes, precedenceOverOperations, precedenceOfOperations,
                         vesselRoutes);
-                updatePrecedenceOverAfterRemovals(precedenceOverRoutes.get(r));
-                updatePrecedenceOfAfterRemovals(precedenceOfRoutes.get(r));
             }
         }
     }
@@ -796,11 +846,12 @@ public class LargeNeighboorhoodSearchRemoval {
                 worstRemovalSailing();
             }
             ObjectiveValues ov = ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
-                    EarliestStartingTimeForVessel, operationGain, new int[vesselRoutes.size()],new int[vesselRoutes.size()],0,simALNS,bigTasksALNS);
+                    EarliestStartingTimeForVessel, operationGainGurobi, new int[vesselRoutes.size()],new int[vesselRoutes.size()],0,simALNS,bigTasksALNS);
             objValue=ov.getObjvalue();
             routeSailingCost=ov.getRouteSailingCost();
             routeOperationGain=ov.getRouteBenefitGain();
             updateAllTimesAfterRemoval();
+            //printLNSSolution(vesseltypes);
         }
     }
 
@@ -865,6 +916,7 @@ public class LargeNeighboorhoodSearchRemoval {
             System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
                     presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
         }
+        /*
         System.out.println("Precedence over 2");
         for(int v= 0;v<vesselRoutes.size();v++){
             for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverRoutes.get(v).entrySet()){
@@ -873,12 +925,15 @@ public class LargeNeighboorhoodSearchRemoval {
                         simOp.getRoute() + " with index: " + simOp.getIndex());
             }
         }
+
+         */
         System.out.println("PRECEDENCE OF DICTIONARY");
         for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
             PrecedenceValues presOfOp = entry.getValue();
             System.out.println("Precedence of operation: " + presOfOp.getOperationObject().getID() + " in route: " +
                     presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
         }
+        /*
         System.out.println("Precedence of 2");
         for(int v= 0;v<vesselRoutes.size();v++){
             for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfRoutes.get(v).entrySet()){
@@ -887,6 +942,8 @@ public class LargeNeighboorhoodSearchRemoval {
                         simOp.getRoute() + " with index: " + simOp.getIndex());
             }
         }
+
+         */
     }
 
     static <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
@@ -956,7 +1013,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(),dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
@@ -967,7 +1024,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
                 dg.getOperationGain(),dg.getBigTasksALNS(),15,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
-                0.1,0.1);
+                0.1,0.1,dg.getOperationGainGurobi(),vesseltypes);
         LNS.runLNSRemoval("related");
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);

@@ -16,6 +16,7 @@ public class LS_operators {
     private int[] routeSailingCost;
     private int[] routeOperationGain;
     private int[][][] operationGain;
+    private int[][][] operationGainGurobi;
     private int objValue;
     private int[][] simALNS;
     private int[][] precedenceALNS;
@@ -40,7 +41,7 @@ public class LS_operators {
                         Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, PrecedenceValues> precedenceOfOperations,
                         Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
                         List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
-                        Map<Integer, ConsolidatedValues> consolidatedOperations) {
+                        Map<Integer, ConsolidatedValues> consolidatedOperations, int[][][] operationGainGurobi) {
         this.OperationsForVessel = OperationsForVessel;
         this.vesseltypes = vesseltypes;
         this.SailingTimes = SailingTimes;
@@ -66,6 +67,7 @@ public class LS_operators {
         this.vesselroutes = vesselroutes;
         this.unroutedTasks = unroutedTasks;
         this.nTimePeriods = SailingTimes[0].length;
+        this.operationGainGurobi=operationGainGurobi;
     }
 
 
@@ -358,7 +360,7 @@ public class LS_operators {
         int[] newRouteSailingCost = new int[vesselroutes.size()];
         int[] newRouteOperationGain = new int[vesselroutes.size()];
         int newObjValue = 0;
-        ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGain, newRouteSailingCost,
+        ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGainGurobi, newRouteSailingCost,
                 newRouteOperationGain, newObjValue, simALNS, bigTasksALNS);
 
         if (newObjValue > oldObjValue) {
@@ -648,7 +650,7 @@ public class LS_operators {
         int[] newRouteSailingCost = new int[vesselroutes.size()];
         int[] newRouteOperationGain = new int[vesselroutes.size()];
         int newObjValue = 0;
-        ConstructionHeuristic.calculateObjective(vesselroutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,EarliestStartingTimeForVessel,operationGain,newRouteSailingCost,
+        ConstructionHeuristic.calculateObjective(vesselroutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,EarliestStartingTimeForVessel,operationGainGurobi,newRouteSailingCost,
                                                 newRouteOperationGain,newObjValue,simALNS,bigTasksALNS);
 
         if (newObjValue > oldObjValue) {
@@ -908,7 +910,7 @@ public class LS_operators {
         int[] newRouteSailingCost = new int[vesselroutes.size()];
         int[] newRouteOperationGain = new int[vesselroutes.size()];
         int newObjValue = 0;
-        ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGain, newRouteSailingCost,
+        ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGainGurobi, newRouteSailingCost,
                 newRouteOperationGain, newObjValue, simALNS, bigTasksALNS);
 
         if (newObjValue > oldObjValue) {
@@ -1231,7 +1233,7 @@ public class LS_operators {
         int[] newRouteSailingCost = new int[vesselroutes.size()];
         int[] newRouteOperationGain = new int[vesselroutes.size()];
         int newObjValue = 0;
-        ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGain, newRouteSailingCost,
+        ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGainGurobi, newRouteSailingCost,
                 newRouteOperationGain, newObjValue, simALNS, bigTasksALNS);
 
         if (newObjValue > oldObjValue) {
@@ -2246,7 +2248,7 @@ public class LS_operators {
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(),dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
@@ -2254,7 +2256,7 @@ public class LS_operators {
                 dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),a.getRouteSailingCost(),a.getRouteOperationGain(),
                 dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getPrecedenceALNS(),dg.getBigTasksALNS(), a.getOperationGain(), a.getVesselroutes(),a.getUnroutedTasks(),
                 a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),
-                a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations());
+                a.getSimOpRoutes(),a.getPrecedenceOfRoutes(), a.getPrecedenceOverRoutes(), a.getConsolidatedOperations(),dg.getOperationGainGurobi());
         //List<List<OperationInRoute>> new_vesselroutes = LSO.two_relocate(a.vesselroutes,1,3,4,0,startnodes,a.getUnroutedTasks());
         //LSO.twoRelocateAll();
         LSO.twoExchangeAll();
