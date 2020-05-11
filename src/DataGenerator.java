@@ -720,7 +720,7 @@ public class DataGenerator {
         int[] locStart = new int[]{1, 2, 3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
                 "test_instances/30_locations_normalOpGenerator.txt",
-                "routing","weather_files/weather_september.txt");
+                "routing","weather_files/weather_desember.txt");
         dg.generateData();
         //dg.printAllData();
         PrintData.printSailingTimes(dg.getSailingTimes(),1,35,vessels.length);
