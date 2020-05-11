@@ -634,7 +634,7 @@ public class BasicModel {
             locStart = new int[]{1, 2, 3,4};
         }
         //dg.printAllData();
-        for(int i =1;i<5;i++){
+        for(int i =1;i<3;i++){
             if(i==0){
                 testInstance="test_instances/30_locations_normalOpGenerator.txt";
             }

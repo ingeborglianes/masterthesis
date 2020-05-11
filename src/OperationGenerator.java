@@ -22,13 +22,13 @@ public class OperationGenerator {
         int[] op5v2 = new int[]{2, 3, 4};
         int[] op5BT = new int[]{6};
         OperationType op5 = new OperationType(5, op5v1, op5v2, op5BT,
-                0, 0, 8760, 360, 40, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "Large inspection of the facility");
+                0, 0, 8760, 360, 40, DataGenerator.costPenalty * DataGenerator.maxSailingTime*2,0, "Large inspection of the facility");
         int[] op6v1 = new int[]{2};
         OperationType op6 = new OperationType(6, op6v1, null, null,
                 0, 0, 5110, 730, 5, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Wash the net");
         int[] op7v1 = new int[]{4, 6};
         OperationType op7 = new OperationType(7, op7v1, null, null,
-                0, 0, 8760, 360, 48, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "tightening anchor lines");
+                0, 0, 8760, 360, 48, DataGenerator.costPenalty * DataGenerator.maxSailingTime*2,0, "tightening anchor lines");
         int[] op8v1 = new int[]{2, 3, 4, 6};
         OperationType op8 = new OperationType(8, op8v1, null, null,
                 9, 0, 8760, 360, 6, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Easy transport of equipment to facility");
@@ -50,7 +50,7 @@ public class OperationGenerator {
                 0, 0, 8760, 360, 4, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Inspect net diver");
         int[] op14v1 = new int[]{2};
         OperationType op14 = new OperationType(14, op14v1, null, null,
-                0, 0, 8760, 360, 4, DataGenerator.costPenalty * DataGenerator.maxSailingTime,0, "Wash bottom ring and floating collar");
+                0, 0, 8760, 360, 4, DataGenerator.costPenalty * DataGenerator.maxSailingTime*2,0, "Wash bottom ring and floating collar");
         int[] op15v1 = new int[]{2, 3, 4, 6};
         OperationType op15 = new OperationType(15, op15v1, null, null,
                 0, 0, 168, 24, 3, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Support working boat");
