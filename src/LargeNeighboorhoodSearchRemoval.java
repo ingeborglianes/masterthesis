@@ -476,6 +476,7 @@ public class LargeNeighboorhoodSearchRemoval {
         int selectedTaskID=selectedTask.getID();
         if(simALNS[selectedTaskID-startNodes.length-1][1] != 0 || simALNS[selectedTaskID-startNodes.length-1][0] != 0
                 || precedenceALNS[selectedTaskID-startNodes.length-1][1] != 0 || precedenceALNS[selectedTaskID-startNodes.length-1][0] != 0) {
+            /*
             System.out.println("remove synchronized op "+selectedTaskID);
             System.out.println("SIMULTANEOUS DICTIONARY");
             for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
@@ -509,6 +510,8 @@ public class LargeNeighboorhoodSearchRemoval {
                             presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
                 }
             }
+
+             */
             removeSynchronizedOp(simultaneousOp.get(selectedTaskID),precedenceOverOperations.get(selectedTaskID),
                     precedenceOfOperations.get(selectedTaskID),selectedTaskID, selectedTask,removalType);
             removeDependentOperations(selectedTaskID,removalType);

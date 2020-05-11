@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.sql.Array;
 import java.sql.SQLOutput;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,11 +13,13 @@ public class ALNS {
     private int[] locStart = new int[]{1,2,3,4,5,6,7};
     private int numberOfRemoval;
     private int randomSeed;
-    private int[] insertionWeights = new int[]{1,1};
-    private int[] removalWeights = new int[]{1,1,1,1,1,1};
-    private int[] LSOweights = new int[]{1,1,1,1};
+    private double[] insertionWeights = new double[]{1,1};
+    private double[] removalWeights = new double[]{1,1,1,1,1,1};
+    private double[] LSOweights = new double[]{1,1,1,1};
     private int[] insertionScore = new int[]{0,0};
     private int[] removalScore = new int[]{0,0,0,0,0,0};
+    private int[] insertionVisitsLastSegment = new int[]{0,0};
+    private int[] removalVisitsLastSegment = new int[]{0,0,0,0,0,0};
     private double relatednessWeightDistance;
     private double relatednessWeightDuration;
     private double relatednessWeightTimewindows;
@@ -43,15 +46,15 @@ public class ALNS {
     private Random generator;
     private List<Integer> discoveredSolutions= new ArrayList<>();
     private int segmentIteration=0;
-    private int totalIteration=0;
     private int numberOfSegmentIterations;
     private int numberOfIterations;
-    private double T_start;
+    private double TParameter=-1;
     private double T_decrease_parameter;
     private double controlParameter;
-    private double reward1;
-    private double reward2;
-    private double reward3;
+    private int reward1;
+    private int reward2;
+    private int reward3;
+    private int iterationsWithoutImprovement=0;
 
     public ALNS(){
         int loc = ParameterFile.loc;
@@ -68,23 +71,23 @@ public class ALNS {
         relatednessWeightPrecedenceOf=ParameterFile.relatednessWeightPrecedenceOf;
         relatednessWeightSimultaneous=ParameterFile.relatednessWeightSimultaneous;
         numberOfIterations=ParameterFile.numberOfIterations;
-        T_decrease_parameter=ParameterFile.T_decrease_parameter;
         controlParameter=ParameterFile.controlParameter;
         reward1=ParameterFile.reward1;
         reward2=ParameterFile.reward2;
         reward3=ParameterFile.reward3;
         numberOfSegmentIterations=ParameterFile.numberOfSegmentIterations;
+        T_decrease_parameter=Math.pow(0.2,1.0/numberOfIterations);
 
         if (loc == 20) {
             vessels = new int[]{1, 2, 3, 4, 5};
             locStart = new int[]{1, 2, 3, 4, 5};
         } else if (loc == 25) {
-            vessels = new int[]{1, 2, 3, 4, 5, 6};
-            locStart = new int[]{1, 2, 3, 4, 5, 6};
+            vessels = new int[]{3, 4, 5, 6};
+            locStart = new int[]{3, 4, 5, 6};
         }
         else if (loc == 30 || loc == 35) {
             vessels = new int[]{1, 3, 4, 5,6};
-            locStart = new int[]{1, 2, 3, 4, 5};
+            locStart = new int[]{1, 3, 4, 5, 6};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -307,11 +310,21 @@ public class ALNS {
         precedenceOverRoutes=copyRoutes.getPrecedenceOverRoutes();
     }
 
-
+    public void retainBestSolution(){
+        CopyValues copyRoutes= copyVesselRoutesAndSynchronization(bestRoutes);
+        vesselroutes = copyRoutes.getVesselRoutes();
+        unroutedTasks = copyUnrouted(bestUnrouted);
+        simultaneousOp=copyRoutes.getSimultaneousOp();
+        precedenceOfOperations=copyRoutes.getPrecedenceOfOperations();
+        precedenceOverOperations=copyRoutes.getPrecedenceOverOperations();
+        simOpRoutes=copyRoutes.getSimOpRoutes();
+        precedenceOfRoutes=copyRoutes.getPrecedenceOfRoutes();
+        precedenceOverRoutes=copyRoutes.getPrecedenceOverRoutes();
+    }
 
     public String chooseLSO() {
         double totalWeight = 0.0d;
-        for (int i : LSOweights) {
+        for (double i : LSOweights) {
             totalWeight += i;
         }
         int randomIndex = -1;
@@ -329,7 +342,7 @@ public class ALNS {
 
     public String chooseRemovalMethod() {
         double totalWeight = 0.0d;
-        for (int i : removalWeights) {
+        for (double i : removalWeights) {
             totalWeight += i;
         }
         int randomIndex = -1;
@@ -347,7 +360,7 @@ public class ALNS {
 
     public String chooseInsertionMethod(){
         double totalWeight = 0.0d;
-        for (int i : insertionWeights) {
+        for (double i : insertionWeights) {
             totalWeight += i;
         }
         int randomIndex = -1;
@@ -363,12 +376,63 @@ public class ALNS {
         return insertionMethods.get(randomIndex);
     }
 
+    public void setScoresAndVisits(int scoreIncrease, String insertMethod, String removeMethod){
+        if(insertMethod.equals("best")){
+            insertionScore[0]+=scoreIncrease;
+            insertionVisitsLastSegment[0]+=1;
+        }
+        if(insertMethod.equals("regret")){
+            insertionScore[1]+=scoreIncrease;
+            insertionVisitsLastSegment[1]+=1;
+        }
+        if(removeMethod.equals("random")){
+            removalScore[0]+=scoreIncrease;
+            removalVisitsLastSegment[0]+=1;
+        }
+        if(removeMethod.equals("synchronized")){
+            removalScore[1]+=scoreIncrease;
+            removalVisitsLastSegment[1]+=1;
+        }
+        if(removeMethod.equals("route")){
+            removalScore[2]+=scoreIncrease;
+            removalVisitsLastSegment[2]+=1;
+        }
+        if(removeMethod.equals("worst")){
+            removalScore[3]+=scoreIncrease;
+            removalVisitsLastSegment[3]+=1;
+        }
+        if(removeMethod.equals("related")){
+            removalScore[4]+=scoreIncrease;
+            removalVisitsLastSegment[4]+=1;
+        }
+        if(removeMethod.equals("worst_sailing")){
+            removalScore[5]+=scoreIncrease;
+            removalVisitsLastSegment[5]+=1;
+        }
+    }
+
+    public Boolean acceptedByProb(int currentObj, int newObj){
+        if(TParameter==-1){
+            TParameter=(-(currentObj-newObj)*Math.log(Math.exp(1)))/Math.log(0.5);
+            System.out.println("T start "+TParameter);
+            System.out.println("T decrase parameter "+T_decrease_parameter);
+        }
+        double randomNum=generator.nextDouble();
+        double prob=Math.exp(-(currentObj-newObj)/TParameter);
+        System.out.println("probability "+prob);
+        if(randomNum<=prob){
+            return true;
+        }
+        return false;
+    }
+
     public void evaluateSolution(int[] routeOperationGain, int[] routeSailingCost, List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks,
                                  String removalMethod, String insertMethod){
         int bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
         int currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
         int newObj = IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
         if(newObj>bestObj){
+            System.out.println("New best global solution "+newObj);
             bestRouteSailingCost = routeSailingCost;
             bestRouteOperationGain = routeOperationGain;
             bestRoutes = copyVesselRoutes(vesselroutes);
@@ -377,25 +441,46 @@ public class ALNS {
             currentRouteOperationGain = routeOperationGain;
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
-            System.out.println("New best global solution");
+            discoveredSolutions.add(newObj);
+            iterationsWithoutImprovement=0;
+            setScoresAndVisits(reward1,insertMethod,removalMethod);
         }
         else if(newObj>currentObj && !discoveredSolutions.contains(newObj)){
+            System.out.println("New best current solution "+newObj);
             //og ikke discovered før, oppdater current
             currentRouteSailingCost = routeSailingCost;
             currentRouteOperationGain = routeOperationGain;
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
+            discoveredSolutions.add(newObj);
+            iterationsWithoutImprovement=0;
+            setScoresAndVisits(reward2,insertMethod,removalMethod);
         }
-        if(!discoveredSolutions.contains(newObj)){
-            //and prob
+        else if(!discoveredSolutions.contains(newObj) && acceptedByProb(currentObj,newObj)){
+            System.out.println("New solution, worse than current, but selected by probability "+newObj);
             currentRouteSailingCost = routeSailingCost;
             currentRouteOperationGain = routeOperationGain;
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
+            discoveredSolutions.add(newObj);
+            iterationsWithoutImprovement=0;
+            setScoresAndVisits(reward3,insertMethod,removalMethod);
+        }
+        else if(iterationsWithoutImprovement==10){
+            System.out.println("New solution because of search will not move on "+newObj);
+            currentRouteSailingCost = routeSailingCost;
+            currentRouteOperationGain = routeOperationGain;
+            currentRoutes = copyVesselRoutes(vesselroutes);
+            currentUnrouted = copyUnrouted(unroutedTasks);
+            if(!discoveredSolutions.contains(newObj)){
+                discoveredSolutions.add(newObj);
+            }
+            iterationsWithoutImprovement=0;
         }
         else{
+            System.out.println("Continue with current solution");
+            iterationsWithoutImprovement+=1;
             retainCurrentSolution();
-
         }
         /*
         for (int i=0;i<bestRoutes.size();i++){
@@ -654,8 +739,8 @@ public class ALNS {
     }
 
     public void runDestroyRepair(){
-        for (int i =0; i<numberOfSegmentIterations; i++){
-            System.out.println(" ");
+        for (int i =0; i<numberOfIterations; i++){
+            System.out.println("iteration "+i);
             //System.out.println("Print før kjøring");
             //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
             //consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
@@ -672,11 +757,12 @@ public class ALNS {
             String removalMethod = chooseRemovalMethod();
             LNSR.runLNSRemoval(removalMethod);
             System.out.println("---------- Removal method " + removalMethod+ " -----------");
-            System.out.println("removal class");
-            System.out.println("ALNS class");
+            /*
             printLNSInsertSolution(vessels, currentRouteSailingCost, currentRouteOperationGain, vesselroutes, dg.getStartNodes(), dg.getSailingTimes(),
                     dg.getTimeVesselUseOnOperation(), unroutedTasks, precedenceOverOperations, consolidatedOperations,
                     precedenceOfOperations, simultaneousOp, simOpRoutes);
+
+             */
             //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,vesselroutes,dg.getStartNodes(),dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
             //unroutedTasks,precedenceOverOperations,consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
             //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
@@ -691,10 +777,37 @@ public class ALNS {
             String insertionMethod = chooseInsertionMethod();
             System.out.println("-------Insertion method " + insertionMethod + " ----------");
             LNSI.runLNSInsert(insertionMethod);
-            System.out.println("LNSI before retain");
             //LNSI.printLNSInsertSolution(vessels);
             evaluateSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks(), removalMethod, insertionMethod);
             //LNSI.printLNSInsertSolution(vessels);
+            if(TParameter!=-1){
+                TParameter=TParameter*T_decrease_parameter;
+            }
+            System.out.println("T parameter "+TParameter);
+            if(segmentIteration<numberOfSegmentIterations){
+                segmentIteration+=1;
+            }
+            else{
+                segmentIteration=1;
+                for (int n=0;n<insertionWeights.length;n++){
+                    if(insertionVisitsLastSegment[n]!=0) {
+                        double newWeight = insertionWeights[n] * (1 - controlParameter) + (controlParameter * insertionScore[n]) / insertionVisitsLastSegment[n];
+                        insertionWeights[n] = newWeight;
+                    }
+                }
+                for (int n=0;n<removalWeights.length;n++){
+                    if(removalVisitsLastSegment[n]!=0) {
+                        double newWeight = removalWeights[n] * (1 - controlParameter) + (controlParameter * removalScore[n]) / removalVisitsLastSegment[n];
+                        removalWeights[n] = newWeight;
+                    }
+                }
+                System.out.println("Insertion weights");
+                System.out.println(Arrays.toString(insertionWeights));
+                System.out.println("Removal weights");
+                System.out.println(Arrays.toString(removalWeights));
+                Arrays.fill(removalVisitsLastSegment, 0);
+                Arrays.fill(insertionVisitsLastSegment, 0);
+            }
         }
     }
 
@@ -709,13 +822,11 @@ public class ALNS {
         //alns.runRelocateInsert();
         int afterFirstLocalObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         alns.runDestroyRepair();
-        /*
+        alns.retainBestSolution();
         alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.vesselroutes,
                 alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
                 alns.precedenceOverOperations, alns.consolidatedOperations,
                 alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
-
-         */
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         //alns.runLocalSearchNormalOperators();
         //alns.runRelocateInsert();
