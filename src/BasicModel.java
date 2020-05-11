@@ -610,12 +610,16 @@ public class BasicModel {
             vessels = new int[]{1, 2, 3, 4, 5};
             locStart = new int[]{1, 2, 3, 4, 5};
         } else if (loc == 25) {
-            vessels = new int[]{1, 2, 3, 4, 5, 6};
-            locStart = new int[]{1, 2, 3, 4, 5, 6};
+            vessels = new int[]{3, 4, 5, 6};
+            locStart = new int[]{3, 4, 5, 6};
         }
         else if (loc == 30) {
-            vessels = new int[]{1, 2, 3, 4, 5, 6,2};
-            locStart = new int[]{1, 2, 3, 4, 5, 6,7};
+            vessels = new int[]{1, 3, 4, 5, 6};
+            locStart = new int[]{1, 3, 4, 5, 6};
+        }
+        else if (loc == 35) {
+            vessels = new int[]{1, 2, 3, 4, 5, 6};
+            locStart = new int[]{1, 2, 3, 4, 5, 6};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -630,12 +634,12 @@ public class BasicModel {
             locStart = new int[]{1, 2, 3,4};
         }
         //dg.printAllData();
-        for(int i =0;i<5;i++){
+        for(int i =1;i<5;i++){
             if(i==0){
                 testInstance="test_instances/30_locations_normalOpGenerator.txt";
             }
             else{
-                testInstance="test_instances/35_"+i+"_locations_normalOpGenerator.txt";
+                testInstance="test_instances/25" + "_"+i+"_locations_normalOpGenerator.txt";
             }
             DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
             dg.generateData();

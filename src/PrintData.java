@@ -64,12 +64,29 @@ public class PrintData {
     //Chosen vessel is the number of the vessel you want to print sailing times for. The number of the chosen vessel is not null
     //indexed, hence the first vessel in the fleet has number 1.
     //print the sailing times for the chosen vessel in each time period, start nodes and end nodes are also included
-    public static void printSailingTimes(int[][][][] sailingTimes, int chosenVessel, int numberOfOperations, int numberOfVessels){
+    /*public static void printSailingTimes(int[][][][] sailingTimes, int chosenVessel, int numberOfOperations, int numberOfVessels){
         int index=1;
         for(int[][] vessel:sailingTimes[chosenVessel-1]) {
             System.out.println("Vessel "+chosenVessel+" in time period: " + String.valueOf(index));
             printGrid(numberOfOperations + 2*numberOfVessels, vessel);
             index += 1;
+        }
+    }*/
+
+    public static void printSailingTimes(int[][][][] sailingTimes, int chosenVessel, int numberOfOperations, int numberOfVessels){
+        int index=1;
+        int i = 4;
+        for(int t= 0; t<sailingTimes[0].length; t++) {
+            for(int j = 0; j < numberOfOperations + 2*numberOfVessels; j++)
+            {
+                System.out.printf("%5d ", sailingTimes[chosenVessel][t][j][j]);
+                }
+                System.out.println();
+            }
+                System.out.println("Vessel " + chosenVessel + " sailing from: " + String.valueOf(index));
+                printGrid(numberOfOperations + 2 * numberOfVessels, vessel);
+                index += 1;
+            }
         }
     }
 

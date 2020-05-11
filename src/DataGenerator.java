@@ -76,6 +76,7 @@ public class DataGenerator {
             count+=1;
         }
         s.close();
+        /*
         for (int wh=0;wh<weatherValues.length;wh++){
             if(weatherValues[wh]<=1.5){
                 weatherPenaltyOperations[wh] = 1.0;
@@ -87,6 +88,25 @@ public class DataGenerator {
             }
             else if(weatherValues[wh]>2.5 && weatherValues[wh]<=3.5) {
                 weatherPenaltyOperations[wh] = 1.3;
+                weatherPenaltySpeed[wh]=2;
+            }
+            //here we need to change time vessel use on operation, not time window
+            else{
+                weatherPenaltyOperations[wh] = 0.0;
+                weatherPenaltySpeed[wh]=3;
+            }
+        }*/
+        for (int wh=0;wh<weatherValues.length;wh++){
+            if(weatherValues[wh]<=1.5){
+                weatherPenaltyOperations[wh] = 1.0;
+                weatherPenaltySpeed[wh]=0;
+            }
+            else if(weatherValues[wh]>1.5 && weatherValues[wh]<=2.5){
+                weatherPenaltyOperations[wh] = 0.8;
+                weatherPenaltySpeed[wh]=0;
+            }
+            else if(weatherValues[wh]>2.5 && weatherValues[wh]<=3.5) {
+                weatherPenaltyOperations[wh] = 0.7;
                 weatherPenaltySpeed[wh]=2;
             }
             //here we need to change time vessel use on operation, not time window
@@ -467,18 +487,39 @@ public class DataGenerator {
             for (Operation op : this.operations){
                 for(int t=0;t<weatherPenaltySpeed.length;t++) {
                     if (containsElement(op.getNumber() + nStartNodes, this.operationsForVessel[vessel.getNum() - 1])) {
+                        double opDuration;
                         if (op.getSimultaneous() == 0) {
+                            opDuration = vessel.getTimePenalty() * op.getDuration();
+                            /*Gammel:
                             timeOpVessel[vessel.getNum() - 1][op.getNumber() - 1][t] = (int) Math.round(vessel.getTimePenalty() * op.getDuration()*weatherPenaltyOperations[t]);
                             //System.out.println("vessel "+vessel.getNum()+ " op "+op.getNumber()+" time "+t+" penaltyV: "+vessel.getTimePenalty()+" penaltyW "+weatherPenaltyOperations[t] +
-                            //      " Duration "+op.getDuration());
+                            //      " Duration "+op.getDuration());*/
                         } else {
                             int[] v1 = findOperationType(op.getNumber()).getVessel1();
                             int[] v2 = findOperationType(op.getNumber()).getVessel1();
                             double maxV1 = findVesselObject(v1[v1.length - 1]).getTimePenalty();
                             double maxV2 = findVesselObject(v2[v2.length - 1]).getTimePenalty();
                             double penalty = Math.max(maxV1, maxV2);
-                            timeOpVessel[vessel.getNum() - 1][op.getNumber() - 1][t] = (int) Math.round(penalty * op.getDuration()*weatherPenaltyOperations[t]);
+                            opDuration = penalty*op.getDuration();
+                            /*Gammel:
+                            int[] v1 = findOperationType(op.getNumber()).getVessel1();
+                            int[] v2 = findOperationType(op.getNumber()).getVessel1();
+                            double maxV1 = findVesselObject(v1[v1.length - 1]).getTimePenalty();
+                            double maxV2 = findVesselObject(v2[v2.length - 1]).getTimePenalty();
+                            double penalty = Math.max(maxV1, maxV2);
+                            timeOpVessel[vessel.getNum() - 1][op.getNumber() - 1][t] = (int) Math.round(penalty * op.getDuration()*weatherPenaltyOperations[t]);*/
                         }
+                        double opTime = 1*weatherPenaltyOperations[t];
+                        int k = 1;
+                        while(opTime < opDuration){
+                            opTime = opTime+weatherPenaltyOperations[Math.min(this.weatherPenaltySpeed.length-1,t+k)];
+                            k++;
+                            if(t+k > (this.weatherPenaltySpeed.length + (2*opDuration))){
+                                k = 10000;
+                                break;
+                            }
+                        }
+                        timeOpVessel[vessel.getNum() - 1][op.getNumber() - 1][t] = k;
                     }
                 }
             }
@@ -581,8 +622,17 @@ public class DataGenerator {
             for (int t = 0; t < weatherPenaltySpeed.length; t++) {
                 for (Operation o1 : this.operations) {
                     for (Operation o2 : this.operations) {
+                        double sailingDist = distanceArray[o1.getLocation() - 1][o2.getLocation() - 1];
+                        double coveredDist = 0;
+                        int k=0;
+                        while(coveredDist<sailingDist){
+                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[Math.min(weatherPenaltySpeed.length-1,t+k)]);
+                            k++;
+                        }
+                        sailingTimes[v.getNum() - 1][t][o1.getNumber() + nStartNodes - 1][o2.getNumber() + nStartNodes - 1] = k;
+                        /*Gammel:
                         sailingTimes[v.getNum() - 1][t][o1.getNumber() + nStartNodes - 1][o2.getNumber() + nStartNodes - 1] =
-                                (int) Math.ceil(distanceArray[o1.getLocation() - 1][o2.getLocation() - 1] / (v.getSpeed() - weatherPenaltySpeed[t]));
+                                (int) Math.ceil(distanceArray[o1.getLocation() - 1][o2.getLocation() - 1] / (v.getSpeed() - weatherPenaltySpeed[t]));*/
                         if(t==0){
                             distOperationsInInstance[o1.getNumber()-1][o2.getNumber()-1]=
                                     (int) Math.ceil(distanceArray[o1.getLocation() - 1][o2.getLocation() - 1]);
@@ -591,8 +641,14 @@ public class DataGenerator {
                 }
                 for (int n = 0; n < nStartNodes; n++) {
                     for (Operation o : this.operations) {
-                        sailingTimes[v.getNum() - 1][t][n][o.getNumber() + nStartNodes - 1]
-                                = (int) Math.ceil(distanceArray[locationsStartNodes[n] - 1][o.getLocation() - 1] / (v.getSpeed() - weatherPenaltySpeed[t]));
+                        double sailingDist = distanceArray[locationsStartNodes[n] - 1][o.getLocation() - 1];
+                        double coveredDist = 0;
+                        int k=0;
+                        while(coveredDist<sailingDist){
+                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[Math.min(weatherPenaltySpeed.length-1,t+k)]);
+                            k++;
+                        }
+                        sailingTimes[v.getNum() - 1][t][n][o.getNumber() + nStartNodes - 1] = k;
                     }
                 }
             }
@@ -664,9 +720,10 @@ public class DataGenerator {
         int[] locStart = new int[]{1, 2, 3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
                 "test_instances/30_locations_normalOpGenerator.txt",
-                "routing","weather_files/weather_normal.txt");
+                "routing","weather_files/weather_september.txt");
         dg.generateData();
-        dg.printAllData();
+        //dg.printAllData();
+        PrintData.printSailingTimes(dg.getSailingTimes(),1,35,vessels.length);
 
     }
 
