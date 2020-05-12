@@ -676,6 +676,9 @@ public class LargeNeighboorhoodSearchInsert {
                     if(earliestTemp<=latestTemp) {
                         //System.out.println("Feasible for empty route");
                         int benefitIncreaseTemp=operationGain[v][o-startNodes.length-1][earliestTemp-1]-sailingCost;
+                        if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                            benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                        }
                         if(simALNS[o-startNodes.length-1][1]==0) {
                             InsertionValues iv = new InsertionValues(benefitIncreaseTemp, 0, v, earliestTemp, latestTemp);
                             insertFeasibleDict(o,iv, benefitIncreaseTemp,allFeasibleInsertions);
@@ -702,7 +705,7 @@ public class LargeNeighboorhoodSearchInsert {
                             int precedenceOfValuesEarliest=checkprecedenceOfEarliestLNS(o,earliestTemp,earliestPO,routeConnectedPrecedence,precedenceALNS,
                                     startNodes,TimeVesselUseOnOperation);
                             earliestTemp=precedenceOfValuesEarliest;
-                            if(earliestTemp<=60) {
+                            if(earliestTemp<=nTimePeriods) {
                                 int sailingTimeOToNext = SailingTimes[v][earliestTemp - 1][o - 1][vesselRoutes.get(v).get(0).getID() - 1];
                                 int latestTemp = Math.min(vesselRoutes.get(v).get(0).getLatestTime() - sailingTimeOToNext - opTime,
                                         twIntervals[o - startNodes.length - 1][1]);
@@ -727,6 +730,9 @@ public class LargeNeighboorhoodSearchInsert {
                                     }
                                     int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
                                     if (benefitIncreaseTemp > 0) {
+                                        if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                            benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                                        }
                                         precedenceOverFeasible = checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, 0, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods,
                                                 SailingTimes, vesselRoutes, precedenceOfOperations, precedenceOverRoutes,unroutedTasks);
                                         precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, 0, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
@@ -769,7 +775,7 @@ public class LargeNeighboorhoodSearchInsert {
                             int latestTemp=twIntervals[o-startNodes.length-1][1];
                             int precedenceOfValuesEarliest=checkprecedenceOfEarliestLNS(o,earliestTemp,earliestPO,routeConnectedPrecedence,precedenceALNS,startNodes,TimeVesselUseOnOperation);
                             earliestTemp=precedenceOfValuesEarliest;
-                            if(earliestTemp<=60) {
+                            if(earliestTemp<=nTimePeriods) {
                                 //System.out.println("Time feasible");
                                 int [] simultaneousTimesValues = checkSimultaneousOfTimesLNS(o, earliestTemp, latestTemp, earliestSO, latestSO,simALNS,startNodes);
                                 earliestTemp = simultaneousTimesValues[0];
@@ -788,11 +794,10 @@ public class LargeNeighboorhoodSearchInsert {
                                                 operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute + changedTime - 1];
                                     }
                                     int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
-                                    if(o==19){
-                                        //System.out.println("DELTA OPERATION GAIN LAST OPERATION: "+deltaOperationGainLastOperation);
-                                        //System.out.println("benefit increase 19: "+benefitIncreaseTemp);
-                                    }
                                     if (benefitIncreaseTemp > 0) {
+                                        if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                            benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                                        }
                                         precedenceOverFeasible = checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods, SailingTimes,
                                                 vesselRoutes, precedenceOfOperations, precedenceOverRoutes,unroutedTasks);
                                         precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
@@ -832,7 +837,7 @@ public class LargeNeighboorhoodSearchInsert {
                             int earliestTemp = Math.max(earliestN + sailingTimePrevToO + operationTimeN, twIntervals[o - startNodes.length - 1][0]);
                             int precedenceOfValuesEarliest=checkprecedenceOfEarliestLNS(o,earliestTemp,earliestPO,routeConnectedPrecedence,precedenceALNS,startNodes,TimeVesselUseOnOperation);
                             earliestTemp=precedenceOfValuesEarliest;
-                            if(earliestTemp<=60) {
+                            if(earliestTemp<=nTimePeriods) {
                                 if (earliestTemp - 1 < nTimePeriods) {
                                     int opTime = TimeVesselUseOnOperation[v][o - 1 - startNodes.length][earliestTemp - 1];
                                     int sailingTimeOToNext = SailingTimes[v][Math.min(earliestTemp + opTime - 1, nTimePeriods - 1)][o - 1][vesselRoutes.get(v).get(n + 1).getID() - 1];
@@ -859,6 +864,9 @@ public class LargeNeighboorhoodSearchInsert {
                                         }
                                         int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
                                         if (benefitIncreaseTemp > 0) {
+                                            if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                                benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                                            }
                                             int currentLatest = vesselRoutes.get(v).get(n).getLatestTime();
                                             simultaneousFeasible = ConstructionHeuristic.checkSOfFeasible(o, v, currentLatest, startNodes, simALNS, simultaneousOp);
                                             if (simultaneousFeasible) {

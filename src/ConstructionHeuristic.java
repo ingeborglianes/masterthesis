@@ -188,6 +188,9 @@ public class ConstructionHeuristic {
 
                         if(earliestTemp<=latestTemp) {
                             int benefitIncreaseTemp=operationGain[v][o-startNodes.length-1][earliestTemp-1]-sailingCost;
+                            if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                            }
                             if(benefitIncreaseTemp>0 && benefitIncreaseTemp>benefitIncrease) {
                                 benefitIncrease = benefitIncreaseTemp;
                                 routeIndex = v;
@@ -214,7 +217,7 @@ public class ConstructionHeuristic {
                                     continue outer;
                                 }
                                 earliestTemp=precedenceOfValuesEarliest[0];
-                                if(earliestTemp<=60) {
+                                if(earliestTemp<=nTimePeriods) {
                                     int sailingTimeOToNext = SailingTimes[v][earliestTemp - 1][o - 1][vesselroutes.get(v).get(0).getID() - 1];
                                     int latestTemp = Math.min(vesselroutes.get(v).get(0).getLatestTime() - sailingTimeOToNext - opTime,
                                             twIntervals[o - startNodes.length - 1][1]);
@@ -243,23 +246,28 @@ public class ConstructionHeuristic {
                                                     operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute + changedTime - 1];
                                         }
                                         int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
-                                        if (benefitIncreaseTemp > 0 && benefitIncreaseTemp > benefitIncrease) {
-                                            precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, 0, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods,
-                                                    SailingTimes, vesselroutes, precedenceOfOperations, precedenceOverRoutes);
-                                            precedenceOfFeasible = checkPOfFeasible(precedenceOfRoutes.get(v), o, 0, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                                    vesselroutes, precedenceOverOperations, precedenceOfRoutes);
-                                            simultaneousFeasible = checkSimultaneousFeasible(simOpRoutes.get(v), o, v, 0, earliestTemp, latestTemp, simultaneousOp, simALNS,
-                                                    startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes);
-                                            if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
-                                                benefitIncrease = benefitIncreaseTemp;
-                                                routeIndex = v;
-                                                indexInRoute = 0;
-                                                earliest = earliestTemp;
-                                                latest = latestTemp;
-                                                timeAdded = timeIncrease;
-                                                //System.out.println("Chosen index: " + (0));
-                                                //System.out.println(earliest);
-                                                //System.out.println(latest);
+                                        if (benefitIncreaseTemp > 0 ) {
+                                            if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                                benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                                            }
+                                            if(benefitIncreaseTemp > benefitIncrease) {
+                                                precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, 0, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods,
+                                                        SailingTimes, vesselroutes, precedenceOfOperations, precedenceOverRoutes);
+                                                precedenceOfFeasible = checkPOfFeasible(precedenceOfRoutes.get(v), o, 0, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
+                                                        vesselroutes, precedenceOverOperations, precedenceOfRoutes);
+                                                simultaneousFeasible = checkSimultaneousFeasible(simOpRoutes.get(v), o, v, 0, earliestTemp, latestTemp, simultaneousOp, simALNS,
+                                                        startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes);
+                                                if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
+                                                    benefitIncrease = benefitIncreaseTemp;
+                                                    routeIndex = v;
+                                                    indexInRoute = 0;
+                                                    earliest = earliestTemp;
+                                                    latest = latestTemp;
+                                                    timeAdded = timeIncrease;
+                                                    //System.out.println("Chosen index: " + (0));
+                                                    //System.out.println(earliest);
+                                                    //System.out.println(latest);
+                                                }
                                             }
                                         }
                                     }
@@ -287,7 +295,7 @@ public class ConstructionHeuristic {
                                     continue outer;
                                 }
                                 earliestTemp=precedenceOfValuesEarliest[0];
-                                if(earliestTemp<=60) {
+                                if(earliestTemp<=nTimePeriods) {
                                     int[] simultaneousTimesValues = checkSimultaneousOfTimes(o, v, earliestTemp, latestTemp,simALNS,simultaneousOp,startNodes);
                                     if (simultaneousTimesValues[2] == 1) {
                                         //System.out.println("BREAK SIMULTANEOUS");
@@ -310,25 +318,26 @@ public class ConstructionHeuristic {
                                                     operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute + changedTime - 1];
                                         }
                                         int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
-                                        if(o==19){
-                                            //System.out.println("DELTA OPERATION GAIN LAST OPERATION: "+deltaOperationGainLastOperation);
-                                            //System.out.println("benefit increase 19: "+benefitIncreaseTemp);
-                                        }
-                                        if (benefitIncreaseTemp > 0 && benefitIncreaseTemp > benefitIncrease) {
-                                            precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods, SailingTimes,
-                                                    vesselroutes, precedenceOfOperations, precedenceOverRoutes);
-                                            precedenceOfFeasible = checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                                    vesselroutes, precedenceOverOperations, precedenceOfRoutes);
-                                            simultaneousFeasible = checkSimultaneousFeasible(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp, simultaneousOp,
-                                                    simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes);
-                                            if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
-                                                //System.out.println("Chosen index: " + (n + 1) + " n==vesselroutes.get(v).size()-1");
-                                                benefitIncrease = benefitIncreaseTemp;
-                                                routeIndex = v;
-                                                indexInRoute = n + 1;
-                                                earliest = earliestTemp;
-                                                latest = latestTemp;
-                                                timeAdded = timeIncrease;
+                                        if (benefitIncreaseTemp > 0 ) {
+                                            if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                                benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
+                                            }
+                                            if(benefitIncreaseTemp > benefitIncrease) {
+                                                precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods, SailingTimes,
+                                                        vesselroutes, precedenceOfOperations, precedenceOverRoutes);
+                                                precedenceOfFeasible = checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
+                                                        vesselroutes, precedenceOverOperations, precedenceOfRoutes);
+                                                simultaneousFeasible = checkSimultaneousFeasible(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp, simultaneousOp,
+                                                        simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes);
+                                                if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
+                                                    //System.out.println("Chosen index: " + (n + 1) + " n==vesselroutes.get(v).size()-1");
+                                                    benefitIncrease = benefitIncreaseTemp;
+                                                    routeIndex = v;
+                                                    indexInRoute = n + 1;
+                                                    earliest = earliestTemp;
+                                                    latest = latestTemp;
+                                                    timeAdded = timeIncrease;
+                                                }
                                             }
                                         }
                                     }
@@ -349,7 +358,7 @@ public class ConstructionHeuristic {
                                     continue outer;
                                 }
                                 earliestTemp = precedenceOfValuesEarliest[0];
-                                if(earliestTemp<=60) {
+                                if(earliestTemp<=nTimePeriods) {
                                     if (earliestTemp - 1 < nTimePeriods) {
                                         int opTime = TimeVesselUseOnOperation[v][o - 1 - startNodes.length][earliestTemp - 1];
                                         int sailingTimeOToNext = SailingTimes[v][Math.min(earliestTemp + opTime - 1, nTimePeriods - 1)][o - 1][vesselroutes.get(v).get(n + 1).getID() - 1];
@@ -380,28 +389,35 @@ public class ConstructionHeuristic {
                                                         operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute + changedTime - 1];
                                             }
                                             int benefitIncreaseTemp = operationGain[v][o - startNodes.length - 1][earliestTemp - 1] - sailingCost - deltaOperationGainLastOperation;
-                                            if (benefitIncreaseTemp > 0 && benefitIncreaseTemp > benefitIncrease) {
-                                                int currentLatest = vesselroutes.get(v).get(n).getLatestTime();
-                                                simultaneousFeasible = checkSOfFeasible(o, v, currentLatest, startNodes, simALNS, simultaneousOp);
-                                                if (simultaneousFeasible) {
-                                                    simultaneousFeasible = checkSimultaneousFeasible(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp,
-                                                            simultaneousOp, simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation,
-                                                            vesselroutes);
+
+                                            if (benefitIncreaseTemp > 0){
+                                                if(precedenceALNS[o-1-startNodes.length][0]!=0){
+                                                    benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
                                                 }
-                                                precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation,
-                                                        nTimePeriods, SailingTimes, vesselroutes, precedenceOfOperations, precedenceOverRoutes);
-                                                precedenceOfFeasible = checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                                        vesselroutes, precedenceOverOperations, precedenceOfRoutes);
-                                                if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
-                                                    //System.out.println("Chosen index: " + (n + 1) + " n<vesselroutes.get(v).size()-1");
-                                                    benefitIncrease = benefitIncreaseTemp;
-                                                    routeIndex = v;
-                                                    indexInRoute = n + 1;
-                                                    earliest = earliestTemp;
-                                                    latest = latestTemp;
-                                                    timeAdded = timeIncrease;
+                                                 if(benefitIncreaseTemp > benefitIncrease) {
+                                                    int currentLatest = vesselroutes.get(v).get(n).getLatestTime();
+                                                    simultaneousFeasible = checkSOfFeasible(o, v, currentLatest, startNodes, simALNS, simultaneousOp);
+                                                    if (simultaneousFeasible) {
+                                                        simultaneousFeasible = checkSimultaneousFeasible(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp,
+                                                                simultaneousOp, simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation,
+                                                                vesselroutes);
+                                                    }
+                                                    precedenceOverFeasible = checkPOverFeasible(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation,
+                                                            nTimePeriods, SailingTimes, vesselroutes, precedenceOfOperations, precedenceOverRoutes);
+                                                    precedenceOfFeasible = checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
+                                                            vesselroutes, precedenceOverOperations, precedenceOfRoutes);
+                                                    if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
+                                                        //System.out.println("Chosen index: " + (n + 1) + " n<vesselroutes.get(v).size()-1");
+                                                        benefitIncrease = benefitIncreaseTemp;
+                                                        routeIndex = v;
+                                                        indexInRoute = n + 1;
+                                                        earliest = earliestTemp;
+                                                        latest = latestTemp;
+                                                        timeAdded = timeIncrease;
+                                                    }
                                                 }
                                             }
+
                                         }
                                     }
                                 }
@@ -1729,7 +1745,7 @@ public class ConstructionHeuristic {
 
     public static void main(String[] args) throws FileNotFoundException {
         int[] vesseltypes = new int[]{1, 2, 3, 4, 5, 6,2};
-        int[] startnodes = new int[]{1, 2, 3, 4, 5,6,7,8};
+        int[] startnodes = new int[]{1, 2,3, 4, 5,6,7};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
                 "test_instances/30_locations_normalOpGenerator.txt",
                 "results.txt", "weather_files/weather_normal.txt");

@@ -37,4 +37,7 @@ public class ParameterFile {
     public static int reward1=33;
     public static int reward2=9;
     public static int reward3=13;
+    public static double lowerThresholdWeights=1.0;
+    public static int iterationsWithoutImprovementParameter=50;
+    public static int earlyPrecedenceFactor=20;
 }

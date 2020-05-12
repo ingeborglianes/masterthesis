@@ -54,7 +54,9 @@ public class ALNS {
     private int reward1;
     private int reward2;
     private int reward3;
+    private int iterationsWithoutImprovementParameter=0;
     private int iterationsWithoutImprovement=0;
+    public double lowerThresholdWeights;
 
     public ALNS(){
         int loc = ParameterFile.loc;
@@ -72,6 +74,8 @@ public class ALNS {
         relatednessWeightSimultaneous=ParameterFile.relatednessWeightSimultaneous;
         numberOfIterations=ParameterFile.numberOfIterations;
         controlParameter=ParameterFile.controlParameter;
+        iterationsWithoutImprovementParameter=ParameterFile.iterationsWithoutImprovementParameter;
+        lowerThresholdWeights=ParameterFile.lowerThresholdWeights;
         reward1=ParameterFile.reward1;
         reward2=ParameterFile.reward2;
         reward3=ParameterFile.reward3;
@@ -354,7 +358,8 @@ public class ALNS {
                 break;
             }
         }
-        List<String> removalMethods = new ArrayList<>(Arrays.asList("random", "synchronized", "route", "worst", "related","worst_sailing"));
+        List<String> removalMethods = new ArrayList<>(Arrays.asList("random", "synchronized", "route",
+                "worst", "related","worst_sailing"));
         return removalMethods.get(randomIndex);
     }
 
@@ -466,8 +471,7 @@ public class ALNS {
             iterationsWithoutImprovement=0;
             setScoresAndVisits(reward3,insertMethod,removalMethod);
         }
-        /*
-        else if(iterationsWithoutImprovement==10){
+        else if(iterationsWithoutImprovement==iterationsWithoutImprovementParameter){
             System.out.println("New solution because of search will not move on "+newObj);
             currentRouteSailingCost = routeSailingCost;
             currentRouteOperationGain = routeOperationGain;
@@ -478,8 +482,6 @@ public class ALNS {
             }
             iterationsWithoutImprovement=0;
         }
-
-         */
         else{
             System.out.println("Continue with current solution");
             iterationsWithoutImprovement+=1;
@@ -796,12 +798,18 @@ public class ALNS {
                     if(insertionVisitsLastSegment[n]!=0) {
                         double newWeight = insertionWeights[n] * (1 - controlParameter) + (controlParameter * insertionScore[n]) / insertionVisitsLastSegment[n];
                         insertionWeights[n] = newWeight;
+                        if(insertionWeights[n] <1){
+                            insertionWeights[n] =1;
+                        }
                     }
                 }
                 for (int n=0;n<removalWeights.length;n++){
                     if(removalVisitsLastSegment[n]!=0) {
                         double newWeight = removalWeights[n] * (1 - controlParameter) + (controlParameter * removalScore[n]) / removalVisitsLastSegment[n];
                         removalWeights[n] = newWeight;
+                        if(removalWeights[n] <1){
+                            removalWeights[n] =1;
+                        }
                     }
                 }
                 System.out.println("Insertion weights");

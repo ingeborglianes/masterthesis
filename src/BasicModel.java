@@ -636,10 +636,10 @@ public class BasicModel {
         //dg.printAllData();
         for(int i =1;i<5;i++){
             if(i==0){
-                testInstance="test_instances/30_locations_normalOpGenerator.txt";
+                testInstance="test_instances/25_locations_normalOpGenerator.txt";
             }
             else{
-                testInstance="test_instances/30" + "_"+i+"_locations_normalOpGenerator.txt";
+                testInstance="test_instances/25" + "_"+i+"_locations_normalOpGenerator.txt";
             }
             DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
             dg.generateData();
