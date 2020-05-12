@@ -86,8 +86,8 @@ public class ALNS {
             locStart = new int[]{3, 4, 5, 6};
         }
         else if (loc == 30 || loc == 35) {
-            vessels = new int[]{1, 3, 4, 5,6};
-            locStart = new int[]{1, 3, 4, 5, 6};
+            vessels = new int[]{1,2, 3, 4, 5,6,2};
+            locStart = new int[]{1, 2,3, 4, 5, 6,7};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -466,6 +466,7 @@ public class ALNS {
             iterationsWithoutImprovement=0;
             setScoresAndVisits(reward3,insertMethod,removalMethod);
         }
+        /*
         else if(iterationsWithoutImprovement==10){
             System.out.println("New solution because of search will not move on "+newObj);
             currentRouteSailingCost = routeSailingCost;
@@ -477,6 +478,8 @@ public class ALNS {
             }
             iterationsWithoutImprovement=0;
         }
+
+         */
         else{
             System.out.println("Continue with current solution");
             iterationsWithoutImprovement+=1;

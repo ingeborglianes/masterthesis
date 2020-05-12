@@ -954,15 +954,14 @@ public class LargeNeighboorhoodSearchInsert {
                                        List<List<OperationInRoute>> vesselRoutes, int[][][] TimeVesselUseOnOperation, int[][][][] SailingTimes){
         //=ConstructionHeuristic.updateConsolidatedOperations(o,routeIndex,removeConsolidatedSmallTasks,bigTasksALNS,
         //        startNodes, consolidatedOperations);
-
         /*
         System.out.println("task to insert: "+o);
         System.out.println("Index in route: "+indexInRoute);
         System.out.println("Route: "+routeIndex);
         System.out.println("Earliest "+earliest);
         System.out.println("Latest "+latest);
-         */
 
+         */
         OperationInRoute newOr=new OperationInRoute(o, earliest, latest);
         int presOver=precedenceALNS[o-1-startNodes.length][0];
         int presOf=precedenceALNS[o-1-startNodes.length][1];
@@ -1009,7 +1008,7 @@ public class LargeNeighboorhoodSearchInsert {
             simultaneousOp.put(o, sim2);
             simOpRoutes.get(routeIndex).put(o, sim2);
         }
-        /*
+/*
         System.out.println("INSERTION IS PERFORMED");
         System.out.println("NEW ADD: Vessel route "+routeIndex);
         System.out.println("Operation "+o);
@@ -1018,7 +1017,9 @@ public class LargeNeighboorhoodSearchInsert {
         System.out.println("Route index "+indexInRoute);
         System.out.println(" ");
 
-         */
+ */
+
+
         if (vesselRoutes.get(routeIndex) == null) {
             int finalIndexInRoute = indexInRoute;
             vesselRoutes.set(routeIndex, new ArrayList<>() {{
@@ -1053,6 +1054,7 @@ public class LargeNeighboorhoodSearchInsert {
         }
 
          */
+        //ConstructionHeuristic.printVessels(vesselRoutes,SailingTimes,TimeVesselUseOnOperation,startNodes);
     }
 
     public static Boolean checkPOverFeasibleLNS(Map<Integer,PrecedenceValues> precedenceOver, int o, int insertIndex,int earliest,
@@ -1147,6 +1149,32 @@ public class LargeNeighboorhoodSearchInsert {
                                     conOp.getIndex() <= 0 && insertIndex - op.getIndex() > 0)){
                                 //System.out.println("Sim infeasible");
                                 return false;
+                            }
+                        }
+                        for(int i=0;i<conOp.getIndex()+1;i++){
+                            int evaluateOp=vesselroutes.get(conOp.getRoute()).get(i).getID();
+                            ConnectedValues simAthird=null;
+                            ConnectedValues simBthird=null;
+                            if (simALNS[evaluateOp-1-startNodes.length][0]!=0 ||
+                                    simALNS[evaluateOp-1-startNodes.length][1]!=0){
+                                simAthird=simultaneousOp.get(evaluateOp);
+                                simBthird=simultaneousOp.get(simAthird.getConnectedOperationObject().getID());
+                                if(simBthird.getRoute()==simARoute){
+                                    /*
+                                    System.out.println("sim a third "+simAthird.getOperationObject().getID()+ " index "+simAthird.getIndex());
+                                    System.out.println("sim b third "+simBthird.getOperationObject().getID()+ " index "+simBthird.getIndex());
+                                    System.out.println("insert op "+o + " op "+op.getOperationObject().getID()+
+                                            " conOp "+conOp.getOperationObject().getID());
+                                    System.out.println("Sim a index: "+ simAIndex + " conOP index: "+conOp.getIndex() + " insertindex: "+
+                                    insertIndex+ " op index: "+op.getIndex());
+
+                                     */
+                                    System.out.println();
+                                    if(op.getIndex()<insertIndex && simAthird.getIndex()<conOp.getIndex() &&
+                                            simBthird.getIndex()>=simAIndex){
+                                        return false;
+                                    }
+                                }
                             }
                         }
                     }

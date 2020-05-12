@@ -1052,6 +1052,7 @@ public class ConstructionHeuristic {
                         //System.out.println("oppdaterer: " + sValues.getOperationObject().getID() + " med ny earliest tid " + sValues.getOperationObject().getEarliestTime());
                         updateEarliest(cur_earliestTemp,sValues.getIndex(),sValues.getRoute(),TimeVesselUseOnOperation,startNodes,SailingTimes,vesselroutes,"notLocal");
                     }else if(earliestTemp>earliestPO){
+                        System.out.println(simOp);
                         //System.out.println("kjører her 2");
                         ConnectedValues simOpObj = simultaneousOp.get(simOp.getID());
                         simOpObj.getOperationObject().setEarliestTime(cur_earliestTemp);
@@ -1225,6 +1226,9 @@ public class ConstructionHeuristic {
             if(vesselroutes.get(routeIndex).get(k).getID() == simID) {
                 break;
             }
+        }
+        if(indexInRoute==0){
+            return sim_latests;
         }
         OperationInRoute op = simultaneousOp.get(simID).getConnectedOperationObject();
         int new_latest = Math.min(lastLatest, op.getLatestTime());
@@ -1536,12 +1540,12 @@ public class ConstructionHeuristic {
         return bol;
     }
 
-    public static void printVessels(List<List<OperationInRoute>> vesselroutes, int[] vessseltypes, int[][][][] SailingTimes,
+    public static void printVessels(List<List<OperationInRoute>> vesselroutes, int[][][][] SailingTimes,
                                     int[][][] TimeVesselUseOnOperation,int[] startNodes){
         for (int i=0;i<vesselroutes.size();i++){
             int totalTime=0;
-            System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
             if (vesselroutes.get(i)!=null) {
+                System.out.println("VESSEL ROUTE "+i);
                 for (int o=0;o<vesselroutes.get(i).size();o++) {
                     System.out.println("Operation number: "+vesselroutes.get(i).get(o).getID() + " Earliest start time: "+
                             vesselroutes.get(i).get(o).getEarliestTime()+ " Latest Start time: "+ vesselroutes.get(i).get(o).getLatestTime());
