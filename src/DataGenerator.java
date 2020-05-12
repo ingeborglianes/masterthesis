@@ -533,24 +533,51 @@ public class DataGenerator {
         int[][][] gainsGurobi = new int[vessels.length][this.operations.length][this.days*12];
         for(int v=0;v<this.vessels.length;v++) {
             for (Operation op : this.operations) {
+                int[] keyTime=new int[]{op.getLocation(),op.getType()};
+                int drawnTime=returnTimeOfOperation(keyTime);
                 for (int t = 0; t < op.getTimeWindow().length; t++) {
                     if (t + timeVesselUseOnOperation[v][op.getNumber()-1][t] < op.getTimeWindow().length) {
-                        gains[v][op.getNumber()-1][t] = op.getOperationGain();
+                        if(drawnTime < (this.days*12)/3) {
+                            gains[v][op.getNumber() - 1][t] = (int) Math.round(op.getOperationGain() * 1.4);
+                        }else if(drawnTime < (2*this.days*12)/3){
+                            gains[v][op.getNumber() - 1][t] = (int) Math.round(op.getOperationGain() * 1.2);
+                        }else if(drawnTime < this.days*12){
+                            gains[v][op.getNumber() - 1][t] = op.getOperationGain();
+                        }
+
                         if(simultaneousALNS[op.getNumber()-1][1]!=0 && bigTasksALNS[op.getNumber()-1]==null){
                             gainsGurobi[v][op.getNumber()-1][t] = 0;
+                        }else{
+                            if(drawnTime < (this.days*12)/3) {
+                                gainsGurobi[v][op.getNumber() - 1][t] = (int) Math.round(op.getOperationGain() * 1.4);
+                            }else if(drawnTime < (2*this.days*12)/3){
+                                gainsGurobi[v][op.getNumber() - 1][t] = (int) Math.round(op.getOperationGain() * 1.2);
+                            }else if(drawnTime < this.days*12){
+                                gainsGurobi[v][op.getNumber() - 1][t] = op.getOperationGain();
+                            }
                         }
-                        else{
-                            gainsGurobi[v][op.getNumber()-1][t] = op.getOperationGain();
-                        }
+
                     } else {
                         int work_time = op.getTimeWindow().length - t;
                         int op_duration = timeVesselUseOnOperation[v][op.getNumber()-1][t];
-                        gains[v][op.getNumber()-1][t] = (int) Math.floor((op.getOperationGain() / op_duration) * work_time);
+                        if(drawnTime < (this.days*12)/3) {
+                            gains[v][op.getNumber()-1][t] = (int) Math.round((op.getOperationGain() / op_duration) * work_time * 1.4);
+                        }else if(drawnTime < (2*this.days*12)/3){
+                            gains[v][op.getNumber()-1][t] = (int) Math.round((op.getOperationGain() / op_duration) * work_time * 1.2);
+                        }else if(drawnTime < this.days*12){
+                            gains[v][op.getNumber()-1][t] = Math.round((op.getOperationGain() / op_duration) * work_time);
+                        }
+
                         if(simultaneousALNS[op.getNumber()-1][1]!=0 && bigTasksALNS[op.getNumber()-1]==null){
                             gainsGurobi[v][op.getNumber()-1][t] = 0;
-                        }
-                        else{
-                            gainsGurobi[v][op.getNumber()-1][t] = (int) Math.floor((op.getOperationGain() / op_duration) * work_time);
+                        }else{
+                            if(drawnTime < (this.days*12)/3) {
+                                gainsGurobi[v][op.getNumber()-1][t] = (int) Math.round((op.getOperationGain() / op_duration) * work_time * 1.4);
+                            }else if(drawnTime < (2*this.days*12)/3){
+                                gainsGurobi[v][op.getNumber()-1][t] = (int) Math.round((op.getOperationGain() / op_duration) * work_time * 1.2);
+                            }else if(drawnTime < this.days*12){
+                                gainsGurobi[v][op.getNumber()-1][t] = Math.round((op.getOperationGain() / op_duration) * work_time);
+                            }
                         }
                     }
                 }
@@ -720,10 +747,12 @@ public class DataGenerator {
         int[] locStart = new int[]{1, 2, 3};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
                 "test_instances/30_locations_normalOpGenerator.txt",
-                "routing","weather_files/weather_desember.txt");
+                "routing","weather_files/weather_normal.txt");
         dg.generateData();
         //dg.printAllData();
-        PrintData.printSailingTimes(dg.getSailingTimes(),1,35,vessels.length);
+        //PrintData.printSailingTimes(dg.getSailingTimes(),1,35,vessels.length);
+        PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),locStart.length);
+        PrintData.printOperationGain(dg.getOperationGain(),locStart.length);
 
     }
 
