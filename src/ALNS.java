@@ -86,8 +86,8 @@ public class ALNS {
             locStart = new int[]{3, 4, 5, 6};
         }
         else if (loc == 30 || loc == 35) {
-            vessels = new int[]{1,2, 3, 4, 5,6,2};
-            locStart = new int[]{1, 2,3, 4, 5, 6,7};
+            vessels = new int[]{1, 3, 4, 5, 6};
+            locStart = new int[]{1,3, 4, 5, 6};
         }
         else if (loc == 5) {
             vessels = new int[]{2,3,5};
@@ -810,6 +810,8 @@ public class ALNS {
                 System.out.println(Arrays.toString(removalWeights));
                 Arrays.fill(removalVisitsLastSegment, 0);
                 Arrays.fill(insertionVisitsLastSegment, 0);
+                Arrays.fill(insertionScore, 0);
+                Arrays.fill(removalScore, 0);
             }
         }
     }
@@ -822,7 +824,8 @@ public class ALNS {
         for (OperationInRoute ur:alns.bestUnrouted){
             unroutedList.add(ur.getID());
         }
-        //alns.runRelocateInsert();
+        alns.runRelocateInsert();
+        alns.runLocalSearchNormalOperators();
         int afterFirstLocalObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         alns.runDestroyRepair();
         alns.retainBestSolution();
@@ -831,8 +834,7 @@ public class ALNS {
                 alns.precedenceOverOperations, alns.consolidatedOperations,
                 alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
-        //alns.runLocalSearchNormalOperators();
-        //alns.runRelocateInsert();
+        alns.runRelocateInsert();
         int bestObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         System.out.println("Construction Objective "+constructionObjective);
         System.out.println("afterFirstLocalObjective "+afterFirstLocalObjective);
