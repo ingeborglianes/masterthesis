@@ -40,4 +40,5 @@ public class ParameterFile {
     public static double lowerThresholdWeights=1.0;
     public static int iterationsWithoutImprovementParameter=50;
     public static int earlyPrecedenceFactor=20;
+    public static int localOptimumIterations=20;
 }

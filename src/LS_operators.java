@@ -232,13 +232,13 @@ public class LS_operators {
         }
         int delta = -sailingdelta + vessel1Gain;
 
-
+/*
         if (delta <= 0) {
             System.out.println("Objective change negative or unchanged, undesirable relocate. Returning old vesselroutes");
             return false;
         }
 
-
+ */
 
         /*
         int earliest_insert = pos1;
@@ -2264,12 +2264,38 @@ public class LS_operators {
             System.out.println("small route 1 "+cv.getConnectedRoute1());
             System.out.println("small route 2 "+cv.getConnectedRoute2());
             System.out.println("route consolidated task "+cv.getConsolidatedRoute()+"\n");
-
         }
-
     }
 
-
+    public void runNormalLSO(String method){
+        switch (method) {
+            case "1RL":
+                System.out.println("1-relocate chosen");
+                oneRelocateAll();
+                break;
+            case "2RL":
+                System.out.println("2-relocate chosen");
+                twoRelocateAll();
+                break;
+            case "1EX":
+                System.out.println("1-exchange chosen");
+                oneExchangeAll();
+                break;
+            case "2EX":
+                System.out.println("2-exchange chosen");
+                twoExchangeAll();
+                break;
+            case "insertNormal":
+                System.out.println("Insert normal chosen");
+                insertAll(vesselroutes,unroutedTasks);
+                break;
+        }
+        ObjectiveValues ov= ConstructionHeuristic.calculateObjective(vesselroutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
+                EarliestStartingTimeForVessel, operationGainGurobi, new int[vesselroutes.size()],new int[vesselroutes.size()],0, simALNS,bigTasksALNS);
+        objValue=ov.getObjvalue();
+        routeSailingCost=ov.getRouteSailingCost();
+        routeOperationGain=ov.getRouteBenefitGain();
+    }
 
     public static void main(String[] args) throws FileNotFoundException {
         int[] vesseltypes = new int[]{1,2,4,5};
@@ -2302,4 +2328,19 @@ public class LS_operators {
         LSO.printLSOSolution(vesseltypes);
     }
 
+    public int[] getRouteSailingCost() {
+        return routeSailingCost;
+    }
+
+    public int[] getRouteOperationGain() {
+        return routeOperationGain;
+    }
+
+    public List<List<OperationInRoute>> getVesselroutes() {
+        return vesselroutes;
+    }
+
+    public List<OperationInRoute> getUnroutedTasks() {
+        return unroutedTasks;
+    }
 }

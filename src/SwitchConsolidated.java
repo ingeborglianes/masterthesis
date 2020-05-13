@@ -488,4 +488,19 @@ public class SwitchConsolidated {
         //System.out.println("Finished switch method");
     }
 
+    public List<OperationInRoute> getUnroutedTasks() {
+        return unroutedTasks;
+    }
+
+    public List<List<OperationInRoute>> getVesselRoutes() {
+        return vesselRoutes;
+    }
+
+    public int[] getRouteSailingCost() {
+        return routeSailingCost;
+    }
+
+    public int[] getRouteOperationGain() {
+        return routeOperationGain;
+    }
 }

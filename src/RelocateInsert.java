@@ -1200,6 +1200,23 @@ public class RelocateInsert {
         return old_vesselroutes;
     }
 
+    public void runRelocateLSO(String method){
+        if(method.equals("relocate")) {
+            relocateAll();
+        }
+        else if(method.equals("precedence")){
+            insertPrecedenceOf();
+        }
+        else if(method.equals("simultaneous")){
+            insertSimultaneous();
+        }
+        ObjectiveValues ov= ConstructionHeuristic.calculateObjective(vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,
+                EarliestStartingTimeForVessel, operationGainGurobi, new int[vesselRoutes.size()],new int[vesselRoutes.size()],0, simALNS,bigTasksALNS);
+        objValue=ov.getObjvalue();
+        routeSailingCost=ov.getRouteSailingCost();
+        routeOperationGain=ov.getRouteBenefitGain();
+    }
+
 
     public void printInitialSolution(int[] vessseltypes){
 
@@ -1313,6 +1330,22 @@ public class RelocateInsert {
         RI.insertPrecedenceOf();
 
 
+    }
+
+    public int[] getRouteSailingCost() {
+        return routeSailingCost;
+    }
+
+    public int[] getRouteOperationGain() {
+        return routeOperationGain;
+    }
+
+    public List<OperationInRoute> getUnroutedTasks() {
+        return unroutedTasks;
+    }
+
+    public List<List<OperationInRoute>> getVesselRoutes() {
+        return vesselRoutes;
     }
 }
 
