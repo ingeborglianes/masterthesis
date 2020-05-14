@@ -3,7 +3,7 @@ import java.sql.SQLOutput;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class LS_operators {
+public class LS_operatorsFeasible {
     private int[][] OperationsForVessel;
     private int[] vesseltypes;
     private int[][][][] SailingTimes;
@@ -34,14 +34,14 @@ public class LS_operators {
     private Map<Integer, ConsolidatedValues> consolidatedOperations;
 
 
-    public LS_operators(int[][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes,
-                                int[][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int[] EarliestStartingTimeForVessel,
-                                int[][] twIntervals, int[] routeSailingCost, int[] routeOperationGain, int[] startNodes, int[][] simALNS, int [][] precedenceALNS,
-                                int[][] bigTasksALNS, int[][][] operationGain, List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks,
-                                Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, PrecedenceValues> precedenceOfOperations,
-                                Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
-                                List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
-                                Map<Integer, ConsolidatedValues> consolidatedOperations, int[][][] operationGainGurobi) {
+    public LS_operatorsFeasible(int[][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes,
+                        int[][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int[] EarliestStartingTimeForVessel,
+                        int[][] twIntervals, int[] routeSailingCost, int[] routeOperationGain, int[] startNodes, int[][] simALNS, int [][] precedenceALNS,
+                        int[][] bigTasksALNS, int[][][] operationGain, List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks,
+                        Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, PrecedenceValues> precedenceOfOperations,
+                        Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
+                        List<Map<Integer, PrecedenceValues>> precedenceOfRoutes, List<Map<Integer, PrecedenceValues>> precedenceOverRoutes,
+                        Map<Integer, ConsolidatedValues> consolidatedOperations, int[][][] operationGainGurobi) {
         this.OperationsForVessel = OperationsForVessel;
         this.vesseltypes = vesseltypes;
         this.SailingTimes = SailingTimes;
@@ -166,8 +166,7 @@ public class LS_operators {
                         [new_vesselroutes.get(vessel).get(pos1 - 1).getID() - 1][new_vesselroutes.get(vessel).get(pos1).getID() - 1];
                 System.out.println(new_pos1_dist + " new pos 1 dist");
             }
-        }
-        else {
+        } else {
             if (pos1 == vesselroutes.get(vessel).size() - 1) {
                 new_pos1_dist = 0;
                 System.out.println(new_pos1_dist + " new pos 1 dist");
@@ -178,6 +177,8 @@ public class LS_operators {
                 System.out.println(new_pos1_dist + " new pos 1 dist");
             }
         }
+
+
         if (pos2 == 0) {
             new_second_sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel]][startnodes[vessel] - 1][new_vesselroutes.get(vessel).get(pos2).getID() - 1];
             new_pos2_dist = new_second_sailing +
@@ -231,11 +232,14 @@ public class LS_operators {
         }
         int delta = -sailingdelta + vessel1Gain;
 
-
+/*
         if (delta <= 0) {
             System.out.println("Objective change negative or unchanged, undesirable relocate. Returning old vesselroutes");
             return false;
         }
+
+ */
+
         /*
         int earliest_insert = pos1;
         int latest_insert = pos2;
@@ -380,32 +384,23 @@ public class LS_operators {
         ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGainGurobi, newRouteSailingCost,
                 newRouteOperationGain, newObjValue, simALNS, bigTasksALNS);
 
-        if (newObjValue > oldObjValue) {
+        //if (newObjValue > oldObjValue) {
         routeSailingCost = newRouteSailingCost;
         routeOperationGain = newRouteOperationGain;
         objValue = newObjValue;
-        }
-
+        //}
+        /*
         else {
             System.out.println("Objective not improved");
-            CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
-            vesselroutes = cv.getVesselRoutes();
-            precedenceOfOperations=cv.getPrecedenceOfOperations();
-            precedenceOfRoutes=cv.getPrecedenceOfRoutes();
-            precedenceOverOperations=cv.getPrecedenceOverOperations();
-            precedenceOverRoutes=cv.getPrecedenceOverRoutes();
-            simOpRoutes=cv.getSimOpRoutes();
-            simultaneousOp=cv.getSimultaneousOp();
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
             return false;
         }
 
+         */
+
         System.out.println("Relocate performed");
         printLSOSolution(vesseltypes);
-        int ID1=vesselroutes.get(vessel).get(pos1).getID();
-        int ID2=vesselroutes.get(vessel).get(pos2).getID();
-        if(precedenceOfOperations.get(ID1)!=null){
 
-        }
         return true;
 
     }
@@ -580,13 +575,13 @@ public class LS_operators {
             }
         }
         int delta = -vessel1_delta - vessel2_delta + vessel1Gain + vessel2Gain;
-
+/*
         if (delta <= 0) {
             System.out.println("Change in objective negative or unchanged, undesirable relocate. Returning old vesselroutes");
             return false;
         }
 
-
+ */
 
 
         // Relocating the elements in the original vesselroutes list to secure the same object structure
@@ -706,26 +701,22 @@ public class LS_operators {
         ConstructionHeuristic.calculateObjective(vesselroutes,TimeVesselUseOnOperation,startNodes,SailingTimes,SailingCostForVessel,EarliestStartingTimeForVessel,operationGainGurobi,newRouteSailingCost,
                 newRouteOperationGain,newObjValue,simALNS,bigTasksALNS);
 
-        if (newObjValue > oldObjValue) {
+        //if (newObjValue > oldObjValue) {
         routeSailingCost = newRouteSailingCost;
         routeOperationGain = newRouteOperationGain;
         objValue = newObjValue;
-        }
-
+        //}
+        /*
         else {
             System.out.println("Objective not improved");
             ConstructionHeuristic.updateIndexesInsertion(vessel1, pos1, new_vesselroutes, simultaneousOp, precedenceOverOperations, precedenceOfOperations);
             ConstructionHeuristic.updateIndexesRemoval(vessel2, pos2, new_vesselroutes, simultaneousOp, precedenceOverOperations, precedenceOfOperations);
-            CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
-            vesselroutes = cv.getVesselRoutes();
-            precedenceOfOperations=cv.getPrecedenceOfOperations();
-            precedenceOfRoutes=cv.getPrecedenceOfRoutes();
-            precedenceOverOperations=cv.getPrecedenceOverOperations();
-            precedenceOverRoutes=cv.getPrecedenceOverRoutes();
-            simOpRoutes=cv.getSimOpRoutes();
-            simultaneousOp=cv.getSimultaneousOp();
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
             return false;
         }
+
+         */
+
 
         System.out.println("Two relocate performed");
         printLSOSolution(vesseltypes);
@@ -869,10 +860,14 @@ public class LS_operators {
                     + operationGain[vessel][oldLastOpVessel1.getID() - startnodes.length - 1][0];
         }
         int delta = -sailingdelta + vessel1Gain;
+/*
         if (delta <= 0) {
             System.out.println("Objective change negative or unchanged, undesirable relocate. Returning old vesselroutes");
             return false;
         }
+
+ */
+
         //Rearranging the new_vesselroutes lists to the original order
         OperationInRoute moveBack2 = new_vesselroutes.get(vessel).get(pos1);
         OperationInRoute moveBack1 = new_vesselroutes.get(vessel).get(pos2);
@@ -1000,24 +995,19 @@ public class LS_operators {
         ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGainGurobi, newRouteSailingCost,
                 newRouteOperationGain, newObjValue, simALNS, bigTasksALNS);
 
-        if (newObjValue > oldObjValue) {
+        //if (newObjValue > oldObjValue) {
         routeSailingCost = newRouteSailingCost;
         routeOperationGain = newRouteOperationGain;
         objValue = newObjValue;
-        }
-
+        //}
+        /*
         else {
             System.out.println("Objective not improved");
-            CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
-            vesselroutes = cv.getVesselRoutes();
-            precedenceOfOperations=cv.getPrecedenceOfOperations();
-            precedenceOfRoutes=cv.getPrecedenceOfRoutes();
-            precedenceOverOperations=cv.getPrecedenceOverOperations();
-            precedenceOverRoutes=cv.getPrecedenceOverRoutes();
-            simOpRoutes=cv.getSimOpRoutes();
-            simultaneousOp=cv.getSimultaneousOp();
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
             return false;
         }
+
+         */
 
         System.out.println("Exchange performed");
         printLSOSolution(vesseltypes);
@@ -1214,10 +1204,13 @@ public class LS_operators {
 
         int delta = -vessel1_delta - vessel2_delta + vessel1Gain + vessel2Gain;
 
+/*
         if (delta <= 0) {
             System.out.println("Objective change negative or unchanged, undesirable relocate. Returning old vesselroutes");
             return false;
         }
+
+ */
 
         //Rearranging the new_vesselroutes lists to the original order
         OperationInRoute toMoveBack2 = new_vesselroutes.get(vessel1).get(pos1);
@@ -1359,23 +1352,19 @@ public class LS_operators {
         ConstructionHeuristic.calculateObjective(vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes, SailingCostForVessel, EarliestStartingTimeForVessel, operationGainGurobi, newRouteSailingCost,
                 newRouteOperationGain, newObjValue, simALNS, bigTasksALNS);
 
-        if (newObjValue > oldObjValue) {
-            routeSailingCost = newRouteSailingCost;
-            routeOperationGain = newRouteOperationGain;
-            objValue = newObjValue;
-        }
+        //if (newObjValue > oldObjValue) {
+        routeSailingCost = newRouteSailingCost;
+        routeOperationGain = newRouteOperationGain;
+        objValue = newObjValue;
+        //}
+        /*
         else {
             System.out.println("Objective not improved");
-            CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
-            vesselroutes = cv.getVesselRoutes();
-            precedenceOfOperations=cv.getPrecedenceOfOperations();
-            precedenceOfRoutes=cv.getPrecedenceOfRoutes();
-            precedenceOverOperations=cv.getPrecedenceOverOperations();
-            precedenceOverRoutes=cv.getPrecedenceOverRoutes();
-            simOpRoutes=cv.getSimOpRoutes();
-            simultaneousOp=cv.getSimultaneousOp();
+            vesselroutes = retainOldSolution(new_vesselroutes, unroutedTasks, simultaneousOp, precedenceOfOperations, precedenceOverOperations);
             return false;
         }
+
+         */
 
         System.out.println("Two exchange performed");
         printLSOSolution(vesseltypes);
@@ -1726,6 +1715,7 @@ public class LS_operators {
         return feasible;
     }
 
+
     public static boolean updateConRoutes(List<Map<Integer, ConnectedValues>> simOpRoutes, List<Map<Integer, PrecedenceValues>> precedenceOfRoutes,
                                           List<Map<Integer, PrecedenceValues>> precedenceOverRoutes, int v,
                                           List<List<OperationInRoute>> vesselroutes, List<Integer> updatedRoutes, Map<Integer, PrecedenceValues> precedenceOverOperations,
@@ -1986,6 +1976,7 @@ public class LS_operators {
                                 int changedTime = ConstructionHeuristic.checkChangeEarliestLastOperation(earliestTemp, earliestTimeLastOperationInRoute,
                                         n + 1, v, o, vesselroutes, TimeVesselUseOnOperation, startNodes, SailingTimes);
                                 int deltaOperationGainLastOperation = 0;
+                                System.out.println(earliestTimeLastOperationInRoute + changedTime - 1);
                                 if (changedTime > 0) {
                                     deltaOperationGainLastOperation = operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute - 1] -
                                             operationGain[v][lastOperation.getID() - 1 - startNodes.length][earliestTimeLastOperationInRoute + changedTime - 1];
@@ -2136,7 +2127,7 @@ public class LS_operators {
     }
 
     public static CopyValues retainOldSolution(List<List<OperationInRoute>> vesselroutes, Map<Integer,ConsolidatedValues> consolidatedOperations,
-                                                                 int[][] simALNS, int[][] precALNS, int[][] bigTaskALNS, int[] startNodes){
+                                               int[][] simALNS, int[][] precALNS, int[][] bigTaskALNS, int[] startNodes){
         /*
         for (int i=0;i<vesselroutes.size();i++){
             System.out.println("VESSELINDEX "+i);
@@ -2422,54 +2413,7 @@ public class LS_operators {
         return vesselroutes;
     }
 
-    /*
-    public void updateIndexesRelocateForward(int route, int index1, int index2){
-        for(int i=index1;i<index2;i++){
-            //System.out.println("Evaluate index: "+index);
-            OperationInRoute curOp=vesselroutes.get(route).get(i);
-            int curOpId=curOp.getID();
-            if(simultaneousOp.get(curOpId)!=null){
-                //System.out.println("index update because of sim");
-                int simIndex=simultaneousOp.get(curOpId).getIndex();
-                simultaneousOp.get(curOpId).setIndex(simIndex-1);
-            }
-            if(precedenceOverOperations.get(curOpId)!=null){
-                //System.out.println("index update because of pres over");
-                int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
-                precedenceOverOperations.get(curOpId).setIndex(pOverIndex-1);
-            }
-            if(precedenceOfOperations.get(curOpId)!=null){
-                //System.out.println("index update because of pres of");
-                int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
-                precedenceOfOperations.get(curOpId).setIndex(pOfIndex-1);
-            }
-        }
-    }
 
-    public void updateIndexesRelocateBackward(int route, int index1, int index2){
-        for(int i=index1+1;i<index2+1;i++){
-            //System.out.println("Evaluate index: "+index);
-            OperationInRoute curOp=vesselroutes.get(route).get(i);
-            int curOpId=curOp.getID();
-            if(simultaneousOp.get(curOpId)!=null){
-                //System.out.println("index update because of sim");
-                int simIndex=simultaneousOp.get(curOpId).getIndex();
-                simultaneousOp.get(curOpId).setIndex(simIndex+1);
-            }
-            if(precedenceOverOperations.get(curOpId)!=null){
-                //System.out.println("index update because of pres over");
-                int pOverIndex=precedenceOverOperations.get(curOpId).getIndex();
-                precedenceOverOperations.get(curOpId).setIndex(pOverIndex+1);
-            }
-            if(precedenceOfOperations.get(curOpId)!=null){
-                //System.out.println("index update because of pres of");
-                int pOfIndex=precedenceOfOperations.get(curOpId).getIndex();
-                precedenceOfOperations.get(curOpId).setIndex(pOfIndex+1);
-            }
-        }
-    }
-
-     */
 
     public void printLSOSolution(int[] vessseltypes){
         //PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
@@ -2602,7 +2546,7 @@ public class LS_operators {
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
-        LS_operators LSO = new LS_operators(dg.getOperationsForVessel(),vesseltypes,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
+        LS_operatorsFeasible LSO = new LS_operatorsFeasible(dg.getOperationsForVessel(),vesseltypes,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
                 dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getTwIntervals(),a.getRouteSailingCost(),a.getRouteOperationGain(),
                 dg.getStartNodes(), dg.getSimultaneousALNS(),dg.getPrecedenceALNS(),dg.getBigTasksALNS(), a.getOperationGain(), a.getVesselroutes(),a.getUnroutedTasks(),
                 a.getPrecedenceOverOperations(), a.getPrecedenceOfOperations(),a.getSimultaneousOp(),

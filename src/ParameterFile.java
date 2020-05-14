@@ -31,14 +31,14 @@ public class ParameterFile {
     public static double relatednessWeightPrecedenceOver=0.1;
     public static double relatednessWeightPrecedenceOf=0.1;
     public static double relatednessWeightSimultaneous=0.1;
-    public static int numberOfIterations = 10000;
+    public static int numberOfIterations = 1;
     public static int numberOfSegmentIterations=100;
-    public static double controlParameter=0.1;
+    public static double controlParameter=0;
     public static int reward1=33;
     public static int reward2=9;
     public static int reward3=13;
     public static double lowerThresholdWeights=1.0;
     public static int iterationsWithoutImprovementParameter=50;
     public static int earlyPrecedenceFactor=20;
-    public static int localOptimumIterations=20;
+    public static int localOptimumIterations=5;
 }

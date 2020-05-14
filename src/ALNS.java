@@ -154,7 +154,6 @@ public class ALNS {
                 for (int s=0;s<vesselroutes.get(vessel).size();s++) {
                     OperationInRoute operationInRoute = vesselroutes.get(vessel).get(s);
                     int ID = operationInRoute.getID();
-                    int matrixIndex=ID-1-dg.getStartNodes().length;
                     OperationInRoute op = new OperationInRoute(ID, operationInRoute.getEarliestTime(), operationInRoute.getLatestTime());
                     route.add(op);
                 }
@@ -740,7 +739,6 @@ public class ALNS {
         for (OperationInRoute ur:alns.bestUnrouted){
             unroutedList.add(ur.getID());
         }
-        int afterFirstLocalObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         alns.runDestroyRepair();
         alns.retainCurrentBestSolution("best");
         alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.vesselroutes,
@@ -748,11 +746,8 @@ public class ALNS {
                 alns.precedenceOverOperations, alns.consolidatedOperations,
                 alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
-        int bestObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         System.out.println("Construction Objective "+constructionObjective);
-        System.out.println("afterFirstLocalObjective "+afterFirstLocalObjective);
-        System.out.println("afterLarge "+afterLarge);
-        System.out.println("bestObjective "+bestObjective);
+        System.out.println("afterALNS "+afterLarge);
         long endTime   = System.nanoTime();
         long totalTime = endTime - startTime;
         System.out.println("Time "+totalTime/1000000000);
@@ -767,9 +762,5 @@ public class ALNS {
         for (OperationInRoute ur:alns.bestUnrouted){
             System.out.println(ur.getID());
         }
-        ObjectiveValues ov= ConstructionHeuristic.calculateObjective(alns.bestRoutes,alns.dg.getTimeVesselUseOnOperation(),alns.dg.getSailingCostForVessel(),
-                alns.dg.getSailingTimes(),alns.dg.getSailingCostForVessel(),alns.dg.getEarliestStartingTimeForVessel(),alns.dg.getOperationGainGurobi(),
-                new int[alns.vesselroutes.size()],new int[alns.vesselroutes.size()],0,alns.dg.getSimultaneousALNS(),alns.dg.getBigTasksALNS());
-        System.out.println("Recalculated obj: "+ov.getObjvalue());
     }
 }
