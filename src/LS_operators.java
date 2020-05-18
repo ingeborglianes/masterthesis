@@ -321,7 +321,7 @@ public class LS_operators {
             precedenceOverRoutes=cv.getPrecedenceOverRoutes();
             simOpRoutes=cv.getSimOpRoutes();
             simultaneousOp=cv.getSimultaneousOp();
-            printLSOSolution(vesseltypes);
+            //printLSOSolution(vesseltypes);
             return false;
         }
 
@@ -400,11 +400,13 @@ public class LS_operators {
         }
 
         System.out.println("Relocate performed");
-        printLSOSolution(vesseltypes);
-        int ID1=vesselroutes.get(vessel).get(pos1).getID();
+        //printLSOSolution(vesseltypes);
         int ID2=vesselroutes.get(vessel).get(pos2).getID();
-        if(precedenceOfOperations.get(ID1)!=null){
-
+        if(precedenceOfOperations.get(ID2)!=null){
+            precedenceOfOperations.get(ID2).setIndex(pos2);
+        }
+        if(precedenceOverOperations.get(ID2)!=null){
+            precedenceOverOperations.get(ID2).setIndex(pos2);
         }
         return true;
 
@@ -728,7 +730,7 @@ public class LS_operators {
         }
 
         System.out.println("Two relocate performed");
-        printLSOSolution(vesseltypes);
+        //printLSOSolution(vesseltypes);
 
         if (bigTasksALNS[vesselroutes.get(vessel2).get(pos2).getID() - 1 - startNodes.length] != null &&
                 bigTasksALNS[vesselroutes.get(vessel2).get(pos2).getID() - startNodes.length - 1][0] == vesselroutes.get(vessel2).get(pos2).getID()) {
@@ -736,7 +738,13 @@ public class LS_operators {
                 consolidatedOperations.get(vesselroutes.get(vessel2).get(pos2).getID()).setConsolidatedRoute(vessel2);
             }
         }
-
+        int ID2=vesselroutes.get(vessel2).get(pos2).getID();
+        if(precedenceOfOperations.get(ID2)!=null){
+            precedenceOfOperations.get(ID2).setIndex(pos2);
+        }
+        if(precedenceOverOperations.get(ID2)!=null){
+            precedenceOverOperations.get(ID2).setIndex(pos2);
+        }
         return true;
 
     }
@@ -1020,8 +1028,21 @@ public class LS_operators {
         }
 
         System.out.println("Exchange performed");
-        printLSOSolution(vesseltypes);
-
+        //printLSOSolution(vesseltypes);
+        int ID1=vesselroutes.get(vessel).get(pos1).getID();
+        int ID2=vesselroutes.get(vessel).get(pos2).getID();
+        if(precedenceOfOperations.get(ID1)!=null){
+            precedenceOfOperations.get(ID1).setIndex(pos1);
+        }
+        if(precedenceOfOperations.get(ID2)!=null){
+            precedenceOfOperations.get(ID2).setIndex(pos2);
+        }
+        if(precedenceOverOperations.get(ID1)!=null){
+            precedenceOverOperations.get(ID1).setIndex(pos1);
+        }
+        if(precedenceOverOperations.get(ID2)!=null){
+            precedenceOverOperations.get(ID2).setIndex(pos2);
+        }
         return true;
     }
 
@@ -1378,7 +1399,7 @@ public class LS_operators {
         }
 
         System.out.println("Two exchange performed");
-        printLSOSolution(vesseltypes);
+        //printLSOSolution(vesseltypes);
 
         if (bigTasksALNS[vesselroutes.get(vessel1).get(pos1).getID() - 1 - startNodes.length] != null &&
                 bigTasksALNS[vesselroutes.get(vessel1).get(pos1).getID() - startNodes.length - 1][0] == vesselroutes.get(vessel1).get(pos1).getID()) {
@@ -1392,6 +1413,20 @@ public class LS_operators {
             if (consolidatedOperations.get(vesselroutes.get(vessel2).get(pos2).getID()) != null) {
                 consolidatedOperations.get(vesselroutes.get(vessel2).get(pos2).getID()).setConsolidatedRoute(vessel2);
             }
+        }
+        int ID1=vesselroutes.get(vessel1).get(pos1).getID();
+        int ID2=vesselroutes.get(vessel2).get(pos2).getID();
+        if(precedenceOfOperations.get(ID1)!=null){
+            precedenceOfOperations.get(ID1).setIndex(pos1);
+        }
+        if(precedenceOfOperations.get(ID2)!=null){
+            precedenceOfOperations.get(ID2).setIndex(pos2);
+        }
+        if(precedenceOverOperations.get(ID1)!=null){
+            precedenceOverOperations.get(ID1).setIndex(pos1);
+        }
+        if(precedenceOverOperations.get(ID2)!=null){
+            precedenceOverOperations.get(ID2).setIndex(pos2);
         }
         return true;
     }
@@ -1429,6 +1464,18 @@ public class LS_operators {
             System.out.println(new_dist + " New dist");
         } else if (pos1 == 0) {
             new_second_sailing = SailingTimes[vessel][EarliestStartingTimeForVessel[vessel]][startnodes[vessel] - 1][vesselroutes.get(vessel).get(pos1).getID() - 1];
+            if(new_second_sailing +
+                    TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID() - 1 - nStartnodes][new_second_sailing-1]-1>50){
+                CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
+                vesselroutes = cv.getVesselRoutes();
+                precedenceOfOperations=cv.getPrecedenceOfOperations();
+                precedenceOfRoutes=cv.getPrecedenceOfRoutes();
+                precedenceOverOperations=cv.getPrecedenceOverOperations();
+                precedenceOverRoutes=cv.getPrecedenceOverRoutes();
+                simOpRoutes=cv.getSimOpRoutes();
+                simultaneousOp=cv.getSimultaneousOp();
+                return false;
+            }
             new_dist = new_second_sailing +
                     SailingTimes[vessel][new_second_sailing +
                             TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID() - 1 - nStartnodes][new_second_sailing-1]-1]
@@ -1445,6 +1492,18 @@ public class LS_operators {
             new_second_sailing = SailingTimes[vessel][Math.min(nTimePeriods - 1, -1+vesselroutes.get(vessel).get(pos1 - 1).getEarliestTime() +
                     TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1 - 1).getID() - 1 - nStartnodes][Math.min(vesselroutes.get(vessel).get(pos1 - 1).getEarliestTime()-1, nTimePeriods - 1)])]
                     [vesselroutes.get(vessel).get(pos1 - 1).getID() - 1][vesselroutes.get(vessel).get(pos1).getID() - 1];
+            if((vesselroutes.get(vessel).get(pos1 + 1).getEarliestTime() + TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID() - 1 - nStartnodes]
+                    [vesselroutes.get(vessel).get(pos1 + 1).getEarliestTime()-1]-1)>59){
+                CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
+                vesselroutes = cv.getVesselRoutes();
+                precedenceOfOperations=cv.getPrecedenceOfOperations();
+                precedenceOfRoutes=cv.getPrecedenceOfRoutes();
+                precedenceOverOperations=cv.getPrecedenceOverOperations();
+                precedenceOverRoutes=cv.getPrecedenceOverRoutes();
+                simOpRoutes=cv.getSimOpRoutes();
+                simultaneousOp=cv.getSimultaneousOp();
+                return false;
+            }
             new_dist = new_second_sailing +
                     SailingTimes[vessel][vesselroutes.get(vessel).get(pos1 + 1).getEarliestTime() + TimeVesselUseOnOperation[vessel][vesselroutes.get(vessel).get(pos1).getID() - 1 - nStartnodes]
                             [vesselroutes.get(vessel).get(pos1 + 1).getEarliestTime()-1]-1][vesselroutes.get(vessel).get(pos1).getID() - 1][vesselroutes.get(vessel).get(pos1 + 1).getID() - 1];
@@ -1502,6 +1561,14 @@ public class LS_operators {
                 vesselroutes.get(vessel).get(pos1).getEarliestTime()) {
             System.out.println("Infeasible insertion - earliest time larger than latest time");
             vesselroutes.get(vessel).remove(pos1);
+            CopyValues cv = retainOldSolution(new_vesselroutes,consolidatedOperations,simALNS,precedenceALNS,bigTasksALNS,startNodes);
+            vesselroutes = cv.getVesselRoutes();
+            precedenceOfOperations=cv.getPrecedenceOfOperations();
+            precedenceOfRoutes=cv.getPrecedenceOfRoutes();
+            precedenceOverOperations=cv.getPrecedenceOverOperations();
+            precedenceOverRoutes=cv.getPrecedenceOverRoutes();
+            simOpRoutes=cv.getSimOpRoutes();
+            simultaneousOp=cv.getSimultaneousOp();
             return false;
         }
 
@@ -1536,7 +1603,7 @@ public class LS_operators {
 
         System.out.println("Unrouted insertion performed");
         unroutedTasks.remove(unroutedTasks.indexOf(unrouted_operation));
-        printLSOSolution(vesseltypes);
+        //printLSOSolution(vesseltypes);
         objValue = objValue + (new_dist * SailingCostForVessel[vessel]) + operationGain[vessel]
                 [vesselroutes.get(vessel).get(pos1).getID() - 1 - startNodes.length][vesselroutes.get(vessel).get(pos1).getEarliestTime()-1];
         routeSailingCost[vessel] = routeSailingCost[vessel] + (new_dist * SailingCostForVessel[vessel]);
@@ -1941,13 +2008,14 @@ public class LS_operators {
                                         LargeNeighboorhoodSearchInsert.insertFeasibleDict(o,iv,benefitIncreaseTemp, allFeasibleInsertions);
                                     } else {
                                         System.out.println("Benefit increase temp: "+benefitIncreaseTemp);
-                                        if (benefitIncreaseTemp > benefitIncrease) {*/
+
+                                     */
+                                    //if (benefitIncreaseTemp > benefitIncrease) {
                                     benefitIncrease = benefitIncreaseTemp;
                                     routeIndex = v;
                                     indexInRoute = n + 1;
                                     earliest = earliestTemp;
                                     latest = latestTemp;
-
                                     //}
                                     //}
                                 }

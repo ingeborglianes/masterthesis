@@ -741,7 +741,7 @@ public class ALNS {
         }
         alns.runDestroyRepair();
         alns.retainCurrentBestSolution("best");
-        alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.vesselroutes,
+        alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
                 alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
                 alns.precedenceOverOperations, alns.consolidatedOperations,
                 alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);

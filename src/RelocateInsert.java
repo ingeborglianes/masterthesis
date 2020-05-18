@@ -179,7 +179,7 @@ public class RelocateInsert {
         }
 
 
-        System.out.println(bestInsertionCombination);
+        System.out.println("best insert combination "+bestInsertionCombination);
         System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
 
         if(bestInsertionCombination > 0) {
@@ -254,10 +254,11 @@ public class RelocateInsert {
                 unrouted++;
             }
 
-            printInitialSolution(vesseltypes);
+            //printInitialSolution(vesseltypes);
             return true;
         }
-        printInitialSolution(vesseltypes);
+        //printInitialSolution(vesseltypes);
+        System.out.println("not accepted move");
         return false;
     }
 
