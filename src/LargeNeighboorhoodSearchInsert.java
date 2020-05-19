@@ -88,6 +88,259 @@ public class LargeNeighboorhoodSearchInsert {
         return presOfOpObjectUnrouted != null;
     }
 
+    public int calculateInsertionValuesRegret3Insertion(){
+        int prevID=-1;
+        int prevRegretValue3=-100000;
+        int currentID=-1;
+        int currentRegretValue3=-100000;
+        allFeasibleInsertions = new HashMap<>();
+        for(OperationInRoute our : unroutedTasks){
+            //System.out.println("OPERATION "+our.getID());
+            int ourID=our.getID();
+            if(simALNS[ourID-startNodes.length-1][1]!=0){
+                int simA=simALNS[ourID-startNodes.length-1][1];
+                int presOfOp=precedenceALNS[ourID-1-startNodes.length][1];
+                if(presOfOp!=0) {
+                    if (checkIfPrecedenceOverOpInUnrouted(presOfOp)){
+                        continue;
+                    }
+                }
+                for (int i=0;i<allFeasibleInsertions.get(simA).size();i++){
+                    InsertionValues option =allFeasibleInsertions.get(simA).get(i);
+                    if(option.getBenenefitIncrease()==-100000){
+                        if(allFeasibleInsertions.get(ourID)==null){
+                            allFeasibleInsertions.put(ourID, new ArrayList<>() {{
+                                add(new InsertionValues(-100000, -1, -1, -1, -1));
+                            }});
+                        }
+                        else{
+                            allFeasibleInsertions.get(ourID).
+                                    add(new InsertionValues(-100000, -1, -1, -1, -1));
+                        }
+                    }
+                    else{
+                        PrecedenceValues pv = precedenceOverOperations.get(presOfOp);
+                        int precedenceIndex=-1;
+                        int precedenceRoute=-1;
+                        int earliestP=-1;
+                        if(pv!=null){
+                            precedenceIndex=pv.getIndex();
+                            precedenceRoute=pv.getRoute();
+                            earliestP=pv.getOperationObject().getEarliestTime();
+                        }
+                        findInsertionCosts(our,option.getEarliest(),option.getLatest(),earliestP,precedenceRoute,option.getRouteIndex(),
+                                precedenceIndex,option.getIndexInRoute(),nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
+                                SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
+                                operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes);
+                        int size=allFeasibleInsertions.get(ourID).size();
+                        InsertionValues ourValues=allFeasibleInsertions.get(ourID).get(size-1);
+                        int ourBenefitIncrease=ourValues.getBenenefitIncrease();
+                        if(ourBenefitIncrease==-100000) {
+                            option.setBenenefitIncrease(-100000);
+                            if(currentID==simA){
+                                currentRegretValue3=prevRegretValue3;
+                                currentID=prevID;
+                            }
+                            if(prevID==simA){
+                                prevRegretValue3=-100000;
+                            }
+                        }
+                        else{
+                            int newBenefitIncrease = (option.getBenenefitIncrease() + ourBenefitIncrease) / 2;
+                            ourValues.setBenenefitIncrease(newBenefitIncrease);
+                            option.setBenenefitIncrease(newBenefitIncrease);
+                            if (i > 0) {
+                                if (newBenefitIncrease >= allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease()) {
+                                    allFeasibleInsertions.get(simA).remove(i);
+                                    allFeasibleInsertions.get(simA).add(0, option);
+                                    allFeasibleInsertions.get(ourID).remove(size - 1);
+                                    allFeasibleInsertions.get(ourID).add(0, ourValues);
+                                } else if (!(newBenefitIncrease < allFeasibleInsertions.get(simA).get(allFeasibleInsertions.get(simA).size() - 1).getBenenefitIncrease())) {
+                                    for (int s = 1; s < allFeasibleInsertions.get(simA).size(); s++) {
+                                        if (newBenefitIncrease < allFeasibleInsertions.get(simA).get(s - 1).getBenenefitIncrease() &&
+                                                newBenefitIncrease >= allFeasibleInsertions.get(simA).get(s).getBenenefitIncrease()) {
+                                            allFeasibleInsertions.get(simA).remove(i);
+                                            allFeasibleInsertions.get(simA).add(s, option);
+                                            allFeasibleInsertions.get(ourID).remove(size - 1);
+                                            allFeasibleInsertions.get(ourID).add(s, ourValues);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                int regretValueTemp1;
+                if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() != -100000) {
+                    regretValueTemp1 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
+                } else if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() == -100000) {
+                    regretValueTemp1 = -100000;
+                } else {
+                    int ourValue1 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
+                    int ourValue2 = allFeasibleInsertions.get(simA).get(1).getBenenefitIncrease();
+                    regretValueTemp1 = ourValue1 - ourValue2;
+                    if (allFeasibleInsertions.get(simA).get(1).getBenenefitIncrease() == -100000) {
+                        regretValueTemp1 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
+                    }
+                }
+                int regretValueTemp2;
+                if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() != -100000) {
+                    regretValueTemp2 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() == -100000) {
+                    regretValueTemp2 = -100000;
+                }
+                else {
+                    int ourValue1 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
+                    int ourValue2 = allFeasibleInsertions.get(simA).get(2).getBenenefitIncrease();
+                    regretValueTemp2 = ourValue1 - ourValue2;
+                    if (allFeasibleInsertions.get(simA).get(2).getBenenefitIncrease() == -100000) {
+                        regretValueTemp2 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
+                    }
+                }
+                int regretValueTemp3=regretValueTemp1+regretValueTemp2;
+                if (regretValueTemp3<-100000){
+                    regretValueTemp3=-100000;
+                }
+                if (simA == currentID && regretValueTemp3 < currentRegretValue3 && prevRegretValue3 > regretValueTemp3) {
+                    currentRegretValue3 = prevRegretValue3;
+                    currentID = prevID;
+                }
+                else if (simA == currentID && regretValueTemp3 < currentRegretValue3 && prevRegretValue3 < regretValueTemp3) {
+                    currentRegretValue3 = regretValueTemp3;
+                } else if (regretValueTemp3 > currentRegretValue3) {
+                    prevRegretValue3 = currentRegretValue3;
+                    currentRegretValue3 = regretValueTemp1;
+                    prevID = currentID;
+                    currentID = simA;
+                }
+            }
+            else if (precedenceALNS[ourID-startNodes.length-1][1]!=0) {
+                int presOfOp=precedenceALNS[ourID-startNodes.length-1][1];
+                if (checkIfPrecedenceOverOpInUnrouted(presOfOp)){
+                    continue;
+                }
+                PrecedenceValues pv = precedenceOverOperations.get(presOfOp);
+                findInsertionCosts(our,-1,-1,pv.getOperationObject().getEarliestTime(),pv.getRoute(),-1,pv.getIndex(),-1
+                        ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
+                        SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
+                        operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes);
+                int regretValueTemp1;
+                if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
+                    regretValueTemp1=-100000;
+                }
+                else{
+                    int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    int ourValue2=allFeasibleInsertions.get(ourID).get(1).getBenenefitIncrease();
+                    regretValueTemp1=ourValue1-ourValue2;
+                    if(allFeasibleInsertions.get(ourID).get(1).getBenenefitIncrease()==-100000){
+                        regretValueTemp1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    }
+                }
+                int regretValueTemp2;
+                if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
+                    regretValueTemp2=-100000;
+                }
+                else{
+                    int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    int ourValue2=allFeasibleInsertions.get(ourID).get(2).getBenenefitIncrease();
+                    regretValueTemp2=ourValue1-ourValue2;
+                    if(allFeasibleInsertions.get(ourID).get(2).getBenenefitIncrease()==-100000){
+                        regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    }
+                }
+                int regretValueTemp3=regretValueTemp1+regretValueTemp2;
+                if (regretValueTemp3<-100000){
+                    regretValueTemp3=-100000;
+                }
+                if(regretValueTemp3>currentRegretValue3){
+                    prevRegretValue3=currentRegretValue3;
+                    prevID=currentID;
+                    currentRegretValue3=regretValueTemp3;
+                    currentID=ourID;
+                }
+            }
+            else{
+                findInsertionCosts(our,-1,-1,-1,-1,-1,-1,-1
+                        ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
+                        SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
+                        operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes);
+                int regretValueTemp1;
+                if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
+                    regretValueTemp1=-100000;
+                }
+                else{
+                    int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    int ourValue2=allFeasibleInsertions.get(ourID).get(1).getBenenefitIncrease();
+                    regretValueTemp1=ourValue1-ourValue2;
+                    if(allFeasibleInsertions.get(ourID).get(1).getBenenefitIncrease()==-100000){
+                        regretValueTemp1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    }
+                }
+                int regretValueTemp2;
+                if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                    regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
+                    regretValueTemp2=-100000;
+                }
+                else{
+                    int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    int ourValue2=allFeasibleInsertions.get(ourID).get(2).getBenenefitIncrease();
+                    regretValueTemp2=ourValue1-ourValue2;
+                    if(allFeasibleInsertions.get(ourID).get(2).getBenenefitIncrease()==-100000){
+                        regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
+                    }
+                }
+                int regretValueTemp3=regretValueTemp1+regretValueTemp2;
+                if (regretValueTemp3<-100000){
+                    regretValueTemp3=-100000;
+                }
+                if(regretValueTemp3>currentRegretValue3){
+                    prevRegretValue3=currentRegretValue3;
+                    prevID=currentID;
+                    currentRegretValue3=regretValueTemp3;
+                    currentID=ourID;
+                }
+            }
+            //System.out.println("ONE ITERATION calculate insertion values:");
+            //System.out.println("current best ID "+currentID);
+            //System.out.println("current best value "+currentRegretValue);
+            //if(currentID!=-1){
+                //System.out.println("Current route: "+allFeasibleInsertions.get(currentID).get(0).getRouteIndex());
+                //System.out.println("Current index: "+allFeasibleInsertions.get(currentID).get(0).getIndexInRoute());
+            //}
+            //System.out.println("previous best ID "+prevID);
+            //System.out.println("previous best value "+prevRegretValue);
+        }
+        if(currentRegretValue3==-100000){
+            currentID=-1;
+        }
+        return currentID;
+    }
+
     public int calculateInsertionValuesRegretInsertion(){
         int prevID=-1;
         int prevRegretValue=-100000;
@@ -445,24 +698,24 @@ public class LargeNeighboorhoodSearchInsert {
     public void insertionByMethod(String method){
         //husk å oppdatere unrouted her
         Boolean continueInsert=true;
-        /*if(!unroutedTasks.isEmpty()){
+        if(!unroutedTasks.isEmpty()){
             //System.out.println("UNROUTED TASKS");
             for(int n=0;n<unroutedTasks.size();n++) {
                 //System.out.println(unroutedTasks.get(n).getID());
             }
         }
-        //System.out.println("\nCONSOLIDATED DICTIONARY:");
+        System.out.println("\nCONSOLIDATED DICTIONARY:");
         for(Map.Entry<Integer, ConsolidatedValues> entry : consolidatedOperations.entrySet()){
             ConsolidatedValues cv = entry.getValue();
             int key = entry.getKey();
-            /*System.out.println("new entry in consolidated dictionary:");
+            System.out.println("new entry in consolidated dictionary:");
             System.out.println("Key "+key);
             System.out.println("big task placed? "+cv.getConsolidated());
             System.out.println("small tasks placed? "+cv.getSmallTasks());
             System.out.println("small route 1 "+cv.getConnectedRoute1());
             System.out.println("small route 2 "+cv.getConnectedRoute2());
             System.out.println("route consolidated task "+cv.getConsolidatedRoute()+"\n");
-        } */
+        }
         while(continueInsert){
             int insertID=-1;
             if(method.equals("best")){
@@ -472,19 +725,21 @@ public class LargeNeighboorhoodSearchInsert {
             else if(method.equals("regret")){
                 insertID= calculateInsertionValuesRegretInsertion();
             }
-            //System.out.println("UNROUTED ALL FEASIBLE DICTIONARY AFTER ONE ROUTE OF CALCULATIONS");
+            else if(method.equals("regret_3")){
+                insertID= calculateInsertionValuesRegret3Insertion();
+            }
+            System.out.println("UNROUTED ALL FEASIBLE DICTIONARY AFTER ONE ROUTE OF CALCULATIONS");
             for (Map.Entry<Integer, List<InsertionValues>> entry : allFeasibleInsertions.entrySet()) {
                 int key = entry.getKey();
-                /*System.out.println("Evaluating operation "+key+" precedenceOver: "+precedenceALNS[key-1-startNodes.length][0]
+                System.out.println("Evaluating operation "+key+" precedenceOver: "+precedenceALNS[key-1-startNodes.length][0]
                         +" precedenceOf: "+precedenceALNS[key-1-startNodes.length][1]+" simOver: "+simALNS[key-1-startNodes.length][0]
-                        +" simOf: "+precedenceALNS[key-1-startNodes.length][1]);*/
+                        +" simOf: "+precedenceALNS[key-1-startNodes.length][1]);
                 List<InsertionValues> iValues = entry.getValue();
-                /*for (InsertionValues iv : iValues){
+                for (InsertionValues iv : iValues){
                     System.out.println("Benefit "+iv.getBenenefitIncrease()+" Route "+iv.getRouteIndex()+" Index "+iv.getIndexInRoute());
                 }
-                System.out.println(" ");*/
+                System.out.println(" ");
             }
-
             if(insertID!=-1 && unroutedTasks.size()!=0){
                 OperationInRoute insertOR=null;
                 for (int i=0;i<unroutedTasks.size();i++){
@@ -493,7 +748,7 @@ public class LargeNeighboorhoodSearchInsert {
                     }
                 }
                 if(insertOR!=null){
-                    //System.out.println("Operation chosen to insert: "+insertOR.getID());
+                    System.out.println("Operation chosen to insert: "+insertOR.getID());
                     unroutedTasks.remove(insertOR);
                     InsertionValues insertValuesOR=allFeasibleInsertions.get(insertOR.getID()).get(0);
                     if(bigTasksALNS[insertID-1-startNodes.length]!=null){
@@ -1353,8 +1608,8 @@ public class LargeNeighboorhoodSearchInsert {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{1, 2, 3,4,5,6,2};
-        int[] startnodes = new int[]{1, 2, 3,4,5,6,7};
+        int[] vesseltypes = new int[]{2, 3,4,5,6};
+        int[] startnodes = new int[]{2, 3,4,5,6};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes ,
                 "test_instances/35_2_locations_normalOpGenerator_old.txt",
                 "results.txt", "weather_files/weather_normal.txt");
@@ -1392,7 +1647,7 @@ public class LargeNeighboorhoodSearchInsert {
         System.out.println("-----------------");
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
-        LNSI.runLNSInsert("regret");
+        LNSI.runLNSInsert("regret_3");
         //LNSI.switchConsolidated();
         LNSI.printLNSInsertSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),2,dg.getSimultaneousALNS().length,dg.getStartNodes().length);

@@ -539,6 +539,7 @@ public class ILS {
         int bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
         int currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
         int newObj = IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
+        System.out.println("Evaluation after perturbation");
         if(newObj>bestObj){
             System.out.println("New best global solution "+newObj);
             bestRouteSailingCost = routeSailingCost;
@@ -562,11 +563,15 @@ public class ILS {
             discoveredSolutions.add(newObj);
             setScoresAndVisits(reward2,insertMethod,removalMethod);
         }
-        else{
-            System.out.println("Continue with current solution");
-            retainCurrentBestSolution("current");
+        else if(!discoveredSolutions.contains(newObj)){
+            System.out.println("New solution, worse than current, but still selected "+newObj);
+            currentRouteSailingCost = routeSailingCost;
+            currentRouteOperationGain = routeOperationGain;
+            currentRoutes = copyVesselRoutes(vesselroutes);
+            currentUnrouted = copyUnrouted(unroutedTasks);
+            discoveredSolutions.add(newObj);
+            setScoresAndVisits(reward3,insertMethod,removalMethod);
         }
-
         System.out.println("Best solution in evaluate method");
         printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
                             consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);

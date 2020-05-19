@@ -37,8 +37,8 @@ public class ParameterFile {
     public static int reward1=33;                               // sigma1
     public static int reward2=9;                                // sigma2
     public static int reward3=13;                               // sigma3
-    public static double lowerThresholdWeights=1.0;
+    public static double lowerThresholdWeights=0.2;
     public static int iterationsWithoutImprovementParameter=50;
-    public static int earlyPrecedenceFactor=20;
+    public static int earlyPrecedenceFactor=20;                 //I construction heuristikken belønnes precedence
     public static int localOptimumIterations=1;
 }

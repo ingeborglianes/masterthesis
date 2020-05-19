@@ -13,11 +13,11 @@ public class ALNS {
     private int[] locStart = new int[]{1,2,3,4,5,6,7};
     private int numberOfRemoval;
     private int randomSeed;
-    private double[] insertionWeights = new double[]{1,1};
+    private double[] insertionWeights = new double[]{1,1,1};
     private double[] removalWeights = new double[]{1,1,1,1,1,1};
-    private int[] insertionScore = new int[]{0,0};
+    private int[] insertionScore = new int[]{0,0,0};
     private int[] removalScore = new int[]{0,0,0,0,0,0};
-    private int[] insertionVisitsLastSegment = new int[]{0,0};
+    private int[] insertionVisitsLastSegment = new int[]{0,0,0};
     private int[] removalVisitsLastSegment = new int[]{0,0,0,0,0,0};
     private double relatednessWeightDistance;
     private double relatednessWeightDuration;
@@ -352,7 +352,7 @@ public class ALNS {
                 break;
             }
         }
-        List<String> insertionMethods = new ArrayList<>(Arrays.asList("best", "regret"));
+        List<String> insertionMethods = new ArrayList<>(Arrays.asList("best", "regret","regret_3"));
         return insertionMethods.get(randomIndex);
     }
 
@@ -364,6 +364,10 @@ public class ALNS {
         if(insertMethod.equals("regret")){
             insertionScore[1]+=scoreIncrease;
             insertionVisitsLastSegment[1]+=1;
+        }
+        if(insertMethod.equals("regret_3")){
+            insertionScore[2]+=scoreIncrease;
+            insertionVisitsLastSegment[2]+=1;
         }
         if(removeMethod.equals("random")){
             removalScore[0]+=scoreIncrease;
