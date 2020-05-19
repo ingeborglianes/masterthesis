@@ -261,7 +261,8 @@ public class SwitchConsolidated {
                     if (secondOr.getLatestTime() > newLSecondOr) {
                         secondOr.setLatestTime(newLSecondOr);
                         //System.out.println("index connected: " + indexConnected);
-                        ConstructionHeuristic.updateLatest(newLSecondOr, indexConnected, pValues.getConnectedRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,"notLocal");
+                        ConstructionHeuristic.updateLatest(newLSecondOr, indexConnected, pValues.getConnectedRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,"notLocal",
+                                                        simultaneousOp,precedenceOfOperations,precedenceOverOperations);
                         ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(routeConnectedOp), connectedOpPValues.getIndex(), TimeVesselUseOnOperation,
                                 startNodes, simOpRoutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, precedenceOverRoutes,
                                 vesselRoutes, simultaneousOp, SailingTimes);
@@ -288,7 +289,7 @@ public class SwitchConsolidated {
                 vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1).setLatestTime(latest);
                 ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,twIntervals);
                 ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(route).size() - 1, route, vesselRoutes, TimeVesselUseOnOperation,
-                        startNodes, SailingTimes,twIntervals);
+                        startNodes, SailingTimes,twIntervals,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
             }
         }
 

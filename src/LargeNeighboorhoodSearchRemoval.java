@@ -779,9 +779,13 @@ public class LargeNeighboorhoodSearchRemoval {
                     int newLSecondOr = firstOr.getLatestTime() - TimeVesselUseOnOperation[pValues.getConnectedRoute()][secondOr.getID() - startNodes.length - 1]
                             [secondOr.getLatestTime() - 1];
                     if (secondOr.getLatestTime() > newLSecondOr) {
+                        newLSecondOr = ConstructionHeuristic.weatherLatestTimeSimPostInsert(newLSecondOr, secondOr.getEarliestTime(),TimeVesselUseOnOperation,pValues.getConnectedRoute(),secondOr.getID(),
+                                                                                            startNodes,SailingTimes,connectedOpPValues.getIndex(),vesselRoutes,simultaneousOp,precedenceOfOperations,precedenceOverOperations,
+                                                                                            -1,0);
                         secondOr.setLatestTime(newLSecondOr);
                         //System.out.println("index connected: " + indexConnected);
-                        ConstructionHeuristic.updateLatest(newLSecondOr, indexConnected, pValues.getConnectedRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,"notLocal");
+                        ConstructionHeuristic.updateLatest(newLSecondOr, indexConnected, pValues.getConnectedRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,"notLocal",
+                                                            simultaneousOp,precedenceOfOperations,precedenceOverOperations);
                         ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(routeConnectedOp), connectedOpPValues.getIndex(), TimeVesselUseOnOperation,
                                 startNodes, simOpRoutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, precedenceOverRoutes,
                                 vesselRoutes, simultaneousOp, SailingTimes);
@@ -807,7 +811,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 vesselRoutes.get(route).get(vesselRoutes.get(route).size() - 1).setLatestTime(latest);
                 ConstructionHeuristic.updateEarliestAfterRemoval(earliest, 0, route, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselRoutes,twIntervals);
                 ConstructionHeuristic.updateLatestAfterRemoval(latest, vesselRoutes.get(route).size() - 1, route, vesselRoutes, TimeVesselUseOnOperation,
-                        startNodes, SailingTimes,twIntervals);
+                        startNodes, SailingTimes,twIntervals,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
             }
         }
 

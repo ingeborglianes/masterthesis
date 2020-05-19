@@ -1575,7 +1575,7 @@ public class LS_operators {
         ConstructionHeuristic.updateEarliest(vesselroutes.get(vessel).get(pos1).getEarliestTime(), pos1, vessel, TimeVesselUseOnOperation, startNodes,
                 SailingTimes, vesselroutes,"local");
         ConstructionHeuristic.updateLatest(vesselroutes.get(vessel).get(pos1).getLatestTime(), pos1, vessel, TimeVesselUseOnOperation, startNodes,
-                SailingTimes, vesselroutes,"local");
+                SailingTimes, vesselroutes,"local",simultaneousOp,precedenceOfOperations,precedenceOverOperations);
         //updateConRoutes(simOpRoutes,precedenceOfRoutes, precedenceOverRoutes, vessel,vesselroutes,null);
 
         //ConstructionHeuristic.updatePrecedenceOver(checkPrecedence(routeIndex,0),indexInRoute);
@@ -1766,7 +1766,8 @@ public class LS_operators {
                         cur_latestTemp = latestTemp;
                         sValues.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println(sValues.getOperationObject().getLatestTime() + " setting the latest time of " + sValues.getOperationObject().getID() );
-                        feasible = ConstructionHeuristic.updateLatest(cur_latestTemp, sValues.getIndex(), routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        feasible = ConstructionHeuristic.updateLatest(cur_latestTemp, sValues.getIndex(), routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local",
+                                                                        simultaneousOp,precedenceOfOperations,precedenceOverOperations);
                         if(!feasible){
                             return feasible;
                         }
@@ -1775,7 +1776,8 @@ public class LS_operators {
                         simOp.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println(simOp.getOperationObject().getLatestTime() + " setting the latest time of " + simOp.getOperationObject().getID() );
 
-                        feasible = ConstructionHeuristic.updateLatest(cur_latestTemp, simOp.getIndex(), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local");
+                        feasible = ConstructionHeuristic.updateLatest(cur_latestTemp, simOp.getIndex(), simOp.getRoute(), TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"local",
+                                                                        simultaneousOp,precedenceOfOperations,precedenceOverOperations);
                         if(!feasible){
                             return feasible;
                         }
@@ -1934,9 +1936,9 @@ public class LS_operators {
                                 precedenceOverFeasible = LargeNeighboorhoodSearchInsert.checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, 0, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods,
                                         SailingTimes, vesselroutes, precedenceOfOperations, precedenceOverRoutes, unroutedTasks);
                                 precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, 0, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                        vesselroutes, precedenceOverOperations, precedenceOfRoutes);
+                                        vesselroutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, simultaneousOp);
                                 simultaneousFeasible = LargeNeighboorhoodSearchInsert.checkSimultaneousFeasibleLNS(simOpRoutes.get(v), o, v, 0, earliestTemp, latestTemp, simultaneousOp, simALNS,
-                                        startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes, routeConnectedSimultaneous, simAIndex);
+                                        startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes, routeConnectedSimultaneous, simAIndex,precedenceOfOperations,precedenceOverOperations);
                                 if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
                                     //System.out.println("Feasible for position n=0");
                                     /*if (simALNS[o - startNodes.length - 1][1] == 0) {
@@ -1998,9 +2000,9 @@ public class LS_operators {
                                 precedenceOverFeasible = LargeNeighboorhoodSearchInsert.checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods, SailingTimes,
                                         vesselroutes, precedenceOfOperations, precedenceOverRoutes, unroutedTasks);
                                 precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                        vesselroutes, precedenceOverOperations, precedenceOfRoutes);
+                                        vesselroutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, simultaneousOp);
                                 simultaneousFeasible = LargeNeighboorhoodSearchInsert.checkSimultaneousFeasibleLNS(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp, simultaneousOp,
-                                        simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes, routeConnectedSimultaneous, simAIndex);
+                                        simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation, vesselroutes, routeConnectedSimultaneous, simAIndex, precedenceOfOperations,precedenceOverOperations);
                                 if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
                                     //System.out.println("Feasible for last position in route");
                                     /*if (simALNS[o - startNodes.length - 1][1] == 0) {
@@ -2066,12 +2068,12 @@ public class LS_operators {
                                     if (simultaneousFeasible) {
                                         simultaneousFeasible = LargeNeighboorhoodSearchInsert.checkSimultaneousFeasibleLNS(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp,
                                                 simultaneousOp, simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation,
-                                                vesselroutes, routeConnectedSimultaneous, simAIndex);
+                                                vesselroutes, routeConnectedSimultaneous, simAIndex,precedenceOfOperations,precedenceOverOperations);
                                     }
                                     precedenceOverFeasible = LargeNeighboorhoodSearchInsert.checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation,
                                             nTimePeriods, SailingTimes, vesselroutes, precedenceOfOperations, precedenceOverRoutes, unroutedTasks);
                                     precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                            vesselroutes, precedenceOverOperations, precedenceOfRoutes);
+                                            vesselroutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, simultaneousOp);
                                     if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
                                         System.out.println("Feasible for index: "+(n+1));
                                         /*if (simALNS[o - startNodes.length - 1][1] == 0) {

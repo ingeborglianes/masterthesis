@@ -686,7 +686,7 @@ public class RelocateInsert {
                                     precedenceOverFeasible = checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, 0, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods,
                                             SailingTimes, vesselRoutes, precedenceOfOperations, precedenceOverRoutes);
                                     precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, 0, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                            vesselRoutes, precedenceOverOperations, precedenceOfRoutes);
+                                            vesselRoutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, simultaneousOp);
                                     simultaneousFeasible = checkSimultaneousFeasibleLNS(simOpRoutes.get(v), o, v, 0, earliestTemp, latestTemp, simultaneousOp, simALNS,
                                             startNodes, SailingTimes, TimeVesselUseOnOperation,vesselRoutes,routeConnectedSimultaneous,simAIndex);
                                     if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
@@ -748,7 +748,7 @@ public class RelocateInsert {
                                     precedenceOverFeasible = checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation, nTimePeriods, SailingTimes,
                                             vesselRoutes, precedenceOfOperations, precedenceOverRoutes);
                                     precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                            vesselRoutes, precedenceOverOperations, precedenceOfRoutes);
+                                            vesselRoutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, simultaneousOp);
                                     simultaneousFeasible = checkSimultaneousFeasibleLNS(simOpRoutes.get(v), o, v, n + 1, earliestTemp, latestTemp, simultaneousOp,
                                             simALNS, startNodes, SailingTimes, TimeVesselUseOnOperation,vesselRoutes,routeConnectedSimultaneous,simAIndex);
                                     if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
@@ -820,7 +820,7 @@ public class RelocateInsert {
                                         precedenceOverFeasible = checkPOverFeasibleLNS(precedenceOverRoutes.get(v), o, n + 1, earliestTemp, startNodes, TimeVesselUseOnOperation,
                                                 nTimePeriods, SailingTimes, vesselRoutes, precedenceOfOperations, precedenceOverRoutes);
                                         precedenceOfFeasible = ConstructionHeuristic.checkPOfFeasible(precedenceOfRoutes.get(v), o, n + 1, latestTemp, startNodes, TimeVesselUseOnOperation, SailingTimes,
-                                                vesselRoutes, precedenceOverOperations, precedenceOfRoutes);
+                                                vesselRoutes, precedenceOverOperations, precedenceOfOperations, precedenceOfRoutes, simultaneousOp);
                                         if (precedenceOverFeasible && precedenceOfFeasible && simultaneousFeasible) {
                                             //System.out.println("Feasible for index: "+(n+1));
                                             if(simALNS[o-startNodes.length-1][1]==0) {
@@ -1115,7 +1115,7 @@ public class RelocateInsert {
                     }
                 }
                 ArrayList<ArrayList<Integer>> latest_change = ConstructionHeuristic.checkChangeLatestSim(latestTemp,insertIndex,v,o,op.getOperationObject().getID(),startNodes,
-                        SailingTimes,TimeVesselUseOnOperation,simultaneousOp,vesselroutes);
+                        SailingTimes,TimeVesselUseOnOperation,simultaneousOp,vesselroutes, precedenceOverOperations,precedenceOfOperations);
                 if(!latest_change.isEmpty()){
                     for(ArrayList<Integer> connectedTimes : latest_change){
                         //System.out.println(connectedTimes.get(0) + " , " + connectedTimes.get(1) + " latest change");

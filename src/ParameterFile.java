@@ -6,7 +6,7 @@ public class ParameterFile {
 
     //Insert the filepath of the weatherfile, if you want no weather impact, use the file path for the
     //normal weather file
-    public static String weatherFile= "weather_files/weather_normal.txt";
+    public static String weatherFile= "weather_files/weather_september.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
     public static String testInstance ="test_instances/25_4_locations_normalOpGenerator.txt";
@@ -25,18 +25,18 @@ public class ParameterFile {
 
     public static int numberOfRemoval=15;
     public static int randomSeed=50;
-    public static double relatednessWeightDistance=0.08;
-    public static double relatednessWeightDuration=0.5;
-    public static double relatednessWeightTimewindows=0.01;
-    public static double relatednessWeightPrecedenceOver=0.1;
-    public static double relatednessWeightPrecedenceOf=0.1;
-    public static double relatednessWeightSimultaneous=0.1;
-    public static int numberOfIterations = 10;
+    public static double relatednessWeightDistance=0.08;        // a0
+    public static double relatednessWeightDuration=0.5;         // a1
+    public static double relatednessWeightTimewindows=0.01;     //Brukes ikke
+    public static double relatednessWeightPrecedenceOver=0.1;   //Brukes ikke
+    public static double relatednessWeightPrecedenceOf=0.1;     //Brukes ikke
+    public static double relatednessWeightSimultaneous=0.1;     //Brukes ikke
+    public static int numberOfIterations = 100;
     public static int numberOfSegmentIterations=100;
-    public static double controlParameter=0;
-    public static int reward1=33;
-    public static int reward2=9;
-    public static int reward3=13;
+    public static double controlParameter=0;                    // cooling rate
+    public static int reward1=33;                               // sigma1
+    public static int reward2=9;                                // sigma2
+    public static int reward3=13;                               // sigma3
     public static double lowerThresholdWeights=1.0;
     public static int iterationsWithoutImprovementParameter=50;
     public static int earlyPrecedenceFactor=20;
