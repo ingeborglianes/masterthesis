@@ -189,10 +189,13 @@ public class LargeNeighboorhoodSearchInsert {
                 if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() != -100000) {
                     regretValueTemp2 = allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease();
                 }
-                else if(allFeasibleInsertions.get(ourID).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
+                else if(allFeasibleInsertions.get(simA).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
                     regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                 }
                 else if (allFeasibleInsertions.get(simA).size() == 1 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() == -100000) {
+                    regretValueTemp2 = -100000;
+                }
+                else if (allFeasibleInsertions.get(simA).size() == 2 && allFeasibleInsertions.get(simA).get(0).getBenenefitIncrease() == -100000) {
                     regretValueTemp2 = -100000;
                 }
                 else {
@@ -256,6 +259,9 @@ public class LargeNeighboorhoodSearchInsert {
                 else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
                     regretValueTemp2=-100000;
                 }
+                else if(allFeasibleInsertions.get(ourID).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
+                    regretValueTemp2=-100000;
+                }
                 else{
                     int ourValue1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                     int ourValue2=allFeasibleInsertions.get(ourID).get(2).getBenenefitIncrease();
@@ -304,6 +310,9 @@ public class LargeNeighboorhoodSearchInsert {
                     regretValueTemp2=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                 }
                 else if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
+                    regretValueTemp2=-100000;
+                }
+                else if(allFeasibleInsertions.get(ourID).size()==2 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()==-100000){
                     regretValueTemp2=-100000;
                 }
                 else{
@@ -704,6 +713,7 @@ public class LargeNeighboorhoodSearchInsert {
                 //System.out.println(unroutedTasks.get(n).getID());
             }
         }
+        /*
         System.out.println("\nCONSOLIDATED DICTIONARY:");
         for(Map.Entry<Integer, ConsolidatedValues> entry : consolidatedOperations.entrySet()){
             ConsolidatedValues cv = entry.getValue();
@@ -716,6 +726,8 @@ public class LargeNeighboorhoodSearchInsert {
             System.out.println("small route 2 "+cv.getConnectedRoute2());
             System.out.println("route consolidated task "+cv.getConsolidatedRoute()+"\n");
         }
+
+         */
         while(continueInsert){
             int insertID=-1;
             if(method.equals("best")){
@@ -728,6 +740,7 @@ public class LargeNeighboorhoodSearchInsert {
             else if(method.equals("regret_3")){
                 insertID= calculateInsertionValuesRegret3Insertion();
             }
+            /*
             System.out.println("UNROUTED ALL FEASIBLE DICTIONARY AFTER ONE ROUTE OF CALCULATIONS");
             for (Map.Entry<Integer, List<InsertionValues>> entry : allFeasibleInsertions.entrySet()) {
                 int key = entry.getKey();
@@ -740,6 +753,8 @@ public class LargeNeighboorhoodSearchInsert {
                 }
                 System.out.println(" ");
             }
+
+             */
             if(insertID!=-1 && unroutedTasks.size()!=0){
                 OperationInRoute insertOR=null;
                 for (int i=0;i<unroutedTasks.size();i++){
@@ -748,7 +763,7 @@ public class LargeNeighboorhoodSearchInsert {
                     }
                 }
                 if(insertOR!=null){
-                    System.out.println("Operation chosen to insert: "+insertOR.getID());
+                    //System.out.println("Operation chosen to insert: "+insertOR.getID());
                     unroutedTasks.remove(insertOR);
                     InsertionValues insertValuesOR=allFeasibleInsertions.get(insertOR.getID()).get(0);
                     if(bigTasksALNS[insertID-1-startNodes.length]!=null){

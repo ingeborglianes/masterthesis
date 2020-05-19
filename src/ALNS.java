@@ -396,10 +396,15 @@ public class ALNS {
     }
 
     public Boolean acceptedByProb(int currentObj, int newObj){
-        if(TParameter==-1){
+        double current= (double) currentObj;
+        double newO= (double) newObj;
+        if(TParameter==-1 && (newO / current >0.95)){
             TParameter=(-(currentObj-newObj)*Math.log(Math.exp(1)))/Math.log(0.5);
             System.out.println("T start "+TParameter);
             System.out.println("T decrase parameter "+T_decrease_parameter);
+        }
+        if(TParameter==-1){
+            return false;
         }
         double randomNum=generator.nextDouble();
         double prob=Math.exp(-(currentObj-newObj)/TParameter);
