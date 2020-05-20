@@ -670,7 +670,7 @@ public class ALNS {
 
     public void runDestroyRepair(){
         for (int i =0; i<numberOfIterations; i++){
-            //System.out.println("iteration "+i);
+            System.out.println("Iteration "+i);
             //System.out.println("Print før kjøring");
             //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
             //consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
