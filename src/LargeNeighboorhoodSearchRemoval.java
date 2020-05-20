@@ -139,24 +139,30 @@ public class LargeNeighboorhoodSearchRemoval {
     public void worstRemoval(){
         sortOperationsProfitDecrease("benefit");
         while (removedOperations.size()<numberOfRemoval && sortedOperationsByProfitDecrease.size()>0){
-            int selectedTaskID=sortedOperationsByProfitDecrease.get(0);
+            double randomY=generator.nextDouble();
+            int removeIndex = (int) Math.floor(Math.pow(randomY,ParameterFile.randomnessParameterRemoval)*sortedOperationsByProfitDecrease.size());
+            int selectedTaskID=sortedOperationsByProfitDecrease.get(removeIndex);
             routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
             OperationInRoute selectedTask = properties.getOr();
             int route=properties.getRoute();
-            int index=0;
+            int indexInRoute=0;
             for (int i=0;i<vesselRoutes.get(route).size();i++){
                 if(vesselRoutes.get(route).get(i).getID()==selectedTaskID){
-                    index=i;
+                    indexInRoute=i;
                 }
             }
-            removeOperations(selectedTask,route,index,"worstRemoval");
+            removeOperations(selectedTask,route,indexInRoute,"worstRemoval");
         }
     }
 
     public void worstRemovalSailing(){
         sortOperationsProfitDecrease("sailing");
         while (removedOperations.size()<numberOfRemoval && sortedOperationsByProfitDecrease.size()>0){
-            int selectedTaskID=sortedOperationsByProfitDecrease.get(0);
+            double randomY=generator.nextDouble();
+            int removeIndex = (int) Math.floor(Math.pow(randomY,ParameterFile.randomnessParameterRemoval)*sortedOperationsByProfitDecrease.size());
+            //System.out.println("remove index: "+removeIndex);
+            //System.out.println("length sorted list: "+sortedOperationsByProfitDecrease.size());
+            int selectedTaskID=sortedOperationsByProfitDecrease.get(removeIndex);
             routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
             OperationInRoute selectedTask = properties.getOr();
             int route=properties.getRoute();
@@ -182,7 +188,14 @@ public class LargeNeighboorhoodSearchRemoval {
             OperationInRoute chosenTask=setOfRelatedOperations.get(randomIndexFromRelatedSet);
             //System.out.println("Operation to be compared randomness with "+chosenTask.getID());
             sortOperationsRelatedness(chosenTask,"simple");
-            int selectedTaskID=sortedOperationsByRelatedness.get(0);
+            double randomY=generator.nextDouble();
+            //System.out.println("number to multiply with length to find index "+Math.pow(randomY,ParameterFile.randomnessParameterRemoval));
+            //System.out.println("floor value of "+Math.floor(Math.pow(randomY,ParameterFile.randomnessParameterRemoval)*sortedOperationsByRelatedness.size()));
+            //System.out.println("not floor value of "+Math.pow(randomY,ParameterFile.randomnessParameterRemoval)*sortedOperationsByRelatedness.size());
+            int removeIndex = (int) Math.floor(Math.pow(randomY,ParameterFile.randomnessParameterRemoval)*sortedOperationsByRelatedness.size());
+            //System.out.println("remove index: "+removeIndex);
+            //System.out.println("length sorted list: "+sortedOperationsByRelatedness.size());
+            int selectedTaskID=sortedOperationsByRelatedness.get(removeIndex);
             routeIndexObjectForOperation properties=routeObjectDict.get(selectedTaskID);
             OperationInRoute selectedTask = properties.getOr();
             int route=properties.getRoute();
@@ -204,7 +217,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 int selectedTaskID=i+startNodes.length+1;
                 if(precedenceOverOperations.get(selectedTaskID)!=null){
                     PrecedenceValues pv= precedenceOverOperations.get(selectedTaskID);
-                    System.out.println("Remove pres");
+                    //System.out.println("Remove pres");
                     removeSynchronizedOp(simultaneousOp.get(selectedTaskID), precedenceOverOperations.get(selectedTaskID),
                             precedenceOfOperations.get(selectedTaskID), selectedTaskID, pv.getOperationObject(),"syncRemoval");
                     removeDependentOperations(selectedTaskID, "syncRemoval");
@@ -217,7 +230,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 int selectedTaskID=i+startNodes.length+1;
                 if(simultaneousOp.get(selectedTaskID)!=null){
                     ConnectedValues cv= simultaneousOp.get(selectedTaskID);
-                    System.out.println("Remove sim");
+                    //System.out.println("Remove sim");
                     removeSynchronizedOp(simultaneousOp.get(selectedTaskID), precedenceOverOperations.get(selectedTaskID),
                             precedenceOfOperations.get(selectedTaskID), selectedTaskID, cv.getOperationObject(),"syncRemoval");
                     removeDependentOperations(selectedTaskID,"syncRemoval");
@@ -667,7 +680,7 @@ public class LargeNeighboorhoodSearchRemoval {
         }
 
          */
-        System.out.println("route "+route+" index "+index + "task "+selectedTaskID);
+        //System.out.println("route "+route+" index "+index + "task "+selectedTaskID);
         vesselRoutes.get(route).remove(index);
         ConstructionHeuristic.updateIndexesRemoval(route, index, vesselRoutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
         if(simOp!=null){
@@ -1032,7 +1045,7 @@ public class LargeNeighboorhoodSearchRemoval {
                 dg.getOperationGain(),dg.getBigTasksALNS(),15,21,dg.getDistOperationsInInstance(),
                 0.08,0.5,0.01,0.1,
                 0.1,0.1,dg.getOperationGainGurobi(),vesseltypes);
-        LNS.runLNSRemoval("related");
+        LNS.runLNSRemoval("worst_sailing");
         System.out.println("-----------------");
         LNS.printLNSSolution(vesseltypes);
         //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
