@@ -21,7 +21,7 @@ public class ParameterFile {
 
 
     //Insert the filepath of the positions.csv file which has all instances between all locations used
-    public static String filePathPositionFile= "Positions.csv";
+    public static String filePathPositionFile= "DistanceMatrixMowiNorway.csv";
 
     public static int numberOfRemoval=15;
     public static int randomSeed=50;

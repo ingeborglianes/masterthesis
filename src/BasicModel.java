@@ -637,7 +637,8 @@ public class BasicModel {
             locStart = new int[]{1, 2, 3,4};
         }
         //dg.printAllData();
-        for(int i =1;i<5;i++){
+        /*
+        for(int i =5;i<6;i++){
             if(i==0){
                 testInstance="test_instances/30_locations_normalOpGenerator.txt";
             }
@@ -654,15 +655,15 @@ public class BasicModel {
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel());
             List<String> routing = m.runModel(testInstance);
             m.writeToFile(routing, nameResultFile);
-        }
-        for(int i =1;i<5;i++){
+        }*/
+        for(int i =1;i<6;i++){
             if(i==0){
                 testInstance="test_instances/25_locations_normalOpGenerator.txt";
             }
             else{
                 vessels = new int[]{1, 3, 4, 5, 6};
                 locStart = new int[]{1, 3, 4, 5, 6};
-                testInstance="test_instances/35" + "_"+i+"_locations_normalOpGenerator.txt";
+                testInstance="test_instances/35" + "_"+i+"_locations_normalOpGenerator_old.txt";
             }
             DataGenerator dg = new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
             dg.generateData();
@@ -673,7 +674,7 @@ public class BasicModel {
             List<String> routing = m.runModel(testInstance);
             m.writeToFile(routing, nameResultFile);
         }
-        for(int i =1;i<5;i++){
+        for(int i =1;i<6;i++){
             if(i==0){
                 testInstance="test_instances/25_locations_normalOpGenerator.txt";
             }

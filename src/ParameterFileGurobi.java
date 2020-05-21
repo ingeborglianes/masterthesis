@@ -21,6 +21,6 @@ public class ParameterFileGurobi {
 
 
     //Insert the filepath of the positions.csv file which has all instances between all locations used
-    public static String filePathPositionFile= "Positions.csv";
+    public static String filePathPositionFile= "DistanceMatrixMowiNorway.csv";
 
 }
