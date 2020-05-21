@@ -341,7 +341,7 @@ public class SwitchConsolidated {
                                 ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes,false,null,0);
                     }
                     else{
                         LargeNeighboorhoodSearchInsert.findInsertionCosts(new OperationInRoute(small1,0,0),-1,-1,
@@ -349,7 +349,7 @@ public class SwitchConsolidated {
                                 ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes,false,null,0);
                     }
                     //System.out.println("insertion possibilities found for sim a");
                     for (int i=0;i<allFeasibleInsertions.get(small1).size();i++){
@@ -381,7 +381,7 @@ public class SwitchConsolidated {
                                     ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                     SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                     operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                    simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
+                                    simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes,false,null,0);
                             int size=allFeasibleInsertions.get(small2).size();
                             InsertionValues ourValues=allFeasibleInsertions.get(small2).get(size-1);
                             int ourBenefitIncrease=ourValues.getBenenefitIncrease();
@@ -452,7 +452,7 @@ public class SwitchConsolidated {
                             ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                             SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                             operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                            simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes);
+                            simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesselTypes,false,null,0);
                     bigTaskInsertionValues=allFeasibleInsertions.get(bigTask).get(0);
 
                 }

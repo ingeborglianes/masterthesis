@@ -138,7 +138,7 @@ public class DataGenerator {
                     distInt = (int) Math.ceil(Double.parseDouble(distReplaced.trim()));
                     if(distInt>maxDistance){
                         maxDistance=distInt;
-                        System.out.println(countInner+" and "+countOuter);
+                        //System.out.println(countInner+" and "+countOuter);
                     }
                 }
                 temp.add(distInt);
@@ -189,7 +189,7 @@ public class DataGenerator {
         }
         s.close();
         for (List<OperationType> opLoc:logOperations.values()){
-            System.out.println("New sorted list");
+            //System.out.println("New sorted list");
             int numberOfOperations=opLoc.size();
             opLoc.sort(Comparator.comparing(OperationType::getNumber));
             /*
@@ -199,10 +199,11 @@ public class DataGenerator {
                 }
             }
              */
+            /*
             for(int i =0;i<numberOfOperations;i++){
                 System.out.println("Type: "+opLoc.get(i).getNumber());
             }
-
+             */
         }
     }
 
@@ -854,6 +855,10 @@ public class DataGenerator {
 
     public int[][] getDistOperationsInInstance() {
         return distOperationsInInstance;
+    }
+
+    public int getMaxDistance() {
+        return maxDistance;
     }
 
     public static String removeSpace(String str)

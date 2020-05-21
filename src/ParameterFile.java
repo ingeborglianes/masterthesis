@@ -23,6 +23,8 @@ public class ParameterFile {
     //Insert the filepath of the positions.csv file which has all instances between all locations used
     public static String filePathPositionFile= "DistanceMatrixMowiNorway.csv";
 
+    public static double noiseControlParameter=0.25;
+    public static double randomnessParameterRemoval=5;
     public static int numberOfRemoval=15;
     public static int randomSeed=50;
     public static double relatednessWeightDistance=0.08;        // a0
@@ -31,14 +33,13 @@ public class ParameterFile {
     public static double relatednessWeightPrecedenceOver=0.1;   //Brukes ikke
     public static double relatednessWeightPrecedenceOf=0.1;     //Brukes ikke
     public static double relatednessWeightSimultaneous=0.1;     //Brukes ikke
-    public static int numberOfIterations = 100;
+    public static int numberOfIterations = 5000;
     public static int numberOfSegmentIterations=100;
-    public static double controlParameter=0.1;                   // reaction parameter
+    public static double controlParameter=0.1;                  // reaction parameter
     public static int reward1=33;                               // sigma1
     public static int reward2=9;                                // sigma2
     public static int reward3=13;                               // sigma3
     public static double lowerThresholdWeights=0.2;
-    public static int iterationsWithoutImprovementParameter=50;
-    public static int earlyPrecedenceFactor=20;                 //I construction heuristikken belønnes precedence
+    public static int earlyPrecedenceFactor=20;                 //I konstruksjonsheuristikken belønnes precedence
     public static int localOptimumIterations=1;
 }

@@ -13,6 +13,9 @@ public class ALNS {
     private int[] locStart = new int[]{1,2,3,4,5,6,7};
     private int numberOfRemoval;
     private int randomSeed;
+    private double[] noiseWeights = new double[]{1,1};
+    private int[] noiseScore = new int[]{0,0};
+    private int[] noiseLastSegment = new int[]{0,0};
     private double[] insertionWeights = new double[]{1,1,1};
     private double[] removalWeights = new double[]{1,1,1,1,1,1};
     private int[] insertionScore = new int[]{0,0,0};
@@ -53,8 +56,6 @@ public class ALNS {
     private int reward1;
     private int reward2;
     private int reward3;
-    private int iterationsWithoutImprovementParameter=0;
-    private int iterationsWithoutImprovement=0;
     public double lowerThresholdWeights;
 
     public ALNS(){
@@ -73,7 +74,6 @@ public class ALNS {
         relatednessWeightSimultaneous=ParameterFile.relatednessWeightSimultaneous;
         numberOfIterations=ParameterFile.numberOfIterations;
         controlParameter=ParameterFile.controlParameter;
-        iterationsWithoutImprovementParameter=ParameterFile.iterationsWithoutImprovementParameter;
         lowerThresholdWeights=ParameterFile.lowerThresholdWeights;
         reward1=ParameterFile.reward1;
         reward2=ParameterFile.reward2;
@@ -117,7 +117,7 @@ public class ALNS {
                 dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
         ch.createSortedOperations();
         ch.constructionHeuristic();
-        ch.printInitialSolution(vessels);
+        //ch.printInitialSolution(vessels);
 
         bestRouteSailingCost = ch.getRouteSailingCost();
         bestRouteOperationGain = ch.getRouteOperationGain();
@@ -356,7 +356,25 @@ public class ALNS {
         return insertionMethods.get(randomIndex);
     }
 
-    public void setScoresAndVisits(int scoreIncrease, String insertMethod, String removeMethod){
+    public Boolean chooseNoise(){
+        double totalWeight = 0.0d;
+        for (double i : noiseWeights) {
+            totalWeight += i;
+        }
+        int randomIndex = -1;
+        double random = generator.nextDouble() * totalWeight;
+        for (int i = 0; i < noiseWeights.length; ++i) {
+            random -= noiseWeights[i];
+            if (random <= 0.0d) {
+                randomIndex = i;
+                break;
+            }
+        }
+        List<Boolean> insertionMethods = new ArrayList<>(Arrays.asList(false, true));
+        return insertionMethods.get(randomIndex);
+    }
+
+    public void setScoresAndVisits(int scoreIncrease, String insertMethod, String removeMethod, Boolean noise){
         if(insertMethod.equals("best")){
             insertionScore[0]+=scoreIncrease;
             insertionVisitsLastSegment[0]+=1;
@@ -393,6 +411,14 @@ public class ALNS {
             removalScore[5]+=scoreIncrease;
             removalVisitsLastSegment[5]+=1;
         }
+        if(!noise){
+            noiseScore[0]+=scoreIncrease;
+            noiseLastSegment[0]+=1;
+        }
+        if(noise) {
+            noiseScore[1] += scoreIncrease;
+            noiseLastSegment[1] += 1;
+        }
     }
 
     public Boolean acceptedByProb(int currentObj, int newObj){
@@ -400,15 +426,15 @@ public class ALNS {
         double newO= (double) newObj;
         if(TParameter==-1 && (newO / current >0.95)){
             TParameter=(-(currentObj-newObj)*Math.log(Math.exp(1)))/Math.log(0.5);
-            System.out.println("T start "+TParameter);
-            System.out.println("T decrase parameter "+T_decrease_parameter);
+            //System.out.println("T start "+TParameter);
+            //System.out.println("T decrase parameter "+T_decrease_parameter);
         }
         if(TParameter==-1){
             return false;
         }
         double randomNum=generator.nextDouble();
         double prob=Math.exp(-(currentObj-newObj)/TParameter);
-        System.out.println("probability "+prob);
+        //System.out.println("probability "+prob);
         if(randomNum<=prob){
             return true;
         }
@@ -416,12 +442,12 @@ public class ALNS {
     }
 
     public void evaluateSolution(int[] routeOperationGain, int[] routeSailingCost, List<List<OperationInRoute>> vesselroutes, List<OperationInRoute> unroutedTasks,
-                                 String removalMethod, String insertMethod){
+                                 String removalMethod, String insertMethod, Boolean noise){
         int bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
         int currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
         int newObj = IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
         if(newObj>bestObj){
-            System.out.println("New best global solution "+newObj);
+            //System.out.println("New best global solution "+newObj);
             bestRouteSailingCost = routeSailingCost;
             bestRouteOperationGain = routeOperationGain;
             bestRoutes = copyVesselRoutes(vesselroutes);
@@ -431,44 +457,31 @@ public class ALNS {
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
             discoveredSolutions.add(newObj);
-            iterationsWithoutImprovement=0;
-            setScoresAndVisits(reward1,insertMethod,removalMethod);
+            setScoresAndVisits(reward1,insertMethod,removalMethod,noise);
         }
         else if(newObj>currentObj && !discoveredSolutions.contains(newObj)){
-            System.out.println("New best current solution "+newObj);
+            //System.out.println("New best current solution "+newObj);
             //og ikke discovered før, oppdater current
             currentRouteSailingCost = routeSailingCost;
             currentRouteOperationGain = routeOperationGain;
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
             discoveredSolutions.add(newObj);
-            iterationsWithoutImprovement=0;
-            setScoresAndVisits(reward2,insertMethod,removalMethod);
+            setScoresAndVisits(reward2,insertMethod,removalMethod,noise);
         }
-        else if( !discoveredSolutions.contains(newObj) && acceptedByProb(currentObj,newObj)){
-            System.out.println("New solution, worse than current, but selected by probability "+newObj);
+        else if(acceptedByProb(currentObj,newObj)){
+            //System.out.println("New solution, worse than current, but selected by probability "+newObj);
             currentRouteSailingCost = routeSailingCost;
             currentRouteOperationGain = routeOperationGain;
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
             discoveredSolutions.add(newObj);
-            iterationsWithoutImprovement=0;
-            setScoresAndVisits(reward3,insertMethod,removalMethod);
-        }
-        else if(iterationsWithoutImprovement==iterationsWithoutImprovementParameter){
-            System.out.println("New solution because of search will not move on "+newObj);
-            currentRouteSailingCost = routeSailingCost;
-            currentRouteOperationGain = routeOperationGain;
-            currentRoutes = copyVesselRoutes(vesselroutes);
-            currentUnrouted = copyUnrouted(unroutedTasks);
-            if(!discoveredSolutions.contains(newObj)){
-                discoveredSolutions.add(newObj);
+            if(!discoveredSolutions.contains(newObj) ){
+                setScoresAndVisits(reward3,insertMethod,removalMethod,noise);
             }
-            iterationsWithoutImprovement=0;
         }
         else{
-            System.out.println("Continue with current solution");
-            iterationsWithoutImprovement+=1;
+            //System.out.println("Continue with current solution");
             retainCurrentBestSolution("current");
         }
         /*
@@ -615,7 +628,7 @@ public class ALNS {
             if(route != null) {
                 for (OperationInRoute operation : route) {
                     if (operation.getEarliestTime() > operation.getLatestTime()) {
-                        System.out.println("Earliest time is larger than latest time, infeasible move");
+                        //System.out.println("Earliest time is larger than latest time, infeasible move");
                         return false;
                     }
                 }
@@ -635,7 +648,7 @@ public class ALNS {
                  */
                 if(op.getOperationObject().getEarliestTime() != conOp.getEarliestTime() ||
                         op.getOperationObject().getLatestTime() != conOp.getLatestTime()){
-                    System.out.println("Earliest and/or latest time for simultaneous op do not match, infeasible move");
+                    //System.out.println("Earliest and/or latest time for simultaneous op do not match, infeasible move");
                     return false;
                 }
             }
@@ -646,7 +659,7 @@ public class ALNS {
                 if(conop != null) {
                     if (conop.getEarliestTime() < op.getOperationObject().getEarliestTime() + dg.getTimeVesselUseOnOperation()[op.getRoute()]
                             [op.getOperationObject().getID() - 1-dg.getStartNodes().length][op.getOperationObject().getEarliestTime()]) {
-                        System.out.println("Precedence infeasible, op: "+op.getOperationObject().getID()+ " and "+conop.getID());
+                        //System.out.println("Precedence infeasible, op: "+op.getOperationObject().getID()+ " and "+conop.getID());
                         return false;
                     }
                 }
@@ -657,7 +670,7 @@ public class ALNS {
 
     public void runDestroyRepair(){
         for (int i =0; i<numberOfIterations; i++){
-            System.out.println("iteration "+i);
+            System.out.println("Iteration "+i);
             //System.out.println("Print før kjøring");
             //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
             //consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
@@ -673,7 +686,7 @@ public class ALNS {
             //for run removal, insert method, alternatives: worst, synchronized, route, related, random, worst_sailing
             String removalMethod = chooseRemovalMethod();
             LNSR.runLNSRemoval(removalMethod);
-            System.out.println("---------- Removal method " + removalMethod+ " -----------");
+            //System.out.println("---------- Removal method " + removalMethod+ " -----------");
             /*
             printLNSInsertSolution(vessels, currentRouteSailingCost, currentRouteOperationGain, vesselroutes, dg.getStartNodes(), dg.getSailingTimes(),
                     dg.getTimeVesselUseOnOperation(), unroutedTasks, precedenceOverOperations, consolidatedOperations,
@@ -684,18 +697,18 @@ public class ALNS {
             //unroutedTasks,precedenceOverOperations,consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
             //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
             //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),dg.getStartNodes().length);
+            Boolean noise=chooseNoise();
             LargeNeighboorhoodSearchInsert LNSI = new LargeNeighboorhoodSearchInsert(precedenceOverOperations,precedenceOfOperations,
                     simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,unroutedTasks,vesselroutes,
                     LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
                     dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),vessels);
-
+                    dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vessels, noise);
             //for run insertion, insert method, alternatives: best, regret
             String insertionMethod = chooseInsertionMethod();
-            System.out.println("-------Insertion method " + insertionMethod + " ----------");
+            //System.out.println("-------Insertion method " + insertionMethod + " ----------");
             LNSI.runLNSInsert(insertionMethod);
             //LNSI.printLNSInsertSolution(vessels);
-            evaluateSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks(), removalMethod, insertionMethod);
+            evaluateSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks(), removalMethod, insertionMethod,noise);
             //LNSI.printLNSInsertSolution(vessels);
             updateWeightsAndTemperatureAndSegmentIterations();
         }
@@ -705,7 +718,7 @@ public class ALNS {
         if(TParameter!=-1){
             TParameter=TParameter*T_decrease_parameter;
         }
-        System.out.println("T parameter "+TParameter);
+        //System.out.println("T parameter "+TParameter);
         if(segmentIteration<numberOfSegmentIterations){
             segmentIteration+=1;
         }
@@ -715,8 +728,8 @@ public class ALNS {
                 if(insertionVisitsLastSegment[n]!=0) {
                     double newWeight = insertionWeights[n] * (1 - controlParameter) + (controlParameter * insertionScore[n]) / insertionVisitsLastSegment[n];
                     insertionWeights[n] = newWeight;
-                    if(insertionWeights[n] <1){
-                        insertionWeights[n] =1;
+                    if(insertionWeights[n] <lowerThresholdWeights){
+                        insertionWeights[n] =lowerThresholdWeights;
                     }
                 }
             }
@@ -724,19 +737,34 @@ public class ALNS {
                 if(removalVisitsLastSegment[n]!=0) {
                     double newWeight = removalWeights[n] * (1 - controlParameter) + (controlParameter * removalScore[n]) / removalVisitsLastSegment[n];
                     removalWeights[n] = newWeight;
-                    if(removalWeights[n] <1){
-                        removalWeights[n] =1;
+                    if(removalWeights[n] <lowerThresholdWeights){
+                        removalWeights[n] =lowerThresholdWeights;
                     }
                 }
             }
+            for (int n=0;n<noiseWeights.length;n++){
+                if(noiseLastSegment[n]!=0) {
+                    double newWeight = noiseWeights[n] * (1 - controlParameter) + (controlParameter * noiseScore[n]) / noiseLastSegment[n];
+                    noiseWeights[n] = newWeight;
+                    if(noiseWeights[n] <lowerThresholdWeights){
+                        noiseWeights[n] =lowerThresholdWeights;
+                    }
+                }
+            }
+            /*
             System.out.println("Insertion weights");
             System.out.println(Arrays.toString(insertionWeights));
             System.out.println("Removal weights");
             System.out.println(Arrays.toString(removalWeights));
+            System.out.println("Noise weights");
+            System.out.println(Arrays.toString(noiseWeights));
+             */
             Arrays.fill(removalVisitsLastSegment, 0);
             Arrays.fill(insertionVisitsLastSegment, 0);
+            Arrays.fill(noiseLastSegment, 0);
             Arrays.fill(insertionScore, 0);
             Arrays.fill(removalScore, 0);
+            Arrays.fill(noiseScore, 0);
         }
     }
 
@@ -772,4 +800,5 @@ public class ALNS {
             System.out.println(ur.getID());
         }
     }
+
 }
