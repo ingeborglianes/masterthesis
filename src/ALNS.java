@@ -1,17 +1,13 @@
-import java.io.FileNotFoundException;
-import java.sql.Array;
-import java.sql.SQLOutput;
+import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.Random;
 
 public class ALNS {
     private ConstructionHeuristic ch;
     private DataGenerator dg;
-    private int[] vessels=new int[]{1,2,4,5,5,6,2};
-    private int[] locStart = new int[]{1,2,3,4,5,6,7};
-    private int numberOfRemoval;
+    private int[] vessels=new int[]{};
+    private double numberOfRemoval;
     private int randomSeed;
     private double[] noiseWeights = new double[]{1,1};
     private int[] noiseScore = new int[]{0,0};
@@ -57,14 +53,16 @@ public class ALNS {
     private int reward2;
     private int reward3;
     public double lowerThresholdWeights;
+    public int loc;
+    public String testInstance;
 
-    public ALNS(){
-        int loc = ParameterFile.loc;
-        String nameResultFile =ParameterFile.nameResultFile;
-        String testInstance=ParameterFile.testInstance;
+    public ALNS(int loc, String testInstance, double numberOfRemoval){
+        this.loc = loc;
+        this.numberOfRemoval=numberOfRemoval;
+        this.testInstance=testInstance;
+        String nameResultFile =ParameterFile.nameResultFile+testInstance;
         int days = ParameterFile.days;
         String weatherFile = ParameterFile.weatherFile;
-        numberOfRemoval=ParameterFile.numberOfRemoval;
         randomSeed=ParameterFile.randomSeed;
         relatednessWeightDistance=ParameterFile.relatednessWeightDistance;
         relatednessWeightDuration=ParameterFile.relatednessWeightDuration;
@@ -81,20 +79,21 @@ public class ALNS {
         numberOfSegmentIterations=ParameterFile.numberOfSegmentIterations;
         T_decrease_parameter=Math.pow(0.2,1.0/numberOfIterations);
 
+        int[] locStart = new int[]{};
         if (loc == 20) {
-            vessels = new int[]{1, 2, 3, 4, 5};
-            locStart = new int[]{1, 2, 3, 4, 5};
+            vessels = new int[]{3, 4, 5};
+            locStart = new int[]{94, 95, 96};
         } else if (loc == 25) {
             vessels = new int[]{3, 4, 5, 6};
-            locStart = new int[]{3, 4, 5, 6};
+            locStart = new int[]{94, 95, 96, 97};
         }
         else if (loc == 30 || loc == 35) {
             vessels = new int[]{1, 3, 4, 5, 6};
             locStart = new int[]{1,3, 4, 5, 6};
         }
-        else if (loc == 5) {
-            vessels = new int[]{2,3,5};
-            locStart = new int[]{1, 2, 3};
+        else if (loc == 40) {
+            vessels = new int[]{1,2,3,4,5,6};
+            locStart = new int[]{94,94,96,97,98,99};
         }
         else if (loc == 10) {
             vessels = new int[]{2, 3, 5};
@@ -104,7 +103,11 @@ public class ALNS {
             vessels = new int[]{1 , 2 , 4,5};
             locStart = new int[]{1, 2, 3,4};
         }
-        dg= new DataGenerator(vessels, days, locStart, testInstance, nameResultFile, weatherFile);
+        else if (loc == 60) {
+            vessels = new int[]{1,2,3,4,5,6,1,2,3,4,5,6};
+            locStart = new int[]{94,95,96,97,98,99,100,101,102,103,104,105};
+        }
+        dg= new DataGenerator(vessels, days, locStart, testInstance, nameResultFile+testInstance, weatherFile);
         try {
             dg.generateData();
         } catch (FileNotFoundException e) {
@@ -520,24 +523,45 @@ public class ALNS {
     }
 
 
-    public void printLNSInsertSolution(int[] vessseltypes, int[]routeSailingCost,int[]routeOperationGain,List<List<OperationInRoute>> vesselRoutes,
-                                       int[] startNodes, int[][][][] SailingTimes, int[][][] TimeVesselUseOnOperation, List<OperationInRoute> unroutedTasks,
-                                       Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, ConsolidatedValues> consolidatedOperations,
-                                       Map<Integer, PrecedenceValues> precedenceOfOperations,Map<Integer, ConnectedValues> simultaneousOp,
-                                       List<Map<Integer, ConnectedValues>> simOpRoutes){
+    public void writeToFile(List<String> parameters, String filename){
+        try(FileWriter fw = new FileWriter(filename, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw))
+        {
+            for(String s : parameters) {
+                out.println(s);
+            }
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
 
+        }
+    }
+
+
+    public List<String> printLNSInsertSolution(int[] vessseltypes, int[]routeSailingCost, int[]routeOperationGain, List<List<OperationInRoute>> vesselRoutes,
+                                               int[] startNodes, int[][][][] SailingTimes, int[][][] TimeVesselUseOnOperation, List<OperationInRoute> unroutedTasks,
+                                               Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, ConsolidatedValues> consolidatedOperations,
+                                               Map<Integer, PrecedenceValues> precedenceOfOperations, Map<Integer, ConnectedValues> simultaneousOp,
+                                               List<Map<Integer, ConnectedValues>> simOpRoutes){
+        List<String> final_routes=new ArrayList<>();
         System.out.println("Print Solution ALNS class");
 
         System.out.println("Sailing cost per route: "+ Arrays.toString(routeSailingCost));
+        final_routes.add("Sailing cost per route: "+ Arrays.toString(routeSailingCost));
         System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
+        final_routes.add("Operation gain per route: "+Arrays.toString(routeOperationGain));
         int obj= IntStream.of(routeOperationGain).sum()-IntStream.of(routeSailingCost).sum();
         System.out.println("Objective value: "+obj);
+        final_routes.add("Objective value: "+obj);
         for (int i=0;i<vesselRoutes.size();i++){
             int totalTime=0;
             System.out.println("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
+            final_routes.add("VESSELINDEX "+i+" VESSELTYPE "+vessseltypes[i]);
             if (vesselRoutes.get(i)!=null) {
                 for (int o=0;o<vesselRoutes.get(i).size();o++) {
                     System.out.println("Operation number: "+vesselRoutes.get(i).get(o).getID() + " Earliest start time: "+
+                            vesselRoutes.get(i).get(o).getEarliestTime()+ " Latest Start time: "+ vesselRoutes.get(i).get(o).getLatestTime());
+                    final_routes.add("Operation number: "+vesselRoutes.get(i).get(o).getID() + " Earliest start time: "+
                             vesselRoutes.get(i).get(o).getEarliestTime()+ " Latest Start time: "+ vesselRoutes.get(i).get(o).getLatestTime());
                     if (o==0){
                         totalTime+=SailingTimes[i][0][i][vesselRoutes.get(i).get(o).getID()-1];
@@ -554,18 +578,26 @@ public class ALNS {
                 }
             }
             System.out.println("TOTAL DURATION FOR ROUTE: "+totalTime);
+            final_routes.add("TOTAL DURATION FOR ROUTE: "+totalTime);
         }
         if(!unroutedTasks.isEmpty()){
             System.out.println("UNROUTED TASKS");
+            final_routes.add("UNROUTED TASKS");
             for(int n=0;n<unroutedTasks.size();n++) {
                 System.out.println(unroutedTasks.get(n).getID());
+                final_routes.add(String.valueOf(unroutedTasks.get(n).getID()));
             }
         }
         System.out.println(" ");
+        final_routes.add(" ");
         System.out.println("SIMULTANEOUS DICTIONARY");
+        final_routes.add("SIMULTANEOUS DICTIONARY");
         for(Map.Entry<Integer, ConnectedValues> entry : simultaneousOp.entrySet()){
             ConnectedValues simOp = entry.getValue();
             System.out.println("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
+                    simOp.getRoute() + " with index: " + simOp.getIndex() + " earliest "+simOp.getOperationObject().getEarliestTime()
+                    + " earliest "+simOp.getOperationObject().getLatestTime()+ " connected ID "+simOp.getConnectedOperationObject().getID() + " connected route "+simOp.getConnectedRoute());
+            final_routes.add("Simultaneous operation: " + simOp.getOperationObject().getID() + " in route: " +
                     simOp.getRoute() + " with index: " + simOp.getIndex() + " earliest "+simOp.getOperationObject().getEarliestTime()
                     + " earliest "+simOp.getOperationObject().getLatestTime()+ " connected ID "+simOp.getConnectedOperationObject().getID() + " connected route "+simOp.getConnectedRoute());
         }
@@ -581,27 +613,37 @@ public class ALNS {
 
          */
         System.out.println("PRECEDENCE OVER DICTIONARY");
+        final_routes.add("PRECEDENCE OVER DICTIONARY");
         for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOverOperations.entrySet()){
             PrecedenceValues presOverOp = entry.getValue();
             if(presOverOp.getConnectedOperationObject()!=null){
                 System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
                         presOverOp.getRoute() + " with index: " + presOverOp.getIndex()+ " connected ID "+presOverOp.getConnectedOperationObject().getID() + " connected route "+presOverOp.getConnectedRoute());
+                final_routes.add("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                        presOverOp.getRoute() + " with index: " + presOverOp.getIndex()+ " connected ID "+presOverOp.getConnectedOperationObject().getID() + " connected route "+presOverOp.getConnectedRoute());
             }
             else{
                 System.out.println("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
+                        presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
+                final_routes.add("Precedence over operation: " + presOverOp.getOperationObject().getID() + " in route: " +
                         presOverOp.getRoute() + " with index: " + presOverOp.getIndex());
             }
 
         }
         System.out.println("PRECEDENCE OF DICTIONARY");
+        final_routes.add("PRECEDENCE OF DICTIONARY");
         for(Map.Entry<Integer, PrecedenceValues> entry : precedenceOfOperations.entrySet()){
             PrecedenceValues presOfOp = entry.getValue();
             if(presOfOp.getConnectedOperationObject()!=null){
                 System.out.println("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
                         presOfOp.getRoute() + " with index: " + presOfOp.getIndex()+ " connected ID "+presOfOp.getConnectedOperationObject().getID() + " connected route "+presOfOp.getConnectedRoute());
+                final_routes.add("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                        presOfOp.getRoute() + " with index: " + presOfOp.getIndex()+ " connected ID "+presOfOp.getConnectedOperationObject().getID() + " connected route "+presOfOp.getConnectedRoute());
             }
             else{
                 System.out.println("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
+                        presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
+                final_routes.add("Precedence over operation: " + presOfOp.getOperationObject().getID() + " in route: " +
                         presOfOp.getRoute() + " with index: " + presOfOp.getIndex());
             }
         }
@@ -620,7 +662,10 @@ public class ALNS {
 
             }
         }
-        System.out.println("Is solution feasible? "+checkSolution(vesselRoutes));
+        boolean feasibleSolution = checkSolution(vesselRoutes);
+        System.out.println("Is solution feasible? "+ feasibleSolution);
+        final_routes.add("Is solution feasible? "+feasibleSolution);
+        return final_routes;
     }
 
     public Boolean checkSolution(List<List<OperationInRoute>> vesselroutes){
@@ -768,36 +813,105 @@ public class ALNS {
         }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        long startTime = System.nanoTime();
-        ALNS alns = new ALNS();
-        int constructionObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
-        List<Integer> unroutedList=new ArrayList<>();
-        for (OperationInRoute ur:alns.bestUnrouted){
-            unroutedList.add(ur.getID());
-        }
-        alns.runDestroyRepair();
-        alns.retainCurrentBestSolution("best");
-        alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
-                alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
-                alns.precedenceOverOperations, alns.consolidatedOperations,
-                alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
-        int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
-        System.out.println("Construction Objective "+constructionObjective);
-        System.out.println("afterALNS "+afterLarge);
-        long endTime   = System.nanoTime();
-        long totalTime = endTime - startTime;
-        System.out.println("Time "+totalTime/1000000000);
-        //System.out.println(alns.generator.doubles());
+    public static void main(String[] args) throws IOException {
+        double[] numberOfRemoval = new double[]{0.05, 0.15, 0.3, 0.5};
+        for (double toRemove : numberOfRemoval) {
+            for (int i = 1; i < 6; i++) {
+                String testInstance = "tuning_instances/20_" + i + "_locations(94_113)_.txt";
+                long startTime = System.nanoTime();
+                ALNS alns = new ALNS(20, testInstance, toRemove);
+                int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                List<Integer> unroutedList = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    unroutedList.add(ur.getID());
+                }
+                alns.runDestroyRepair();
+                alns.retainCurrentBestSolution("best");
+                List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
+                        alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                        alns.precedenceOverOperations, alns.consolidatedOperations,
+                        alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+                int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                System.out.println("Construction Objective " + constructionObjective);
+                route.add("\nConstruction Objective " + constructionObjective);
+                route.add("\nafterALNS " + afterLarge);
+                System.out.println("afterALNS " + afterLarge);
+                long endTime = System.nanoTime();
+                long totalTime = endTime - startTime;
+                System.out.println("Time " + totalTime / 1000000000);
+                //System.out.println(alns.generator.doubles());
+                route.add("\nTime " + totalTime / 1000000000);
+                System.out.println("Unrouted construction");
+                for (Integer urInt : unroutedList) {
+                    System.out.println(urInt);
+                }
 
-        System.out.println("Unrouted construction");
-        for (Integer urInt:unroutedList){
-            System.out.println(urInt);
-        }
+                System.out.println("Unrouted after all search");
+                List<Integer> final_unrouted = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    final_unrouted.add(ur.getID());
+                    System.out.println(ur.getID());
+                }
+                alns.writeToFile(route, ParameterFile.nameResultFile+testInstance);
 
-        System.out.println("Unrouted after all search");
-        for (OperationInRoute ur:alns.bestUnrouted){
-            System.out.println(ur.getID());
+                ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
+                        final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
+                        ParameterFile.randomnessParameterRemoval, alns.numberOfRemoval, ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
+                        ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
+                ALNSresult.store();
+
+            }
+            for (int i = 1; i < 6; i++) {
+                String testInstance = "tuning_instances/40_" + i + "_locations(94_133)_.txt";
+                long startTime = System.nanoTime();
+                ALNS alns = new ALNS(40, testInstance, toRemove);
+                int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                List<Integer> unroutedList = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    unroutedList.add(ur.getID());
+                }
+                alns.runDestroyRepair();
+                alns.retainCurrentBestSolution("best");
+                List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
+                        alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                        alns.precedenceOverOperations, alns.consolidatedOperations,
+                        alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+                int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                System.out.println("Construction Objective " + constructionObjective);
+                route.add("\nConstruction Objective " + constructionObjective);
+                route.add("\nafterALNS " + afterLarge);
+                System.out.println("afterALNS " + afterLarge);
+                long endTime = System.nanoTime();
+                long totalTime = endTime - startTime;
+                System.out.println("Time " + totalTime / 1000000000);
+                //System.out.println(alns.generator.doubles());
+                route.add("\nTime " + totalTime / 1000000000);
+                System.out.println("Unrouted construction");
+                for (Integer urInt : unroutedList) {
+                    System.out.println(urInt);
+                }
+
+                System.out.println("Unrouted after all search");
+                List<Integer> final_unrouted = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    final_unrouted.add(ur.getID());
+                    System.out.println(ur.getID());
+                }
+                alns.writeToFile(route, ParameterFile.nameResultFile+testInstance);
+
+                ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
+                        final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
+                        ParameterFile.randomnessParameterRemoval, alns.numberOfRemoval, ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
+                        ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
+                ALNSresult.store();
+
+            }
+
+
         }
     }
 

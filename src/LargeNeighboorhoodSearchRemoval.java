@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Random;
@@ -53,7 +54,7 @@ public class LargeNeighboorhoodSearchRemoval {
                                         List<List<OperationInRoute>> vesselRoutes, int [][]twIntervals,
                                         int[][] precedenceALNS,int[][] simALNS,int [] startNodes, int [][][][] SailingTimes,
                                         int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel,int[] EarliestStartingTimeForVessel,
-                                        int[][][] operationGain, int[][] bigTasksALNS, int numberOfRemoval, int randomSeed,
+                                        int[][][] operationGain, int[][] bigTasksALNS, double numberOfRemoval, int randomSeed,
                                     int[][] distOperationsInInstance,double relatednessWeightDistance, double relatednessWeightDuration,
                                     double relatednessWeightTimewindows, double relatednessWeightPrecedenceOver, double relatednessWeightPrecedenceOf,
                                     double relatednessWeightSimultaneous, int[][][] operationGainGurobi,int[]vesseltypes){
@@ -75,7 +76,7 @@ public class LargeNeighboorhoodSearchRemoval {
         this.SailingCostForVessel=SailingCostForVessel;
         this.EarliestStartingTimeForVessel=EarliestStartingTimeForVessel;
         this.operationGain=operationGain;
-        this.numberOfRemoval=numberOfRemoval;
+        this.numberOfRemoval= (int) Math.floor(numberOfRemoval* TimeVesselUseOnOperation[0].length);
         this.routeSailingCost=new int[vesselRoutes.size()];
         this.routeOperationGain=new int[vesselRoutes.size()];
         this.objValue=0;

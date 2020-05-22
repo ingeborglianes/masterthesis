@@ -744,16 +744,17 @@ public class DataGenerator {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vessels = new int[]{2, 3,4};
-        int[] locStart = new int[]{1, 2, 3};
+        int[] vessels = new int[]{1, 3,4,5,6};
+        int[] locStart = new int[]{1, 3,4,5,6};
         DataGenerator dg=new DataGenerator(vessels,5,locStart,
-                "test_instances/30_locations_normalOpGenerator.txt",
+                "test_instances/30_1_locations_normalOpGenerator.txt",
                 "routing","weather_files/weather_normal.txt");
         dg.generateData();
         //dg.printAllData();
-        //PrintData.printSailingTimes(dg.getSailingTimes(),1,35,vessels.length);
-        PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),locStart.length);
+        //PrintData.printSailingTimes(dg.getSailingTimes(),5,32,vessels.length);
+        //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),locStart.length);
         PrintData.printOperationGain(dg.getOperationGain(),locStart.length);
+        PrintData.printSailingCostForVessel(dg.getSailingCostForVessel());
 
     }
 
