@@ -1189,6 +1189,18 @@ public class LargeNeighboorhoodSearchInsert {
                                     if (earliestTemp <= latestTemp && pPlacementFeasible) {
                                         OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
+                                        /*
+                                        for (int i = 0; i < vesselRoutes.size(); i++) {
+                                            System.out.println("VESSELINDEX " + i);
+                                            if (vesselRoutes.get(i) != null) {
+                                                for (int o2 = 0; o2 < vesselRoutes.get(i).size(); o2++) {
+                                                    System.out.println("Operation number: " + vesselRoutes.get(i).get(o2).getID() + " Earliest start time: " +
+                                                            vesselRoutes.get(i).get(o2).getEarliestTime() + " Latest Start time: " + vesselRoutes.get(i).get(o2).getLatestTime());
+                                                }
+                                            }
+                                        }
+
+                                         */
                                         int changedTime = ConstructionHeuristic.checkChangeEarliestLastOperation(earliestTemp, earliestTimeLastOperationInRoute,
                                                 n + 1, v, o,vesselRoutes,TimeVesselUseOnOperation,startNodes,SailingTimes);
                                         int deltaOperationGainLastOperation = 0;

@@ -111,12 +111,12 @@ public class RelocateInsert {
         int toInsertKey = 0;
         for (Map.Entry<Integer, List<InsertionValues>> entry : feasibleInsertions.entrySet()) {
             int key = entry.getKey();
-            System.out.println("Evaluating operation " + key);
+            //System.out.println("Evaluating operation " + key);
             List<InsertionValues> iValues = entry.getValue();
             for (InsertionValues iv : iValues) {
                 if(iv.getBenenefitIncrease() > 0){
-                    System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
-                            " on index " + iv.getIndexInRoute());
+                    //System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
+                            //" on index " + iv.getIndexInRoute());
                     List<List<OperationInRoute>> VRCopy = copyVesselroutesRI(vesselRoutes);
                     InsertionValues cp = currentPosition.get(key);
                     VRCopy.get(cp.routeIndex).remove(cp.indexInRoute);
@@ -143,7 +143,7 @@ public class RelocateInsert {
                     }
                     for (Map.Entry<Integer, List<InsertionValues>> task : feasibleUnrouted.entrySet()) {
                         int unrouted = task.getKey();
-                        System.out.println("Evaluating operation " + unrouted);
+                        //System.out.println("Evaluating operation " + unrouted);
                         List<InsertionValues> positions = task.getValue();
                         for (InsertionValues po : positions) {
                             if (po.getBenenefitIncrease() > 0) {
@@ -155,18 +155,18 @@ public class RelocateInsert {
                                     toMove = iv;
                                     toInsert = po;
                                 }
-                                System.out.println("Benefit " + po.getBenenefitIncrease() + " in route " + po.getRouteIndex() +
-                                        " on index " + po.getIndexInRoute());
+                                //System.out.println("Benefit " + po.getBenenefitIncrease() + " in route " + po.getRouteIndex() +
+                                     //   " on index " + po.getIndexInRoute());
                             }
                         }
-                        System.out.println(" ");
+                        //System.out.println(" ");
                     }
 
                 }
             }
         }
-        System.out.println(" ");
-
+        //System.out.println(" ");
+        /*
         for (Map.Entry<Integer, List<InsertionValues>> entry : feasibleInsertions.entrySet()) {
         int key = entry.getKey();
         System.out.println("Evaluating operation " + key);
@@ -178,12 +178,14 @@ public class RelocateInsert {
         System.out.println(" ");
         }
 
+         */
 
-        System.out.println("best insert combination "+bestInsertionCombination);
-        System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
+
+        //System.out.println("best insert combination "+bestInsertionCombination);
+        //System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
 
         if(bestInsertionCombination > 0) {
-            System.out.println();
+            //System.out.println();
             InsertionValues currentPos = currentPosition.get(toMoveKey);
             removeNormalOp(currentPos.getRouteIndex(), currentPos.getIndexInRoute());
             insertOperation(toMoveKey, toMove.getEarliest(), toMove.getLatest(), toMove.getIndexInRoute(), toMove.getRouteIndex());
@@ -258,7 +260,7 @@ public class RelocateInsert {
             return true;
         }
         //printInitialSolution(vesseltypes);
-        System.out.println("not accepted move");
+        //System.out.println("not accepted move");
         return false;
     }
 
@@ -294,12 +296,12 @@ public class RelocateInsert {
                 int toInsertKey = 0;
                 for (Map.Entry<Integer, List<InsertionValues>> entry : feasibleInsertions.entrySet()) {
                     int key = entry.getKey();
-                    System.out.println("Evaluating operation " + key);
+                    //System.out.println("Evaluating operation " + key);
                     List<InsertionValues> iValues = entry.getValue();
                     for (InsertionValues iv : iValues) {
                         if (iv.getBenenefitIncrease() > 0) {
-                            System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
-                                    " on index " + iv.getIndexInRoute());
+                            //System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
+                                  //  " on index " + iv.getIndexInRoute());
                             Map<Integer, List<InsertionValues>> feasibleSecondSim = new HashMap<>();
                             boolean found = false;
                             int secondSimIndex = 0;
@@ -319,7 +321,7 @@ public class RelocateInsert {
                             }
                             for (Map.Entry<Integer, List<InsertionValues>> task : feasibleSecondSim.entrySet()) {
                                 int unrouted = task.getKey();
-                                System.out.println("Evaluating operation " + unrouted);
+                                //System.out.println("Evaluating operation " + unrouted);
                                 List<InsertionValues> positions = task.getValue();
                                 for (InsertionValues po : positions) {
                                     if (po.getBenenefitIncrease() > 0) {
@@ -331,34 +333,40 @@ public class RelocateInsert {
                                             toMove = iv;
                                             toInsert = po;
                                         }
+                                        /*
                                         System.out.println("Benefit " + po.getBenenefitIncrease() + " in route " + po.getRouteIndex() +
                                                 " on index " + po.getIndexInRoute());
+
+                                         */
                                     }
                                 }
-                                System.out.println(" ");
+                                //System.out.println(" ");
                             }
                         }
                     }
                 }
-                System.out.println(" ");
+                //System.out.println(" ");
 
                 for (Map.Entry<Integer, List<InsertionValues>> entry : feasibleInsertions.entrySet()) {
                     int key = entry.getKey();
-                    System.out.println("Evaluating operation " + key);
+                    //System.out.println("Evaluating operation " + key);
                     List<InsertionValues> iValues = entry.getValue();
                     for (InsertionValues iv : iValues) {
+                        /*
                         System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
                                 " on index " + iv.getIndexInRoute());
+
+                         */
                     }
-                    System.out.println(" ");
+                    //System.out.println(" ");
                 }
 
 
-                System.out.println(bestInsertionCombination);
-                System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
+                //System.out.println(bestInsertionCombination);
+                //System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
 
                 if (bestInsertionCombination > 0) {
-                    System.out.println();
+                    //System.out.println();
                     insertOperation(toMoveKey, toMove.getEarliest(), toMove.getLatest(), toMove.getIndexInRoute(), toMove.getRouteIndex());
                     insertOperation(toInsertKey, toInsert.getEarliest(), toInsert.getLatest(), toInsert.getIndexInRoute(), toInsert.getRouteIndex());
                     int unrouted = 0;
@@ -376,13 +384,13 @@ public class RelocateInsert {
                         }
                         unrouted++;
                     }
-                    System.out.println("Simultaneous insertion performed");
-                    printInitialSolution(vesseltypes);
+                    //System.out.println("Simultaneous insertion performed");
+                    //printInitialSolution(vesseltypes);
                     return true;
                 }
             }
         }
-        System.out.println("No feasible placements for the simultaneous tasks found");
+        //System.out.println("No feasible placements for the simultaneous tasks found");
         return false;
     }
 
@@ -409,12 +417,15 @@ public class RelocateInsert {
             Map<Integer, List<InsertionValues>> infeasibleSim = new HashMap<>();
             for (Map.Entry<Integer, List<InsertionValues>> entry : feasibleInsertions.entrySet()) {
                 int key = entry.getKey();
-                System.out.println("Evaluating operation " + key);
+                //System.out.println("Evaluating operation " + key);
                 List<InsertionValues> iValues = entry.getValue();
                 for (InsertionValues iv : iValues) {
                     if (iv.getBenenefitIncrease() > 0) {
+                        /*
                         System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
                                 " on index " + iv.getIndexInRoute());
+
+                         */
                         Map<Integer, List<InsertionValues>> feasibleSecondSim = new HashMap<>();
                         boolean found = false;
                         int secondSimIndex = 0;
@@ -439,7 +450,7 @@ public class RelocateInsert {
                         }
                         for (Map.Entry<Integer, List<InsertionValues>> task : feasibleSecondSim.entrySet()) {
                             int unrouted = task.getKey();
-                            System.out.println("Evaluating operation " + unrouted);
+                            //System.out.println("Evaluating operation " + unrouted);
                             List<InsertionValues> positions = task.getValue();
                             for (InsertionValues po : positions) {
                                 if (po.getBenenefitIncrease() > 0) {
@@ -455,8 +466,11 @@ public class RelocateInsert {
                                     if (combinationBenefit > bestInsertionCombination) {
                                         bestInsertionCombination = combinationBenefit;
                                     }
+                                    /*
                                     System.out.println("Benefit " + po.getBenenefitIncrease() + " in route " + po.getRouteIndex() +
                                             " on index " + po.getIndexInRoute());
+
+                                     */
                                 }
                                 else{
                                     if(infeasibleSim.get(key)==null){
@@ -470,7 +484,7 @@ public class RelocateInsert {
                                     //feasibleInsertions.get(key).remove(iv);
                                 }
                             }
-                            System.out.println(" ");
+                            //System.out.println(" ");
                         }
                     }
                 }
@@ -512,13 +526,16 @@ public class RelocateInsert {
                     int toInsertKey = 0;
                     for (Map.Entry<Integer, List<InsertionValues>> entry : feasibleInsertions.entrySet()) {
                         int key = entry.getKey();
-                        System.out.println("Evaluating operation " + key);
+                        //System.out.println("Evaluating operation " + key);
                         List<InsertionValues> iValues = entry.getValue();
                         for (InsertionValues iv : iValues) {
                             Map<Integer, List<InsertionValues>> feasibleMoves = new HashMap<>();
                             if (iv.getBenenefitIncrease() > 0) {
+                                /*
                                 System.out.println("Benefit " + iv.getBenenefitIncrease() + " in route " + iv.getRouteIndex() +
                                         " on index " + iv.getIndexInRoute());
+
+                                 */
                                 List<List<OperationInRoute>> VRCopy = copyVesselroutesRI(vesselRoutes);
                                 InsertionValues cp = currentPosition.get(precOverId);
                                 VRCopy.get(cp.routeIndex).remove(cp.indexInRoute);
@@ -528,7 +545,7 @@ public class RelocateInsert {
                             }
                             for (Map.Entry<Integer, List<InsertionValues>> task : feasibleMoves.entrySet()) {
                                 int unrouted = task.getKey();
-                                System.out.println("Evaluating operation " + unrouted);
+                                //System.out.println("Evaluating operation " + unrouted);
                                 List<InsertionValues> positions = task.getValue();
                                 for (InsertionValues po : positions) {
                                     if (po.getBenenefitIncrease() > 0) {
@@ -542,19 +559,22 @@ public class RelocateInsert {
                                                 toInsert = iv;
                                             }
                                         }
+                                        /*
                                         System.out.println("Benefit " + po.getBenenefitIncrease() + " in route " + po.getRouteIndex() +
                                                 " on index " + po.getIndexInRoute());
+
+                                         */
                                     }
                                 }
-                                System.out.println(" ");
+                                //System.out.println(" ");
                             }
                         }
                     }
-                    System.out.println(bestInsertionCombination);
-                    System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
+                    //System.out.println(bestInsertionCombination);
+                    //System.out.println("By removing " + toMoveKey + " and inserting " + toInsertKey);
 
                     if (bestInsertionCombination > 0) {
-                        System.out.println();
+                        //System.out.println();
                         InsertionValues currentPos = currentPosition.get(toMoveKey);
                         removeNormalOp(currentPos.getRouteIndex(), currentPos.getIndexInRoute());
                         insertOperation(toMoveKey, toMove.getEarliest(), toMove.getLatest(), toMove.getIndexInRoute(), toMove.getRouteIndex());
@@ -590,13 +610,13 @@ public class RelocateInsert {
                             }
                             unrouted++;
                         }
-                        printInitialSolution(vesseltypes);
+                        //printInitialSolution(vesseltypes);
                         return true;
                     }
                 }
             }
         }
-        printInitialSolution(vesseltypes);
+        //printInitialSolution(vesseltypes);
         return false;
     }
 
@@ -612,13 +632,13 @@ public class RelocateInsert {
         int routeIndex=0;
         int earliest=0;
         int latest=nTimePeriods-1;
-        System.out.println("On operation: "+o);
+        //System.out.println("On operation: "+o);
         boolean precedenceOverFeasible;
         boolean precedenceOfFeasible;
         boolean simultaneousFeasible;
         //System.out.println("ROUTE CONNECTED SIM: "+routeConnectedSimultaneous);
         if (DataGenerator.containsElement(o, OperationsForVessel[v]) && v!= routeConnectedSimultaneous) {
-            System.out.println("Try vessel "+v);
+            //System.out.println("Try vessel "+v);
             if (vesselRoutes.get(v) == null || vesselRoutes.get(v).isEmpty()) {
                 //System.out.println("Empty route");
                 //insertion into empty route
@@ -848,7 +868,7 @@ public class RelocateInsert {
             }
         }
         if(simALNS[o-startNodes.length-1][1]==0){
-            System.out.println("Benefit increase for presOf or simOf "+benefitIncrease);
+            //System.out.println("Benefit increase for presOf or simOf "+benefitIncrease);
             int finalBenefitIncrease = benefitIncrease;
             int finalIndexInRoute = indexInRoute;
             int finalRouteIndex = routeIndex;
@@ -955,7 +975,7 @@ public class RelocateInsert {
         ConstructionHeuristic.updatePrecedenceOf(precedenceOfRoutes.get(routeIndex),indexInRoute,TimeVesselUseOnOperation,startNodes,simOpRoutes,
                 precedenceOverOperations,precedenceOfOperations,precedenceOfRoutes,precedenceOverRoutes,vesselRoutes,simultaneousOp,SailingTimes);
         LS_operators.updateSimultaneous(simOpRoutes,routeIndex,simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,TimeVesselUseOnOperation,
-                startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,vesselRoutes,0,0,"relocateInsert",EarliestStartingTimeForVessel);
+                startNodes,SailingTimes,precedenceOverOperations,precedenceOfOperations,vesselRoutes,0,0,"relocateInsert",EarliestStartingTimeForVessel,twIntervals);
     }
 
     public void removeNormalOp(int route, int index){
@@ -1142,7 +1162,7 @@ public class RelocateInsert {
                 OperationInRoute secondOr = pValues.getConnectedOperationObject();
                 if (secondOr != null && !unroutedTasks.contains(secondOr)) {
                     PrecedenceValues connectedOpPValues = precedenceOfOperations.get(secondOr.getID());
-                    System.out.println("first operation: "+firstOr.getID());
+                    //System.out.println("first operation: "+firstOr.getID());
                     int routeConnectedOp = connectedOpPValues.getRoute();
                     if (routeConnectedOp == pValues.getRoute()) {
                         continue;
@@ -1343,6 +1363,34 @@ public class RelocateInsert {
 
     public List<List<OperationInRoute>> getVesselRoutes() {
         return vesselRoutes;
+    }
+
+    public Map<Integer, PrecedenceValues> getPrecedenceOverOperations() {
+        return precedenceOverOperations;
+    }
+
+    public Map<Integer, PrecedenceValues> getPrecedenceOfOperations() {
+        return precedenceOfOperations;
+    }
+
+    public Map<Integer, ConnectedValues> getSimultaneousOp() {
+        return simultaneousOp;
+    }
+
+    public List<Map<Integer, ConnectedValues>> getSimOpRoutes() {
+        return simOpRoutes;
+    }
+
+    public List<Map<Integer, PrecedenceValues>> getPrecedenceOfRoutes() {
+        return precedenceOfRoutes;
+    }
+
+    public List<Map<Integer, PrecedenceValues>> getPrecedenceOverRoutes() {
+        return precedenceOverRoutes;
+    }
+
+    public Map<Integer, ConsolidatedValues> getConsolidatedOperations() {
+        return consolidatedOperations;
     }
 }
 
