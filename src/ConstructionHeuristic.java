@@ -962,7 +962,7 @@ public class ConstructionHeuristic {
             OperationInRoute objectFMinus1=vesselroutes.get(routeIndex).get(f-1);
             OperationInRoute objectF=vesselroutes.get(routeIndex).get(f);
             int opTimeFMinus1=TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1]
-                    [objectFMinus1.getLatestTime()-1];
+                    [objectFMinus1.getEarliestTime()-1];
             if(localSearch.equals("local")){
                 if(objectFMinus1.getEarliestTime()+opTimeFMinus1-1>59){
                     return false;
@@ -1213,7 +1213,6 @@ public class ConstructionHeuristic {
                         //System.out.println("Cur latest before weather update "+cur_latestTemp);
                         cur_latestTemp = weatherLatestTimeSimPostInsert(cur_latestTemp,sValues.getOperationObject().getEarliestTime(),TimeVesselUseOnOperation,sValues.getRoute(),sValues.getOperationObject().getID(),
                                                             startNodes, SailingTimes,sValues.getIndex(),vesselroutes,simultaneousOp, precedenceOfOperations,precedenceOverOperations,-1,0);
-                        //System.out.println("Cur latest after weather update "+cur_latestTemp);
                         sValues.getOperationObject().setLatestTime(cur_latestTemp);
                         //System.out.println("Set latest of "+sValues.getOperationObject().getID()+ " to "+cur_latestTemp);
                         //System.out.println("oppdaterer: " + sValues.getOperationObject().getID() + " med ny latest tid " + sValues.getOperationObject().getLatestTime());
@@ -1482,7 +1481,7 @@ public class ConstructionHeuristic {
             OperationInRoute objectFMinus1=vesselroutes.get(routeIndex).get(f-1);
             OperationInRoute objectF=vesselroutes.get(routeIndex).get(f);
             int opTimeFMinus1=TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1]
-                    [objectFMinus1.getLatestTime()-1];
+                    [objectFMinus1.getEarliestTime()-1];
             int newTime=Math.max( lastEarliest+ SailingTimes[routeIndex][objectFMinus1.getEarliestTime()+opTimeFMinus1-1]
                     [objectFMinus1.getID()-1][objectF.getID()-1]
                     +TimeVesselUseOnOperation[routeIndex][objectFMinus1.getID()-startNodes.length-1][objectFMinus1.getEarliestTime()-1] ,

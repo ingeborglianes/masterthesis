@@ -1426,7 +1426,19 @@ public class LargeNeighboorhoodSearchInsert {
                 int route = pValues.getRoute();
                 OperationInRoute firstOr = pValues.getOperationObject();
                 OperationInRoute secondOr = pValues.getConnectedOperationObject();
+                /*if(secondOr!=null) {
+                    for (int v = 0; v < vesselroutes.size(); v++) {
+                        if (vesselroutes.get(v) != null && vesselroutes.get(v).size() != 0) {
+                            for (int i = 0; i < vesselroutes.get(v).size(); i++) {
+                                if (vesselroutes.get(v).get(i).getID() == secondOr.getID()) {
+                                    System.out.println("Route " + v);
+                                }
+                            }
+                        }
+                    }
+                }*/
                 if (secondOr != null && !unroutedTasks.contains(secondOr)) {
+                    //System.out.println(secondOr.getID());
                     PrecedenceValues connectedOpPValues = precedenceOfOperations.get(secondOr.getID());
                     //System.out.println("first operation: "+firstOr.getID());
                     int routeConnectedOp = connectedOpPValues.getRoute();
