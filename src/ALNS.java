@@ -715,48 +715,56 @@ public class ALNS {
     }
 
     public void runDestroyRepair(){
-        for (int i =0; i<numberOfIterations; i++){
-            System.out.println("Iteration "+i);
-            //System.out.println("Print før kjøring");
-            //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
-            //consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
-            LargeNeighboorhoodSearchRemoval LNSR = new LargeNeighboorhoodSearchRemoval(precedenceOverOperations,precedenceOfOperations,
-                    simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,
-                    consolidatedOperations,unroutedTasks,vesselroutes, dg.getTwIntervals(),
-                    dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
-                    dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getOperationGain(),dg.getBigTasksALNS(),numberOfRemoval,randomSeed,dg.getDistOperationsInInstance(),
-                    relatednessWeightDistance,relatednessWeightDuration,relatednessWeightTimewindows,relatednessWeightPrecedenceOver,
-                    relatednessWeightPrecedenceOf,relatednessWeightSimultaneous,dg.getOperationGainGurobi(),vessels);
+        int i = 0;
+        while(i < numberOfIterations){
+        //for (int i =0; i<numberOfIterations; i++){
+            try{
+                System.out.println("Iteration "+i);
+                //System.out.println("Print før kjøring");
+                //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,bestRoutes,locStart,dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),bestUnrouted,precedenceOverOperations,
+                //consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
+                LargeNeighboorhoodSearchRemoval LNSR = new LargeNeighboorhoodSearchRemoval(precedenceOverOperations,precedenceOfOperations,
+                        simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes,
+                        consolidatedOperations,unroutedTasks,vesselroutes, dg.getTwIntervals(),
+                        dg.getPrecedenceALNS(), dg.getSimultaneousALNS(),dg.getStartNodes(),
+                        dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
+                        dg.getOperationGain(),dg.getBigTasksALNS(),numberOfRemoval,randomSeed,dg.getDistOperationsInInstance(),
+                        relatednessWeightDistance,relatednessWeightDuration,relatednessWeightTimewindows,relatednessWeightPrecedenceOver,
+                        relatednessWeightPrecedenceOf,relatednessWeightSimultaneous,dg.getOperationGainGurobi(),vessels);
 
-            //for run removal, insert method, alternatives: worst, synchronized, route, related, random, worst_sailing
-            String removalMethod = chooseRemovalMethod();
-            LNSR.runLNSRemoval(removalMethod);
-            //System.out.println("---------- Removal method " + removalMethod+ " -----------");
-            /*
-            printLNSInsertSolution(vessels, currentRouteSailingCost, currentRouteOperationGain, vesselroutes, dg.getStartNodes(), dg.getSailingTimes(),
-                    dg.getTimeVesselUseOnOperation(), unroutedTasks, precedenceOverOperations, consolidatedOperations,
-                    precedenceOfOperations, simultaneousOp, simOpRoutes);
+                //for run removal, insert method, alternatives: worst, synchronized, route, related, random, worst_sailing
+                String removalMethod = chooseRemovalMethod();
+                LNSR.runLNSRemoval(removalMethod);
+                //System.out.println("---------- Removal method " + removalMethod+ " -----------");
+                /*
+                printLNSInsertSolution(vessels, currentRouteSailingCost, currentRouteOperationGain, vesselroutes, dg.getStartNodes(), dg.getSailingTimes(),
+                        dg.getTimeVesselUseOnOperation(), unroutedTasks, precedenceOverOperations, consolidatedOperations,
+                        precedenceOfOperations, simultaneousOp, simOpRoutes);
 
-             */
-            //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,vesselroutes,dg.getStartNodes(),dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
-            //unroutedTasks,precedenceOverOperations,consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
-            //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
-            //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),dg.getStartNodes().length);
-            Boolean noise=chooseNoise();
-            LargeNeighboorhoodSearchInsert LNSI = new LargeNeighboorhoodSearchInsert(precedenceOverOperations,precedenceOfOperations,
-                    simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,unroutedTasks,vesselroutes,
-                    LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
-                    dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vessels, noise);
-            //for run insertion, insert method, alternatives: best, regret
-            String insertionMethod = chooseInsertionMethod();
-            //System.out.println("-------Insertion method " + insertionMethod + " ----------");
-            LNSI.runLNSInsert(insertionMethod);
-            //LNSI.printLNSInsertSolution(vessels);
-            evaluateSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks(), removalMethod, insertionMethod,noise);
-            //LNSI.printLNSInsertSolution(vessels);
-            updateWeightsAndTemperatureAndSegmentIterations();
+                 */
+                //printLNSInsertSolution(vessels,bestRouteSailingCost,bestRouteOperationGain,vesselroutes,dg.getStartNodes(),dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),
+                //unroutedTasks,precedenceOverOperations,consolidatedOperations,precedenceOfOperations,simultaneousOp,simOpRoutes);
+                //PrintData.printSailingTimes(dg.getSailingTimes(),4,dg.getSimultaneousALNS().length,a.getVesselroutes().size());
+                //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),dg.getStartNodes().length);
+                Boolean noise=chooseNoise();
+                LargeNeighboorhoodSearchInsert LNSI = new LargeNeighboorhoodSearchInsert(precedenceOverOperations,precedenceOfOperations,
+                        simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,unroutedTasks,vesselroutes,
+                        LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
+                        dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
+                        dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vessels, noise);
+                //for run insertion, insert method, alternatives: best, regret
+                String insertionMethod = chooseInsertionMethod();
+                //System.out.println("-------Insertion method " + insertionMethod + " ----------");
+                LNSI.runLNSInsert(insertionMethod);
+                //LNSI.printLNSInsertSolution(vessels);
+                evaluateSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks(), removalMethod, insertionMethod,noise);
+                //LNSI.printLNSInsertSolution(vessels);
+                updateWeightsAndTemperatureAndSegmentIterations();
+                i++;
+            }catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+                retainCurrentBestSolution("best");
+                i++;
+            }
         }
     }
 
@@ -825,49 +833,42 @@ public class ALNS {
         }
         PrintData.printPrecedenceALNS(alns.dg.getPrecedenceALNS());
         PrintData.printSimALNS(alns.dg.getSimultaneousALNS());
-        try{
-            alns.runDestroyRepair();
-            alns.retainCurrentBestSolution("best");
-            List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
-                    alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
-                    alns.precedenceOverOperations, alns.consolidatedOperations,
-                    alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
-            int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
-            System.out.println("Construction Objective " + constructionObjective);
-            route.add("\nConstruction Objective " + constructionObjective);
-            route.add("\nafterALNS " + afterLarge);
-            System.out.println("afterALNS " + afterLarge);
-            long endTime = System.nanoTime();
-            long totalTime = endTime - startTime;
-            System.out.println("Time " + totalTime / 1000000000);
-            //System.out.println(alns.generator.doubles());
-            route.add("\nTime " + totalTime / 1000000000);
-            System.out.println("Unrouted construction");
-            for (Integer urInt : unroutedList) {
-                System.out.println(urInt);
-            }
-
-            System.out.println("Unrouted after all search");
-            List<Integer> final_unrouted = new ArrayList<>();
-            for (OperationInRoute ur : alns.bestUnrouted) {
-                final_unrouted.add(ur.getID());
-                System.out.println(ur.getID());
-            }
-            alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
-
-            ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
-                    final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
-                    ParameterFile.randomnessParameterRemoval, alns.numberOfRemoval, ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
-                    ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
-                    ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
-                    alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
-            ALNSresult.store();
-        }catch (StackOverflowError stack){
-            alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
-                    alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
-                    alns.precedenceOverOperations, alns.consolidatedOperations,
-                    alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+        alns.runDestroyRepair();
+        alns.retainCurrentBestSolution("best");
+        List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
+                alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                alns.precedenceOverOperations, alns.consolidatedOperations,
+                alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+        int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+        System.out.println("Construction Objective " + constructionObjective);
+        route.add("\nConstruction Objective " + constructionObjective);
+        route.add("\nafterALNS " + afterLarge);
+        System.out.println("afterALNS " + afterLarge);
+        long endTime = System.nanoTime();
+        long totalTime = endTime - startTime;
+        System.out.println("Time " + totalTime / 1000000000);
+        //System.out.println(alns.generator.doubles());
+        route.add("\nTime " + totalTime / 1000000000);
+        System.out.println("Unrouted construction");
+        for (Integer urInt : unroutedList) {
+            System.out.println(urInt);
         }
+
+        System.out.println("Unrouted after all search");
+        List<Integer> final_unrouted = new ArrayList<>();
+        for (OperationInRoute ur : alns.bestUnrouted) {
+            final_unrouted.add(ur.getID());
+            System.out.println(ur.getID());
+        }
+        alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
+
+        ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
+                final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
+                ParameterFile.randomnessParameterRemoval, alns.numberOfRemoval, ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
+                ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
+        ALNSresult.store();
 
 /*
 
