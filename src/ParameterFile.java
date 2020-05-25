@@ -2,7 +2,7 @@ public class ParameterFile {
     //Insert your parameters and then run with the basic model from the BasicModel class
 
     //Insert the number of locations for the test instance file used
-    public static int loc=60;
+    public static int loc=20;
 
     //Insert the filepath of the weatherfile, if you want no weather impact, use the file path for the
     //normal weather file
