@@ -698,8 +698,8 @@ public class BasicModel {
 
         }
         for(int i =1;i<6;i++){
-            int[] vessels = new int[]{1,2,3,4,5,6};
-            int [] locStart = new int[]{94,95,96,97,98,99};
+            int[] vessels = new int[]{1,3,4,5,6};
+            int [] locStart = new int[]{94,95,96,97,98};
             String testInstance = "tuning_instances/40_"+i+"_locations(94_133)_.txt";
             String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
@@ -713,8 +713,8 @@ public class BasicModel {
 
         }
         for(int i =1;i<6;i++){
-            int []vessels = new int[]{1,2, 3,4, 5,6,2,3,4};
-            int []locStart = new int[]{94,95,96,97,98,99,100,101,102};
+            int []vessels = new int[]{1,2, 3,4, 5,6,3,4};
+            int []locStart = new int[]{94,95,96,97,98,99,100,101};
             String testInstance = "tuning_instances/60_"+i+"_locations(81_140)_.txt";
             String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);

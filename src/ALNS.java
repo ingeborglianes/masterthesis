@@ -7,7 +7,7 @@ public class ALNS {
     private ConstructionHeuristic ch;
     private DataGenerator dg;
     private int[] vessels=new int[]{};
-    private double percentageRemoved;
+    private double[] removalInterval;
     private int randomSeed;
     private double[] noiseWeights = new double[]{1,1};
     private int[] noiseScore = new int[]{0,0};
@@ -56,14 +56,16 @@ public class ALNS {
     public int loc;
     public String testInstance;
 
-    public ALNS(int loc, String testInstance, double[] numberOfRemoval){
+
+    public ALNS(int loc, String testInstance){
         this.loc = loc;
-        this.percentageRemoved=percentageToRemove(numberOfRemoval);
+        this.removalInterval=ParameterFile.removalInterval;
         this.testInstance=testInstance;
         String nameResultFile =ParameterFile.nameResultFile+testInstance;
         int days = ParameterFile.days;
         String weatherFile = ParameterFile.weatherFile;
-        randomSeed=ParameterFile.randomSeed;
+        Random r = new Random();
+        randomSeed=r.nextInt(1000000);
         relatednessWeightDistance=ParameterFile.relatednessWeightDistance;
         relatednessWeightDuration=ParameterFile.relatednessWeightDuration;
         relatednessWeightTimewindows=ParameterFile.relatednessWeightTimewindows;
@@ -92,8 +94,8 @@ public class ALNS {
             locStart = new int[]{1,3, 4, 5, 6};
         }
         else if (loc == 40) {
-            vessels = new int[]{1,2,3,4,5,6};
-            locStart = new int[]{94,94,96,97,98,99};
+            vessels = new int[]{1,3,4,5,6};
+            locStart = new int[]{94,94,96,97,98};
         }
         else if (loc == 10) {
             vessels = new int[]{2, 3, 5};
@@ -104,8 +106,8 @@ public class ALNS {
             locStart = new int[]{1, 2, 3,4};
         }
         else if (loc == 60) {
-            vessels = new int[]{1,2,3,4,5,6,2,3,4};
-            locStart = new int[]{94,95,96,97,98,99,100,101,102};
+            vessels = new int[]{1,2,3,4,5,6,3,4};
+            locStart = new int[]{94,95,96,97,98,99,100,101};
         }
         dg= new DataGenerator(vessels, days, locStart, testInstance, nameResultFile+testInstance, weatherFile);
         try {
@@ -463,7 +465,7 @@ public class ALNS {
             discoveredSolutions.add(newObj);
             setScoresAndVisits(reward1,insertMethod,removalMethod,noise);
         }
-        else if(newObj>currentObj && !discoveredSolutions.contains(newObj)){
+        else if(newObj>currentObj){
             //System.out.println("New best current solution "+newObj);
             //og ikke discovered før, oppdater current
             currentRouteSailingCost = routeSailingCost;
@@ -471,7 +473,10 @@ public class ALNS {
             currentRoutes = copyVesselRoutes(vesselroutes);
             currentUnrouted = copyUnrouted(unroutedTasks);
             discoveredSolutions.add(newObj);
-            setScoresAndVisits(reward2,insertMethod,removalMethod,noise);
+            if(!discoveredSolutions.contains(newObj) ){
+                setScoresAndVisits(reward2,insertMethod,removalMethod,noise);
+            }
+
         }
         else if(acceptedByProb(currentObj,newObj)){
             //System.out.println("New solution, worse than current, but selected by probability "+newObj);
@@ -723,6 +728,7 @@ public class ALNS {
         int i = 0;
         while(i < numberOfIterations){
         //for (int i =0; i<numberOfIterations; i++){
+            double percentageRemoved = percentageToRemove(removalInterval);
             try{
                 System.out.println("Iteration "+i);
                 //System.out.println("Print før kjøring");
@@ -767,7 +773,7 @@ public class ALNS {
                 updateWeightsAndTemperatureAndSegmentIterations();
                 i++;
             }catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("best");
+                retainCurrentBestSolution("current");
                 i++;
             }
         }
@@ -878,13 +884,11 @@ public class ALNS {
 */
 
         // Run loop
-        double[][] removalInterval = new double[][]{new double[]{0.05,0.3}, new double[]{0.15,0.3},
-                                                    new double[]{0.3,0.5}, new double[]{0.15,0.5}};
-        for (double[] interval : removalInterval) {
+        for(int t=1; t < 6; t++) {
             for (int i = 1; i < 6; i++) {
                 String testInstance = "tuning_instances/20_" + i + "_locations(94_113)_.txt";
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(20, testInstance, interval);
+                ALNS alns = new ALNS(20, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -917,15 +921,14 @@ public class ALNS {
                     final_unrouted.add(ur.getID());
                     System.out.println(ur.getID());
                 }
-                alns.writeToFile(route, ParameterFile.nameResultFile+testInstance);
+                alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
 
                 ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
-                        ParameterFile.randomnessParameterRemoval, alns.percentageRemoved,
-                        interval,((int)Math.floor(alns.percentageRemoved*alns.dg.getTimeVesselUseOnOperation()[0].length)),
-                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
-                        ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
-                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
+                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance, ParameterFile.relatednessWeightDuration,
+                        ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
                 ALNSresult.store();
 
@@ -933,7 +936,7 @@ public class ALNS {
             for (int i = 1; i < 6; i++) {
                 String testInstance = "tuning_instances/40_" + i + "_locations(94_133)_.txt";
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(40, testInstance, interval);
+                ALNS alns = new ALNS(40, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -966,15 +969,14 @@ public class ALNS {
                     final_unrouted.add(ur.getID());
                     System.out.println(ur.getID());
                 }
-                alns.writeToFile(route, ParameterFile.nameResultFile+testInstance);
+                alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
 
                 ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
-                        ParameterFile.randomnessParameterRemoval, alns.percentageRemoved,
-                        interval,((int)Math.floor(alns.percentageRemoved*alns.dg.getTimeVesselUseOnOperation()[0].length)),
-                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
-                        ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
-                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
+                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance, ParameterFile.relatednessWeightDuration,
+                        ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
                 ALNSresult.store();
 
@@ -982,7 +984,7 @@ public class ALNS {
             for (int i = 1; i < 6; i++) {
                 String testInstance = "tuning_instances/60_" + i + "_locations(81_140)_.txt";
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(60, testInstance, interval);
+                ALNS alns = new ALNS(60, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1015,15 +1017,14 @@ public class ALNS {
                     final_unrouted.add(ur.getID());
                     System.out.println(ur.getID());
                 }
-                alns.writeToFile(route, ParameterFile.nameResultFile+testInstance);
+                alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
 
                 ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
-                        ParameterFile.randomnessParameterRemoval, alns.percentageRemoved,
-                        interval,((int)Math.floor(alns.percentageRemoved*alns.dg.getTimeVesselUseOnOperation()[0].length)),
-                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance,
-                        ParameterFile.relatednessWeightDuration, ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
-                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
+                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance, ParameterFile.relatednessWeightDuration,
+                        ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc);
                 ALNSresult.store();
 

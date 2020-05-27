@@ -37,9 +37,7 @@ public class ALNSresult {
         //Model specific info
         public double noiseControlParameter;
         public double randomnessParameterRemoval;
-        public double percentageOfRemoval;
         public double[] removalInterval;
-        public int  numberOfRemoval;
         public int randomSeed;
         public double relatednessWeightDistance;        // a0
         public double relatednessWeightDuration;         // a1
@@ -63,8 +61,7 @@ public class ALNSresult {
         // constructor
         public ALNSresult(long runTime,long timeInSec, int objective, int heuristicObjective, String instanceName, String weatherfile,
                       List<Integer> operationsNotCompleted, List<Integer> operationsNotCompletedAfterHeuristic,
-                      double noiseControlParameter,double randomnessParameterRemoval, double percentageOfRemoval, double[] removalInterval,
-                          int numberOfRemoval, int randomSeed,
+                      double noiseControlParameter,double randomnessParameterRemoval, double[] removalInterval, int randomSeed,
                       double relatednessWeightDistance, double relatednessWeightDuration, int numberOfIterations, int numberOfSegmentIterations,
                       double controlParameter, int reward1, int reward2, int reward3, double lowerThresholdWeights, int earlyPrecedenceFactor, int localOptimumIterations,
                       int numOperations, int numVessels, int numPeriods, int numLocations) {
@@ -79,9 +76,7 @@ public class ALNSresult {
             this.operationsNotCompletedAfterHeuristic = operationsNotCompletedAfterHeuristic;
             this.noiseControlParameter = noiseControlParameter;
             this.randomnessParameterRemoval = randomnessParameterRemoval;
-            this.percentageOfRemoval = percentageOfRemoval;
             this.removalInterval = removalInterval;
-            this.numberOfRemoval = numberOfRemoval;
             this.randomSeed = randomSeed;
             this.relatednessWeightDistance =relatednessWeightDistance;
             this.relatednessWeightDuration = relatednessWeightDuration;
@@ -118,8 +113,7 @@ public class ALNSresult {
             if (newFile.length() == 0){
                 String[] CSV_COLUMNS = {"Instance", "Objective Value","Heuristic Objective", "Time in seconds","NanoTime",
                         "Unrouted", "Unrouted after Heuristic", "Weather File",
-                        "Date", "noiseControlParameter", "randomnessParameterRemoval", "Percentage removed", "Removal interval",
-                        "Number of tasks removed", "randomSeed",
+                        "Date", "noiseControlParameter", "randomnessParameterRemoval", "Removal interval","randomSeed",
                 "relatednessWeightDistance", "relatednessWeightDuration", "numberOfIterations", "numberOfSegmentIterations",
                 "controlParameter", "reward1", "reward2", "reward3", "lowerThresholdWeights", "earlyPrecedenceFactor", "localOptimumIterations",
                         "Number of Tasks", "Number of Vessels", "Number of periods", "Number of Locations"};
@@ -129,8 +123,7 @@ public class ALNSresult {
             String[] results = {instanceName, formatter.format(objective), formatter.format(heuristicObjective), formatter.format(timeInSec),
                     formatter.format(runTime), String.valueOf(operationsNotCompleted), String.valueOf(operationsNotCompletedAfterHeuristic),
                     weatherfile, date_formatter.format(todaysDate), formatter.format(noiseControlParameter),
-                    formatter.format(randomnessParameterRemoval), formatter.format(percentageOfRemoval), String.valueOf(removalInterval),
-                    formatter.format(numberOfRemoval), formatter.format(randomSeed),
+                    formatter.format(randomnessParameterRemoval), Arrays.toString(removalInterval), formatter.format(randomSeed),
                     formatter.format(relatednessWeightDistance), formatter.format(relatednessWeightDuration), formatter.format(numberOfIterations),
                     formatter.format(numberOfSegmentIterations), formatter.format(controlParameter), formatter.format(reward1), formatter.format(reward2),
                     formatter.format(reward3), formatter.format(lowerThresholdWeights), formatter.format(earlyPrecedenceFactor), formatter.format(localOptimumIterations),
