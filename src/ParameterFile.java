@@ -29,7 +29,7 @@ public class ParameterFile {
     public static double noiseControlParameter=0.0;
     public static double randomnessParameterRemoval=5;
     public static int numberOfRemoval=15;
-    public static double[] removalInterval = new double[]{0.05,0.3};
+    public static double[] removalInterval = new double[]{0.15,0.3};
     public static int randomSeed=50;
     public static double relatednessWeightDistance=0.01;        // a0
     public static double relatednessWeightDuration=4.00;         // a1
