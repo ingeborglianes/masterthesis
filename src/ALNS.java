@@ -55,6 +55,17 @@ public class ALNS {
     public double lowerThresholdWeights;
     public int loc;
     public String testInstance;
+    private List<String> objValues = new ArrayList<>();
+    private List<String> bestObjValues = new ArrayList<>();
+    private List<String> removalWeight1 = new ArrayList<>();
+    private List<String> removalWeight2 = new ArrayList<>();
+    private List<String> removalWeight3 = new ArrayList<>();
+    private List<String> removalWeight4 = new ArrayList<>();
+    private List<String> removalWeight5 = new ArrayList<>();
+    private List<String> removalWeight6 = new ArrayList<>();
+    private List<String> insertionWeight1 = new ArrayList<>();
+    private List<String> insertionWeight2 = new ArrayList<>();
+    private List<String> insertionWeight3 = new ArrayList<>();
 
 
     public ALNS(int loc, String testInstance){
@@ -115,7 +126,7 @@ public class ALNS {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
+        //PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         ch = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
@@ -150,6 +161,9 @@ public class ALNS {
         unroutedTasks = ch.getUnroutedTasks();
         generator=new Random(randomSeed);
         discoveredSolutions.add(IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum());
+
+
+
     }
 
     public List<List<OperationInRoute>> copyVesselRoutes(List<List<OperationInRoute>> vesselroutes){
@@ -724,8 +738,9 @@ public class ALNS {
         return true;
     }
 
-    public void runDestroyRepair(){
+    public void runDestroyRepair() throws IOException {
         int i = 0;
+
         while(i < numberOfIterations){
         //for (int i =0; i<numberOfIterations; i++){
             double percentageRemoved = percentageToRemove(removalInterval);
@@ -771,9 +786,35 @@ public class ALNS {
                 evaluateSolution(LNSI.getRouteOperationGain(),LNSI.getRouteSailingCost(),LNSI.getVesselRoutes(),LNSI.getUnroutedTasks(), removalMethod, insertionMethod,noise);
                 //LNSI.printLNSInsertSolution(vessels);
                 updateWeightsAndTemperatureAndSegmentIterations();
+                double bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
+                double currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
+                objValues.add(String.valueOf(currentObj));
+                bestObjValues.add(String.valueOf(bestObj));
+                removalWeight1.add(String.valueOf(removalWeights[0]));
+                removalWeight2.add(String.valueOf(removalWeights[1]));
+                removalWeight3.add(String.valueOf(removalWeights[2]));
+                removalWeight4.add(String.valueOf(removalWeights[3]));
+                removalWeight5.add(String.valueOf(removalWeights[4]));
+                removalWeight6.add(String.valueOf(removalWeights[5]));
+                insertionWeight1.add(String.valueOf(insertionWeights[0]));
+                insertionWeight2.add(String.valueOf(insertionWeights[1]));
+                insertionWeight3.add(String.valueOf(insertionWeights[2]));
                 i++;
             }catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
                 retainCurrentBestSolution("current");
+                double bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
+                double currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
+                objValues.add(String.valueOf(currentObj));
+                bestObjValues.add(String.valueOf(bestObj));
+                removalWeight1.add(String.valueOf(removalWeights[0]));
+                removalWeight2.add(String.valueOf(removalWeights[1]));
+                removalWeight3.add(String.valueOf(removalWeights[2]));
+                removalWeight4.add(String.valueOf(removalWeights[3]));
+                removalWeight5.add(String.valueOf(removalWeights[4]));
+                removalWeight6.add(String.valueOf(removalWeights[5]));
+                insertionWeight1.add(String.valueOf(insertionWeights[0]));
+                insertionWeight2.add(String.valueOf(insertionWeights[1]));
+                insertionWeight3.add(String.valueOf(insertionWeights[2]));
                 i++;
             }
         }
@@ -886,7 +927,8 @@ public class ALNS {
         // Run loop
         for(int t=1; t < 6; t++) {
             for (int i = 1; i < 6; i++) {
-                String testInstance = "tuning_instances/20_" + i + "_locations(94_113)_.txt";
+                String instance = "20_" + i + "_locations(94_113)_";
+                String testInstance = "tuning_instances/"+instance+".txt";
                 long startTime = System.nanoTime();
                 ALNS alns = new ALNS(20, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
@@ -923,6 +965,18 @@ public class ALNS {
                 }
                 alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
 
+                alns.writeToFile(alns.bestObjValues, "results/ALNS_tracking_values/bestObjValues_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.objValues, "results/ALNS_tracking_values/objValues_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight1, "results/ALNS_tracking_values/insertionWeight1_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight2, "results/ALNS_tracking_values/insertionWeight2_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight3, "results/ALNS_tracking_values/insertionWeight3_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight1, "results/ALNS_tracking_values/removalWeight1_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight2, "results/ALNS_tracking_values/removalWeight2_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight3, "results/ALNS_tracking_values/removalWeight3_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight4, "results/ALNS_tracking_values/removalWeight4_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight5, "results/ALNS_tracking_values/removalWeight5_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight6, "results/ALNS_tracking_values/removalWeight6_"+instance+"_"+t+".txt");
+
                 ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
                         ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
@@ -934,7 +988,8 @@ public class ALNS {
 
             }
             for (int i = 1; i < 6; i++) {
-                String testInstance = "tuning_instances/40_" + i + "_locations(94_133)_.txt";
+                String instance = "40_" + i + "_locations(94_133)_";
+                String testInstance = "tuning_instances/"+instance+".txt";
                 long startTime = System.nanoTime();
                 ALNS alns = new ALNS(40, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
@@ -971,6 +1026,18 @@ public class ALNS {
                 }
                 alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
 
+                alns.writeToFile(alns.bestObjValues, "results/ALNS_tracking_values/bestObjValues_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.objValues, "results/ALNS_tracking_values/objValues_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight1, "results/ALNS_tracking_values/insertionWeight1_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight2, "results/ALNS_tracking_values/insertionWeight2_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight3, "results/ALNS_tracking_values/insertionWeight3_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight1, "results/ALNS_tracking_values/removalWeight1_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight2, "results/ALNS_tracking_values/removalWeight2_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight3, "results/ALNS_tracking_values/removalWeight3_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight4, "results/ALNS_tracking_values/removalWeight4_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight5, "results/ALNS_tracking_values/removalWeight5_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight6, "results/ALNS_tracking_values/removalWeight6_"+instance+"_"+t+".txt");
+
                 ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
                         ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
@@ -982,7 +1049,8 @@ public class ALNS {
 
             }
             for (int i = 1; i < 6; i++) {
-                String testInstance = "tuning_instances/60_" + i + "_locations(81_140)_.txt";
+                String instance = "60_" + i + "_locations(81_140)_";
+                String testInstance = "tuning_instances/"+instance+".txt";
                 long startTime = System.nanoTime();
                 ALNS alns = new ALNS(60, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
@@ -1018,6 +1086,18 @@ public class ALNS {
                     System.out.println(ur.getID());
                 }
                 alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
+
+                alns.writeToFile(alns.bestObjValues, "results/ALNS_tracking_values/bestObjValues_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.objValues, "results/ALNS_tracking_values/objValues_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight1, "results/ALNS_tracking_values/insertionWeight1_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight2, "results/ALNS_tracking_values/insertionWeight2_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.insertionWeight3, "results/ALNS_tracking_values/insertionWeight3_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight1, "results/ALNS_tracking_values/removalWeight1_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight2, "results/ALNS_tracking_values/removalWeight2_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight3, "results/ALNS_tracking_values/removalWeight3_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight4, "results/ALNS_tracking_values/removalWeight4_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight5, "results/ALNS_tracking_values/removalWeight5_"+instance+"_"+t+".txt");
+                alns.writeToFile(alns.removalWeight6, "results/ALNS_tracking_values/removalWeight6_"+instance+"_"+t+".txt");
 
                 ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
