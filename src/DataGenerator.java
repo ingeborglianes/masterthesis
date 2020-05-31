@@ -386,6 +386,7 @@ public class DataGenerator {
         }
         routing.add(" ");
         for (Vessel v:vessels){
+            //System.out.println("Vessel "+ v.getNum()+" is vessel type "+v.getVesselType());
             routing.add("Vessel "+ v.getNum()+" is vessel type "+v.getVesselType());
         }
         routing.add(" ");
