@@ -42,4 +42,12 @@ public class ConsolidatedValues {
 
     public void setConsolidatedRoute(int consolidatedRoute) { this.consolidatedRoute = consolidatedRoute;
     }
+
+    public void setConsolidated(Boolean consolidated) {
+        this.consolidated = consolidated;
+    }
+
+    public void setSmallTasks(Boolean smallTasks) {
+        this.smallTasks = smallTasks;
+    }
 }

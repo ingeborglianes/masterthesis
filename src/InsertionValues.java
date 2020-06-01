@@ -36,4 +36,8 @@ public class InsertionValues {
     public void setBenenefitIncrease(int benenefitIncrease) {
         this.benenefitIncrease = benenefitIncrease;
     }
+
+    public void setIndexInRoute(int indexInRoute) {
+        this.indexInRoute = indexInRoute;
+    }
 }
