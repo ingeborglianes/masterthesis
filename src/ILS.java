@@ -72,6 +72,7 @@ public class ILS {
     private int numberOfImprovementsLocal;
     private int ALNSobj;
     private Boolean infeasibleSearch=false;
+    private int largestLocalImprovement=0;
 
 
     public ILS(int loc, String testInstance){
@@ -1131,6 +1132,11 @@ public class ILS {
             if(newObj2==newObj1){
                 continueLocal=false;
             }
+            else if(newObj2>newObj1){
+                if(newObj2>largestLocalImprovement){
+                    largestLocalImprovement=newObj2;
+                }
+            }
             try{
                 sc.runSwitchConsolidated();
                 vesselroutes=sc.getVesselRoutes();
@@ -1469,6 +1475,7 @@ public class ILS {
                 long endTime = System.nanoTime();
                 long totalTime = endTime - startTime;
                 System.out.println("Time " + totalTime / 1000000000);
+                System.out.println("Largest local improvement" +alns.largestLocalImprovement);
                 //System.out.println(alns.generator.doubles());
                 route.add("\nTime " + totalTime / 1000000000);
                 System.out.println("Unrouted construction");
@@ -1492,7 +1499,7 @@ public class ILS {
                         ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length,
                         alns.loc,ParameterFile.IterationsWithoutAcceptance,ParameterFile.numberOfILSIterations,
-                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch);
+                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement);
                 ILSresult.store();
 
             }
@@ -1544,7 +1551,7 @@ public class ILS {
                         ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length,
                         alns.loc,ParameterFile.IterationsWithoutAcceptance,ParameterFile.numberOfILSIterations,
-                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch);
+                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement);
                 ILSresult.store();
 
             }
@@ -1596,7 +1603,7 @@ public class ILS {
                         ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length,
                         alns.loc,ParameterFile.IterationsWithoutAcceptance,ParameterFile.numberOfILSIterations,
-                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch);
+                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement);
                 ILSresult.store();
 
             }

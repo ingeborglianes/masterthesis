@@ -62,6 +62,7 @@ public class ILSResult {
     public int numberOfImprovementsLocal;
     public int ALNSObj;
     public Boolean infeasibleSearch;
+    public int largestLocalImprovement;
 
 
     // constructor
@@ -71,7 +72,7 @@ public class ILSResult {
                       double relatednessWeightDistance, double relatednessWeightDuration, int numberOfIterations, int numberOfSegmentIterations,
                       double controlParameter, int reward1, int reward2, int reward3, double lowerThresholdWeights, int earlyPrecedenceFactor, int localOptimumIterations,
                       int numOperations, int numVessels, int numPeriods, int numLocations, int iterationsWithoutAcceptance,
-                         int ILSIterations,int numberOfImprovementsLocal,int ALNSObj, Boolean infeasibleSearch) {
+                         int ILSIterations,int numberOfImprovementsLocal,int ALNSObj, Boolean infeasibleSearch,int largestLocalImprovement) {
 
         this.runTime  =runTime;
         this.timeInSec = timeInSec;
@@ -142,7 +143,7 @@ public class ILSResult {
                 formatter.format(earlyPrecedenceFactor), formatter.format(localOptimumIterations),
                 formatter.format(numOperations), formatter.format(numVessels), formatter.format(numPeriods), formatter.format(numLocations)
                 , formatter.format(ILSIterations), formatter.format(numberOfImprovementsLocal), formatter.format(ALNSObj)
-                , formatter.format(infeasibleSearch)};
+                , String.valueOf(infeasibleSearch),formatter.format(largestLocalImprovement)};
         csvWriter.writeNext(results, false);
         csvWriter.close();
         writer.close();

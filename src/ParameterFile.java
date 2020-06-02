@@ -37,7 +37,7 @@ public class ParameterFile {
     public static double relatednessWeightPrecedenceOver=0.1;   //Brukes ikke
     public static double relatednessWeightPrecedenceOf=0.1;     //Brukes ikke
     public static double relatednessWeightSimultaneous=0.1;     //Brukes ikke
-    public static int numberOfIterations = 100000;
+    public static int numberOfIterations = 25000;
     public static int numberOfSegmentIterations=100;
     public static double controlParameter=0.5;                  // reaction parameter
     public static int reward1=33;                               // sigma1
@@ -47,5 +47,5 @@ public class ParameterFile {
     public static int earlyPrecedenceFactor=20;                 //I konstruksjonsheuristikken belønnes precedence
     public static int localOptimumIterations=1;
     public static int IterationsWithoutAcceptance=ParameterFile.numberOfIterations+1;
-    public static int numberOfILSIterations=2000;
+    public static int numberOfILSIterations=10000;
 }
