@@ -33,6 +33,11 @@ public class LS_operators {
     private List<Map<Integer, PrecedenceValues>> precedenceOverRoutes;
     private Map<Integer, ConsolidatedValues> consolidatedOperations;
     private Boolean print=false;
+    private int count1RL=0;
+    private int count2RL=0;
+    private int count1EX=0;
+    private int count2EX=0;
+    private int countNormalInsertion=0;
 
 
     public LS_operators(int[][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes,
@@ -476,6 +481,7 @@ public class LS_operators {
             simultaneousOp=cv.getSimultaneousOp();
             return false;
         }
+        count1RL+=1;
 
         System.out.println("One Relocate performed");
         //printLSOSolution(vesseltypes);
@@ -855,7 +861,7 @@ public class LS_operators {
             simultaneousOp=cv.getSimultaneousOp();
             return false;
         }
-
+        count2RL+=1;
         System.out.println("Two relocate performed");
         //printLSOSolution(vesseltypes);
 
@@ -1201,7 +1207,7 @@ public class LS_operators {
             simultaneousOp=cv.getSimultaneousOp();
             return false;
         }
-
+        count1EX+=1;
         System.out.println("Exchange performed");
         //printLSOSolution(vesseltypes);
 
@@ -1607,6 +1613,7 @@ public class LS_operators {
         }
 
         System.out.println("Two exchange performed");
+        count2EX+=1;
         //printLSOSolution(vesseltypes);
 
         if (bigTasksALNS[vesselroutes.get(vessel1).get(pos1).getID() - 1 - startNodes.length] != null &&
@@ -2853,6 +2860,8 @@ public class LS_operators {
                                         startNodes, precedenceOverOperations, precedenceOverRoutes, precedenceOfOperations, precedenceOfRoutes,
                                         simALNS, simultaneousOp, simOpRoutes, vesselroutes, TimeVesselUseOnOperation, SailingTimes, twIntervals);
                                 insertedTasks.add(task);
+                                countNormalInsertion+=1;
+                                System.out.println("Task " + task.getID() + " inserted performed");
                             }
                         }
                     } else {
@@ -2864,6 +2873,7 @@ public class LS_operators {
                                     startNodes, precedenceOverOperations, precedenceOverRoutes, precedenceOfOperations, precedenceOfRoutes,
                                     simALNS, simultaneousOp, simOpRoutes, vesselroutes, TimeVesselUseOnOperation, SailingTimes, twIntervals);
                             insertedTasks.add(task);
+                            countNormalInsertion+=1;
                             System.out.println("Task " + task.getID() + " inserted performed");
                         }
                     }
@@ -3538,5 +3548,45 @@ public class LS_operators {
 
     public void setPrint(Boolean print) {
         this.print = print;
+    }
+
+    public int getCount1RL() {
+        return count1RL;
+    }
+
+    public void setCount1RL(int count1RL) {
+        this.count1RL = count1RL;
+    }
+
+    public int getCount2RL() {
+        return count2RL;
+    }
+
+    public void setCount2RL(int count2RL) {
+        this.count2RL = count2RL;
+    }
+
+    public int getCount1EX() {
+        return count1EX;
+    }
+
+    public void setCount1EX(int count1EX) {
+        this.count1EX = count1EX;
+    }
+
+    public int getCount2EX() {
+        return count2EX;
+    }
+
+    public void setCount2EX(int count2EX) {
+        this.count2EX = count2EX;
+    }
+
+    public int getCountNormalInsertion() {
+        return countNormalInsertion;
+    }
+
+    public void setCountNormalInsertion(int countNormalInsertion) {
+        this.countNormalInsertion = countNormalInsertion;
     }
 }

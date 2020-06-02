@@ -29,6 +29,7 @@ public class SwitchConsolidated {
     private int nTimePeriods;
     private int [][] OperationsForVessel;
     private int [] vesselTypes;
+    private int countSwap=0;
 
     Map<Integer,List<InsertionValues>> allFeasibleInsertions = new HashMap<>();
 
@@ -492,6 +493,7 @@ public class SwitchConsolidated {
                 if(benefitIncreaseBigTask>=benefitIncreaseSmall && benefitIncreaseBigTask>0){
                     if(alreadyInserted.equals("small")){
                         System.out.println("swap consolidated performed");
+                        countSwap+=1;
                     }
                     LargeNeighboorhoodSearchInsert.insertOperation(bigTask,bigTaskInsertionValues.getEarliest(),bigTaskInsertionValues.getLatest(),bigTaskInsertionValues.getIndexInRoute(),
                             bigTaskInsertionValues.getRouteIndex(),precedenceALNS,startNodes,precedenceOverOperations,precedenceOverRoutes,precedenceOfOperations,precedenceOfRoutes,
@@ -504,6 +506,7 @@ public class SwitchConsolidated {
                 else if(benefitIncreaseBigTask<benefitIncreaseSmall && benefitIncreaseSmall>0){
                     if(alreadyInserted.equals("big")){
                         System.out.println("swap consolidated performed");
+                        countSwap+=1;
                     }
                     LargeNeighboorhoodSearchInsert.insertOperation(small1,small1InsertionValues.getEarliest(),small1InsertionValues.getLatest(),small1InsertionValues.getIndexInRoute(),
                             small1InsertionValues.getRouteIndex(),precedenceALNS,startNodes,precedenceOverOperations,precedenceOverRoutes,precedenceOfOperations,precedenceOfRoutes,
@@ -569,5 +572,13 @@ public class SwitchConsolidated {
 
     public Map<Integer, ConsolidatedValues> getConsolidatedOperations() {
         return consolidatedOperations;
+    }
+
+    public int getCountSwap() {
+        return countSwap;
+    }
+
+    public void setCountSwap(int countSwap) {
+        this.countSwap = countSwap;
     }
 }

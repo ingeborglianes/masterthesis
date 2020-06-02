@@ -64,6 +64,17 @@ public class ILSResult {
     public Boolean infeasibleSearch;
     public int largestLocalImprovement;
 
+    private int count1RL=0;
+    private int count2RL=0;
+    private int count1EX=0;
+    private int count2EX=0;
+    private int countNormalInsertion=0;
+    private int countSim=0;
+    private int countPres=0;
+    private int countRelocateSim=0;
+    private int countRelocateSingle=0;
+    private int swapCount=0;
+
 
     // constructor
         public ILSResult(long runTime,long timeInSec, int objective, int heuristicObjective, String instanceName, String weatherfile,
@@ -72,7 +83,9 @@ public class ILSResult {
                       double relatednessWeightDistance, double relatednessWeightDuration, int numberOfIterations, int numberOfSegmentIterations,
                       double controlParameter, int reward1, int reward2, int reward3, double lowerThresholdWeights, int earlyPrecedenceFactor, int localOptimumIterations,
                       int numOperations, int numVessels, int numPeriods, int numLocations, int iterationsWithoutAcceptance,
-                         int ILSIterations,int numberOfImprovementsLocal,int ALNSObj, Boolean infeasibleSearch,int largestLocalImprovement) {
+                         int ILSIterations,int numberOfImprovementsLocal,int ALNSObj, Boolean infeasibleSearch,int largestLocalImprovement,
+                         int count1RL, int count2RL, int count1EX, int count2EX, int countNormalInsertion, int countSim,
+                         int countPres, int countRelocateSim, int countRelocateSingle,int swapCount) {
 
         this.runTime  =runTime;
         this.timeInSec = timeInSec;
@@ -107,6 +120,17 @@ public class ILSResult {
         this.numberOfImprovementsLocal=numberOfImprovementsLocal;
         this.ALNSObj=ALNSObj;
         this.infeasibleSearch=infeasibleSearch;
+        this.largestLocalImprovement=largestLocalImprovement;
+        this.count1RL=count1RL;
+        this.count2RL=count2RL;
+        this.count1EX=count1EX;
+        this.count2EX=count2EX;
+        this.countNormalInsertion=countNormalInsertion;
+        this.countSim=countSim;
+        this.countPres=countPres;
+        this.countRelocateSim=countRelocateSim;
+        this.countRelocateSingle=countRelocateSingle;
+        this.swapCount=swapCount;
 
     }
     //write all attributes of the object to results to a csv file
@@ -129,7 +153,9 @@ public class ILSResult {
                     "Date", "noiseControlParameter", "randomnessParameterRemoval", "Removal interval","randomSeed",
                     "relatednessWeightDistance", "relatednessWeightDuration", "numberOfIterations", "numberOfSegmentIterations",
                     "controlParameter", "reward1", "reward2", "reward3", "Num iterations before acceptance","lowerThresholdWeights", "earlyPrecedenceFactor", "localOptimumIterations",
-                    "Number of Tasks", "Number of Vessels", "Number of periods", "Number of Locations","ILS Iterations","number Of improvements local","ALNS Objective","Infeasible search"};
+                    "Number of Tasks", "Number of Vessels", "Number of periods", "Number of Locations","ILS Iterations","number Of improvements local","ALNS Objective","Infeasible search",
+            "Largest local improvement","Count 1RL","Count 2RL","Count 1EX","Count 2EX","Count normal insertion","Count sim insertion"
+                    ,"Count pres insertion", "Cont relocate insert sim","Count relocate insert normal","Count swap consolidated"};
             csvWriter.writeNext(CSV_COLUMNS, false);
 
         }
@@ -143,7 +169,9 @@ public class ILSResult {
                 formatter.format(earlyPrecedenceFactor), formatter.format(localOptimumIterations),
                 formatter.format(numOperations), formatter.format(numVessels), formatter.format(numPeriods), formatter.format(numLocations)
                 , formatter.format(ILSIterations), formatter.format(numberOfImprovementsLocal), formatter.format(ALNSObj)
-                , String.valueOf(infeasibleSearch),formatter.format(largestLocalImprovement)};
+                , String.valueOf(infeasibleSearch),formatter.format(largestLocalImprovement),formatter.format(count1RL),
+                formatter.format(count2RL), formatter.format(count1EX), formatter.format(count2EX), formatter.format(countNormalInsertion),
+                        formatter.format(countSim), formatter.format(countPres), formatter.format(countRelocateSim), formatter.format(countRelocateSingle),formatter.format(swapCount)};
         csvWriter.writeNext(results, false);
         csvWriter.close();
         writer.close();

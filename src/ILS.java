@@ -73,6 +73,16 @@ public class ILS {
     private int ALNSobj;
     private Boolean infeasibleSearch=false;
     private int largestLocalImprovement=0;
+    private int count1RL=0;
+    private int count2RL=0;
+    private int count1EX=0;
+    private int count2EX=0;
+    private int countNormalInsertion=0;
+    private int countSim=0;
+    private int countPres=0;
+    private int countRelocateSim=0;
+    private int countRelocateSingle=0;
+    private int swapCount=0;
 
 
     public ILS(int loc, String testInstance){
@@ -1041,6 +1051,11 @@ public class ILS {
             */
             //evaluateSolutionLocal(LSO.getRouteOperationGain(), LSO.getRouteSailingCost(), LSO.getVesselroutes(), LSO.getUnroutedTasks());
             //System.out.println("run relocate LSOs");
+            count1RL+=LSO.getCount1RL();
+            count2RL+=LSO.getCount2RL();
+            count1EX+=LSO.getCount1EX();
+            count2EX+=LSO.getCount2EX();
+            countNormalInsertion+=LSO.getCountNormalInsertion();
             RelocateInsert RI = new RelocateInsert(dg.getOperationsForVessel(), vessels, dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(),
                     dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(), dg.getTwIntervals(), currentRouteSailingCost, currentRouteOperationGain,
                     dg.getStartNodes(), dg.getSimultaneousALNS(), dg.getPrecedenceALNS(), dg.getBigTasksALNS(), dg.getOperationGain(),
@@ -1102,6 +1117,10 @@ public class ILS {
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
+            countRelocateSim+=RI.getCountRelocateSim();
+            countRelocateSingle+=RI.getCountRelocateSingle();
+            countSim+=RI.getCountSim();
+            countPres+=RI.getCountPres();
 
             //System.out.println("Called from full enumeration");
 
@@ -1154,7 +1173,7 @@ public class ILS {
                 retainCurrentBestSolution("temp");
             }
 
-
+            swapCount+=sc.getCountSwap();
 
             //evaluateSolutionLocal(sc.getRouteOperationGain(), sc.getRouteSailingCost(), sc.getVesselRoutes(), sc.getUnroutedTasks());
             //System.out.println("New obj 2 "+newObj2);
@@ -1491,6 +1510,11 @@ public class ILS {
                 }
                 alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
 
+                System.out.println("1RL "+alns.count1RL + "2RL "+alns.count2RL+ "1EX "+alns.count1EX
+                        + "2EX "+alns.count2EX+ "Insert normal "+alns.countNormalInsertion+ "Sim insert "+alns.countSim+
+                        "count pres insert "+alns.countPres+" count relocate normal "+alns.countRelocateSingle+" count relocate sim" +
+                        alns.countRelocateSim+" swap consolidated "+alns.swapCount);
+
                 ILSResult ILSresult = new ILSResult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
                         final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
                         ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
@@ -1499,7 +1523,9 @@ public class ILS {
                         ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length,
                         alns.loc,ParameterFile.IterationsWithoutAcceptance,ParameterFile.numberOfILSIterations,
-                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement);
+                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement,alns.count1RL,
+                        alns.count2RL,alns.count1EX,alns.count2EX,alns.countNormalInsertion,alns.countSim,alns.countPres,
+                        alns.countRelocateSim,alns.countRelocateSingle,alns.swapCount);
                 ILSresult.store();
 
             }
@@ -1551,7 +1577,9 @@ public class ILS {
                         ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length,
                         alns.loc,ParameterFile.IterationsWithoutAcceptance,ParameterFile.numberOfILSIterations,
-                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement);
+                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement,alns.count1RL,
+                        alns.count2RL,alns.count1EX,alns.count2EX,alns.countNormalInsertion,alns.countSim,alns.countPres,
+                        alns.countRelocateSim,alns.countRelocateSingle,alns.swapCount);
                 ILSresult.store();
 
             }
@@ -1603,7 +1631,9 @@ public class ILS {
                         ParameterFile.reward1,ParameterFile.reward2,ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length,
                         alns.loc,ParameterFile.IterationsWithoutAcceptance,ParameterFile.numberOfILSIterations,
-                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement);
+                        alns.numberOfImprovementsLocal,alns.ALNSobj,alns.infeasibleSearch,alns.largestLocalImprovement,alns.count1RL,
+                        alns.count2RL,alns.count1EX,alns.count2EX,alns.countNormalInsertion,alns.countSim,alns.countPres,
+                        alns.countRelocateSim,alns.countRelocateSingle,alns.swapCount);
                 ILSresult.store();
 
             }

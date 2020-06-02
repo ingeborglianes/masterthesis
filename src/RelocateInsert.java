@@ -35,7 +35,10 @@ public class RelocateInsert {
     private List<Map<Integer,PrecedenceValues>> precedenceOverRoutes;
     private Map<Integer, ConsolidatedValues> consolidatedOperations;
     private Boolean printCauseSimInserted=false;
-
+    private int countSim=0;
+    private int countPres=0;
+    private int countRelocateSim=0;
+    private int countRelocateSingle=0;
 
     public RelocateInsert(int [][] OperationsForVessel, int[] vesseltypes, int[][][][] SailingTimes,
                        int [][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int [] EarliestStartingTimeForVessel,
@@ -211,12 +214,14 @@ public class RelocateInsert {
             if(simALNS[toInsertKey-startNodes.length-1][0] == 0) {
                 insertOperation(toInsertKey, toInsert.getEarliest(), toInsert.getLatest(), toInsert.getIndexInRoute(), toInsert.getRouteIndex());
                 System.out.println("Relocate insert for insertion of task "+toInsertKey+ " performed");
+                countRelocateSingle+=1;
             }else {
                 if(toInsert.getEarliest()==toInsertSim.getEarliest() && toInsert.getLatest()==toInsertSim.getLatest()) {
                     insertOperation(toInsertKey, toInsert.getEarliest(), toInsert.getLatest(), toInsert.getIndexInRoute(), toInsert.getRouteIndex());
                     insertOperation(toInsertSimKey, toInsert.getEarliest(), toInsert.getLatest(), toInsertSim.getIndexInRoute(), toInsertSim.getRouteIndex());
                     printInitialSolution(vesseltypes);
                     System.out.println("Relocate insert for insertion of sim task " + toInsertKey + " and " + simALNS[toInsertKey - startNodes.length - 1][0] + " performed ");
+                    countRelocateSim+=1;
                 }
             }
             if(bigTasksALNS[toMoveKey-startNodes.length-1] != null && bigTasksALNS[toMoveKey-startNodes.length-1][0] != 0){
@@ -458,6 +463,7 @@ public class RelocateInsert {
                     }
 
                     //printInitialSolution(vesseltypes);
+                    countSim+=1;
                     return true;
                 }
             }
@@ -704,6 +710,7 @@ public class RelocateInsert {
                             return false;
                         }
                         //printInitialSolution(vesseltypes);
+                        countPres+=1;
                         return true;
                     }
                 }
@@ -1525,6 +1532,38 @@ public class RelocateInsert {
 
     public void setPrintCauseSimInserted(Boolean printCauseSimInserted) {
         this.printCauseSimInserted = printCauseSimInserted;
+    }
+
+    public int getCountSim() {
+        return countSim;
+    }
+
+    public void setCountSim(int countSim) {
+        this.countSim = countSim;
+    }
+
+    public int getCountPres() {
+        return countPres;
+    }
+
+    public void setCountPres(int countPres) {
+        this.countPres = countPres;
+    }
+
+    public int getCountRelocateSim() {
+        return countRelocateSim;
+    }
+
+    public void setCountRelocateSim(int countRelocateSim) {
+        this.countRelocateSim = countRelocateSim;
+    }
+
+    public int getCountRelocateSingle() {
+        return countRelocateSingle;
+    }
+
+    public void setCountRelocateSingle(int countRelocateSingle) {
+        this.countRelocateSingle = countRelocateSingle;
     }
 }
 
