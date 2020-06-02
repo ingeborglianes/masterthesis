@@ -856,7 +856,7 @@ public class ILS {
                 objValues.add(String.valueOf(currentObj));
                 bestObjValues.add(String.valueOf(bestObj));
                 i++;
-            }catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            }catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("current");
                 double bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
                 double currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
@@ -867,7 +867,7 @@ public class ILS {
         }
     }
 
-    public EvaluateValues runLocalSearchFullEnumeration(){
+    public EvaluateValues runLocalSearchFullEnumeration() throws IOException{
         EvaluateValues returnValues = null;
         Boolean continueLocal=true;
         int localRuns=0;
@@ -929,7 +929,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -948,7 +948,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -968,7 +968,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -1002,7 +1002,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -1023,7 +1023,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -1075,7 +1075,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -1093,7 +1093,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
             //System.out.println("run precedence");
@@ -1114,7 +1114,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
             countRelocateSim+=RI.getCountRelocateSim();
@@ -1169,7 +1169,7 @@ public class ILS {
                     tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
-            catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
                 retainCurrentBestSolution("temp");
             }
 
@@ -1266,7 +1266,7 @@ public class ILS {
             //LNSI.printLNSInsertSolution(vessels);
             updateWeightsAndTemperatureAndSegmentIterations();
             return new String[]{removalMethod,insertionMethod,String.valueOf(noise)};
-        }catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
+        }catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
             retainCurrentBestSolution("current");
             double bestObj= IntStream.of(bestRouteOperationGain).sum()-IntStream.of(bestRouteSailingCost).sum();
             double currentObj= IntStream.of(currentRouteOperationGain).sum()-IntStream.of(currentRouteSailingCost).sum();
@@ -1283,7 +1283,7 @@ public class ILS {
         runLocalSearchFullEnumeration();
     }
 
-    public void runILS(){
+    public void runILS() throws IOException {
         runLocalSearchFullEnumeration();
         //System.out.println("After first local search");
         /*
