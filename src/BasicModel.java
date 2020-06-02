@@ -681,11 +681,11 @@ public class BasicModel {
         }*/
         //dg.printAllData();
 
-        for(int i =1;i<6;i++){
+        for(int i =3;i<4;i++){
             int[] vessels = new int[]{3, 4, 5};
             int []  locStart = new int[]{94, 95, 96};
             //testInstance="test_instances/30" + "_"+i+"_locations_normalOpGenerator.txt";
-            String testInstance = "tuning_instances/20_"+i+"_locations(94_113)_.txt";
+            String testInstance = "technical_test_instances//20_"+i+"_high_locations(94_113)_.txt";
             String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();
@@ -697,10 +697,10 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
-        for(int i =1;i<6;i++){
+        for(int i =3;i<4;i++){
             int[] vessels = new int[]{1,3,4,5,6};
             int [] locStart = new int[]{94,95,96,97,98};
-            String testInstance = "tuning_instances/40_"+i+"_locations(94_133)_.txt";
+            String testInstance = "technical_test_instances//40_"+i+"_high_locations(94_133)_.txt";
             String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();
@@ -712,10 +712,10 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
-        for(int i =1;i<6;i++){
+        for(int i =3;i<4;i++){
             int []vessels = new int[]{1,2, 3,4, 5,6,3,4};
             int []locStart = new int[]{94,95,96,97,98,99,100,101};
-            String testInstance = "tuning_instances/60_"+i+"_locations(81_140)_.txt";
+            String testInstance = "technical_test_instances//60_"+i+"_high_locations(81_140)_.txt";
             String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();

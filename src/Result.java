@@ -28,7 +28,7 @@ public class Result {
     public Double objBound;
     public Double objBoundC;
     public String instanceName;
-    public String filename = "result_instances";
+    public String filename = "Gurobi_result_instances";
     public int isOptimal;
     public int optimistatus;
 

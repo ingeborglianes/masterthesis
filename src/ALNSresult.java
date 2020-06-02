@@ -57,6 +57,7 @@ public class ALNSresult {
         public int numVessels;
         public int numLocations;
         public String filePath;
+        public int iterationsWithoutAcceptance;
 
         // constructor
         public ALNSresult(long runTime,long timeInSec, int objective, int heuristicObjective, String instanceName, String weatherfile,
@@ -64,7 +65,7 @@ public class ALNSresult {
                       double noiseControlParameter,double randomnessParameterRemoval, double[] removalInterval, int randomSeed,
                       double relatednessWeightDistance, double relatednessWeightDuration, int numberOfIterations, int numberOfSegmentIterations,
                       double controlParameter, int reward1, int reward2, int reward3, double lowerThresholdWeights, int earlyPrecedenceFactor, int localOptimumIterations,
-                      int numOperations, int numVessels, int numPeriods, int numLocations) {
+                      int numOperations, int numVessels, int numPeriods, int numLocations, int iterationsWithoutAcceptance) {
 
             this.runTime  =runTime;
             this.timeInSec = timeInSec;
@@ -89,6 +90,7 @@ public class ALNSresult {
             this.lowerThresholdWeights = lowerThresholdWeights;
             this.earlyPrecedenceFactor = earlyPrecedenceFactor;
             this.localOptimumIterations = localOptimumIterations;
+            this.iterationsWithoutAcceptance = iterationsWithoutAcceptance;
             this.numOperations=numOperations;
             this.numVessels=numVessels;
             this.numPeriods = numPeriods;
@@ -115,7 +117,7 @@ public class ALNSresult {
                         "Unrouted", "Unrouted after Heuristic", "Weather File",
                         "Date", "noiseControlParameter", "randomnessParameterRemoval", "Removal interval","randomSeed",
                 "relatednessWeightDistance", "relatednessWeightDuration", "numberOfIterations", "numberOfSegmentIterations",
-                "controlParameter", "reward1", "reward2", "reward3", "lowerThresholdWeights", "earlyPrecedenceFactor", "localOptimumIterations",
+                "controlParameter", "reward1", "reward2", "reward3", "Num iterations before acceptance","lowerThresholdWeights", "earlyPrecedenceFactor", "localOptimumIterations",
                         "Number of Tasks", "Number of Vessels", "Number of periods", "Number of Locations"};
                 csvWriter.writeNext(CSV_COLUMNS, false);
 
@@ -126,7 +128,8 @@ public class ALNSresult {
                     formatter.format(randomnessParameterRemoval), Arrays.toString(removalInterval), formatter.format(randomSeed),
                     formatter.format(relatednessWeightDistance), formatter.format(relatednessWeightDuration), formatter.format(numberOfIterations),
                     formatter.format(numberOfSegmentIterations), formatter.format(controlParameter), formatter.format(reward1), formatter.format(reward2),
-                    formatter.format(reward3), formatter.format(lowerThresholdWeights), formatter.format(earlyPrecedenceFactor), formatter.format(localOptimumIterations),
+                    formatter.format(reward3), formatter.format(iterationsWithoutAcceptance),formatter.format(lowerThresholdWeights),
+                    formatter.format(earlyPrecedenceFactor), formatter.format(localOptimumIterations),
                     formatter.format(numOperations), formatter.format(numVessels), formatter.format(numPeriods), formatter.format(numLocations)};
             csvWriter.writeNext(results, false);
             csvWriter.close();
