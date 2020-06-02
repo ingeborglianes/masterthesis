@@ -14,7 +14,7 @@ public class ParameterFile {
     // Insert the name of your result-routing-file. In this file the different variables are printed for the results
     // for each test instance you run on one of the models
     // Choose which name you prefer, the file will be generated automatically
-    public static String nameResultFile ="results/ALNSroutes/";//+testInstance;
+    public static String nameResultFile ="results/ILSroutes/";//+testInstance;
 
     public  static String nameResultFileGurobi = "results/GurobiRoutes/";//+testInstance;
 
@@ -47,4 +47,5 @@ public class ParameterFile {
     public static int earlyPrecedenceFactor=20;                 //I konstruksjonsheuristikken belønnes precedence
     public static int localOptimumIterations=1;
     public static int IterationsWithoutAcceptance=ParameterFile.numberOfIterations+1;
+    public static int numberOfILSIterations=2000;
 }

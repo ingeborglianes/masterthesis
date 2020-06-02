@@ -59,6 +59,7 @@ public class ALNSresult {
         public String filePath;
         public int iterationsWithoutAcceptance;
 
+
         // constructor
         public ALNSresult(long runTime,long timeInSec, int objective, int heuristicObjective, String instanceName, String weatherfile,
                       List<Integer> operationsNotCompleted, List<Integer> operationsNotCompletedAfterHeuristic,

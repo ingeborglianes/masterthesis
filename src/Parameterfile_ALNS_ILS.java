@@ -9,12 +9,12 @@ public class Parameterfile_ALNS_ILS {
     public static String weatherFile= "weather_files/weather_normal.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
-    public static String testInstance ="test_instances/35_2_locations_normalOpGenerator_old.txt";
+    public static String testInstance ="test_instances/35_4_locations_normalOpGenerator_old.txt";
 
     // Insert the name of your result-routing-file. In this file the different variables are printed for the results
     // for each test instance you run on one of the models
     // Choose which name you prefer, the file will be generated automatically
-    public static String nameResultFile ="results.txt";
+    public static String nameResultFile ="results/ILSroutes.txt";
 
     public  static String nameResultFileGurobi = "results/GurobiRoutes/";//+testInstance;
 
@@ -44,7 +44,7 @@ public class Parameterfile_ALNS_ILS {
     public static int reward3=13;                               // sigma3
     public static double lowerThresholdWeights=0.2;
 
-    public static int numberOfILSIterations=500;
+    public static int numberOfILSIterations=2000;
 
     public static int IterationsWithoutAcceptance=50;
 }
