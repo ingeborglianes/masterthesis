@@ -39,7 +39,7 @@ public class ParameterFile {
     public static double relatednessWeightSimultaneous=0.1;     //Brukes ikke
     public static int numberOfIterations = 100000;
     public static int numberOfSegmentIterations=100;
-    public static double controlParameter=0.0;                  // reaction parameter
+    public static double controlParameter=0.5;                  // reaction parameter
     public static int reward1=33;                               // sigma1
     public static int reward2=9;                                // sigma2
     public static int reward3=9;                               // sigma3
