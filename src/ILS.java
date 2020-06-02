@@ -30,6 +30,8 @@ public class ILS {
     private int[] currentRouteOperationGain;
     private List<List<OperationInRoute>> bestRoutes;
     private List<OperationInRoute> bestUnrouted;
+    private List<List<OperationInRoute>> tempRoutes;
+    private List<OperationInRoute> tempUnrouted;
     private List<List<OperationInRoute>> currentRoutes;
     private List<OperationInRoute> currentUnrouted;
     private List<List<OperationInRoute>> vesselroutes;
@@ -154,6 +156,9 @@ public class ILS {
 
         currentRoutes=copyVesselRoutes(ch.getVesselroutes());
         currentUnrouted=copyUnrouted(ch.getUnroutedTasks(),true);
+
+        tempRoutes=copyVesselRoutes(ch.getVesselroutes());
+        tempUnrouted=copyUnrouted(ch.getUnroutedTasks(),true);
 
         precedenceOverOperations = ch.getPrecedenceOverOperations();
         precedenceOfOperations = ch.getPrecedenceOfOperations();
@@ -345,6 +350,10 @@ public class ILS {
         if(typeSolution.equals("current")){
             copyRoutes= copyVesselRoutesAndSynchronization(currentRoutes);
             unroutedTasks = copyUnrouted(currentUnrouted,false);
+        }
+        else if(typeSolution.equals("temp")){
+            copyRoutes= copyVesselRoutesAndSynchronization(tempRoutes);
+            unroutedTasks = copyUnrouted(tempUnrouted,false);
         }
         else{
             copyRoutes= copyVesselRoutesAndSynchronization(bestRoutes);
@@ -904,21 +913,15 @@ public class ILS {
                 unroutedTasks=LSO.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
             //System.out.println("run 2RL");
@@ -929,21 +932,15 @@ public class ILS {
                 unroutedTasks=LSO.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
             //System.out.println("run 1EX");
@@ -955,21 +952,15 @@ public class ILS {
                 unroutedTasks=LSO.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
             //System.out.println("index 25 in sim op before 2EX: "+simultaneousOp.get(25).getIndex());
@@ -995,21 +986,15 @@ public class ILS {
                 unroutedTasks = LSO.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
 
@@ -1022,21 +1007,15 @@ public class ILS {
                 unroutedTasks=LSO.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
             /*
@@ -1075,21 +1054,15 @@ public class ILS {
                 unroutedTasks=RI.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
             //continueLocal=evaluateSolutionLocal(RI.getRouteOperationGain(), RI.getRouteSailingCost(), RI.getVesselRoutes(), RI.getUnroutedTasks());
@@ -1099,21 +1072,15 @@ public class ILS {
                 unroutedTasks=RI.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
             //System.out.println("run precedence");
 
@@ -1126,21 +1093,15 @@ public class ILS {
                 unroutedTasks=RI.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
             //System.out.println("Called from full enumeration");
@@ -1178,28 +1139,28 @@ public class ILS {
                 unroutedTasks=sc.getUnroutedTasks();
                 updateSolAfterLocal(vesselroutes,unroutedTasks);
                 if(!checkSolution(vesselroutes)){
-                    retainCurrentBestSolution("current");
-                    double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                    double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                    objValues.add(String.valueOf(currentObj));
-                    bestObjValues.add(String.valueOf(bestObj));
-                    return null;
+                    retainCurrentBestSolution("temp");
+                }
+                else{
+                    tempRoutes = copyVesselRoutes(vesselroutes);
+                    tempUnrouted = copyUnrouted(unroutedTasks,false);
                 }
             }
             catch(StackOverflowError | NullPointerException | ArrayIndexOutOfBoundsException error) {
-                retainCurrentBestSolution("current");
-                double bestObj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
-                double currentObj = IntStream.of(currentRouteOperationGain).sum() - IntStream.of(currentRouteSailingCost).sum();
-                objValues.add(String.valueOf(currentObj));
-                bestObjValues.add(String.valueOf(bestObj));
-                return null;
+                retainCurrentBestSolution("temp");
             }
 
 
 
             //evaluateSolutionLocal(sc.getRouteOperationGain(), sc.getRouteSailingCost(), sc.getVesselRoutes(), sc.getUnroutedTasks());
             //System.out.println("New obj 2 "+newObj2);
-            returnValues=new EvaluateValues(sc.getRouteOperationGain(), sc.getRouteSailingCost(), sc.getVesselRoutes(), sc.getUnroutedTasks());
+            ObjectiveValues ovR= ConstructionHeuristic.calculateObjective(vesselroutes,dg.getTimeVesselUseOnOperation(),dg.getStartNodes(),
+                    dg.getSailingTimes(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),dg.getOperationGainGurobi(),
+                     new int[vesselroutes.size()],new int[vesselroutes.size()],0, dg.getSimultaneousALNS(),dg.getBigTasksALNS());
+            int objValueReturn=ovR.getObjvalue();
+            int [] routeSailingCostReturn=ovR.getRouteSailingCost();
+            int[] routeOperationGainReturn=ovR.getRouteBenefitGain();
+            returnValues=new EvaluateValues(routeOperationGainReturn, routeSailingCostReturn,vesselroutes, unroutedTasks);
             if(localRuns>10){
                 continueLocal=false;
             }
@@ -1351,12 +1312,15 @@ public class ILS {
             noise= perturbValues[2].equals("true");
             evaluateSolution(ev.getRouteOperationGain(),ev.getRouteSailingCost(),ev.getVesselroutes(),ev.getUnrouted(),
                     perturbValues[0],perturbValues[1],noise);
+            tempRoutes = copyVesselRoutes(vesselroutes);
+            tempUnrouted = copyUnrouted(unroutedTasks,false);
         }
         retainCurrentBestSolution("best");
         if(!checkSolution(bestRoutes)){
             System.out.println("Infeasible result");
             infeasibleSearch=true;
         }
+
 
     }
 

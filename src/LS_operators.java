@@ -3028,15 +3028,12 @@ public class LS_operators {
                 twoRelocateAll();
                 break;
             case "1EX":
-                System.out.println("1-exchange chosen");
                 oneExchangeAll();
                 break;
             case "2EX":
-                System.out.println("2-exchange chosen");
                 twoExchangeAll();
                 break;
             case "insertNormal":
-                System.out.println("Insert normal chosen");
                 insertAll();
                 /*
                 if(print){
