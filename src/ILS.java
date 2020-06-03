@@ -1283,7 +1283,13 @@ public class ILS {
     public void runALNS_and_Local() throws IOException {
         runDestroyRepair();
         ALNSobj = IntStream.of(bestRouteOperationGain).sum() - IntStream.of(bestRouteSailingCost).sum();
+        tempRoutes = copyVesselRoutes(bestRoutes);
+        tempUnrouted = copyUnrouted(bestUnrouted,false);
         runLocalSearchFullEnumeration();
+        EvaluateValues ev=runLocalSearchFullEnumeration();
+        Boolean noise;
+        evaluateSolution(ev.getRouteOperationGain(),ev.getRouteSailingCost(),ev.getVesselroutes(),ev.getUnrouted(),
+                "related","best",true);
     }
 
     public void runILS() throws IOException {
