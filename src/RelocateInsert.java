@@ -213,14 +213,14 @@ public class RelocateInsert {
             insertOperation(toMoveKey, toMove.getEarliest(), toMove.getLatest(), toMove.getIndexInRoute(), toMove.getRouteIndex());
             if(simALNS[toInsertKey-startNodes.length-1][0] == 0) {
                 insertOperation(toInsertKey, toInsert.getEarliest(), toInsert.getLatest(), toInsert.getIndexInRoute(), toInsert.getRouteIndex());
-                System.out.println("Relocate insert for insertion of task "+toInsertKey+ " performed");
+                //System.out.println("Relocate insert for insertion of task "+toInsertKey+ " performed");
                 countRelocateSingle+=1;
             }else {
                 if(toInsert.getEarliest()==toInsertSim.getEarliest() && toInsert.getLatest()==toInsertSim.getLatest()) {
                     insertOperation(toInsertKey, toInsert.getEarliest(), toInsert.getLatest(), toInsert.getIndexInRoute(), toInsert.getRouteIndex());
                     insertOperation(toInsertSimKey, toInsert.getEarliest(), toInsert.getLatest(), toInsertSim.getIndexInRoute(), toInsertSim.getRouteIndex());
                     printInitialSolution(vesseltypes);
-                    System.out.println("Relocate insert for insertion of sim task " + toInsertKey + " and " + simALNS[toInsertKey - startNodes.length - 1][0] + " performed ");
+                    //System.out.println("Relocate insert for insertion of sim task " + toInsertKey + " and " + simALNS[toInsertKey - startNodes.length - 1][0] + " performed ");
                     countRelocateSim+=1;
                 }
             }
@@ -242,6 +242,7 @@ public class RelocateInsert {
                                 unroutedTasks.remove(sim);
                                 found = true;
                             }
+                            sim++;
                         }
                     }
                     unrouted++;
@@ -664,7 +665,7 @@ public class RelocateInsert {
 
                     if (bestInsertionCombination > 0) {
                         //System.out.println();
-                        System.out.println(toMoveKey);
+                        //System.out.println(toMoveKey);
                         InsertionValues currentPos = currentPosition.get(toMoveKey);
                         removeNormalOp(currentPos.getRouteIndex(), currentPos.getIndexInRoute());
                         insertOperation(toMoveKey, toMove.getEarliest(), toMove.getLatest(), toMove.getIndexInRoute(), toMove.getRouteIndex());
@@ -701,6 +702,7 @@ public class RelocateInsert {
                                                 unroutedTasks.remove(sim);
                                                 found = true;
                                             }
+                                            sim++;
                                         }
                                     }
                                 }

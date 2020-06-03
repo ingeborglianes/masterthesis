@@ -2704,6 +2704,7 @@ public class LS_operators {
         String lastChange = null;
         boolean done = false;
         while(!done) {
+            int count=0;
             for (int vessel = 0; vessel < vesselroutes.size(); vessel++) {
                 if (vesselroutes.get(vessel) != null) {
                     for (int vessel2 = 0; vessel2 < vesselroutes.size(); vessel2++) {
