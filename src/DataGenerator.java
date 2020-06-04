@@ -40,8 +40,8 @@ public class DataGenerator {
     public static int maxSailingTime=0;
     public static int costPenalty=66;
     private String fileNameRouting;
-    private Double [] weatherPenaltyOperations;
-    private int [] weatherPenaltySpeed;
+    private Double [][] weatherPenaltyOperations;
+    private int [][] weatherPenaltySpeed;
     private String weatherFile;
     private int[][] twIntervals;
     private int[][] precedenceALNS;
@@ -58,8 +58,8 @@ public class DataGenerator {
         this.filePath=filePath;
         this.fileNameRouting=fileNameRouting;
         this.weatherFile=weatherFile;
-        this.weatherPenaltyOperations=new Double[days*12];
-        this.weatherPenaltySpeed=new int[days*12];
+        this.weatherPenaltyOperations=new Double[vessels.length][days*12];
+        this.weatherPenaltySpeed=new int[vessels.length][days*12];
         this.simNumber=0;
         this.presNumber=0;
     }
@@ -97,22 +97,41 @@ public class DataGenerator {
             }
         }*/
         for (int wh=0;wh<weatherValues.length;wh++){
-            if(weatherValues[wh]<=1.5){
-                weatherPenaltyOperations[wh] = 1.0;
-                weatherPenaltySpeed[wh]=0;
-            }
-            else if(weatherValues[wh]>1.5 && weatherValues[wh]<=2.5){
-                weatherPenaltyOperations[wh] = 0.8;
-                weatherPenaltySpeed[wh]=0;
-            }
-            else if(weatherValues[wh]>2.5 && weatherValues[wh]<=3.5) {
-                weatherPenaltyOperations[wh] = 0.7;
-                weatherPenaltySpeed[wh]=2;
-            }
-            //here we need to change time vessel use on operation, not time window
-            else{
-                weatherPenaltyOperations[wh] = 0.0;
-                weatherPenaltySpeed[wh]=3;
+            for(int i=0;i<vesselsInput.length;i++) {
+                if(vesselsInput[i]<5) {
+                    if (weatherValues[wh] <= 0.25) {
+                        weatherPenaltyOperations[i][wh] = 1.0;
+                        weatherPenaltySpeed[i][wh] = 0;
+                    } else if (weatherValues[wh] > 0.25 && weatherValues[wh] <= 0.5) {
+                        weatherPenaltyOperations[i][wh] = 0.8;
+                        weatherPenaltySpeed[i][wh] = 0;
+                    } else if (weatherValues[wh] > 0.5 && weatherValues[wh] <= 1) {
+                        weatherPenaltyOperations[i][wh] = 0.7;
+                        weatherPenaltySpeed[i][wh] = 2;
+                    }
+                    //here we need to change time vessel use on operation, not time window
+                    else {
+                        weatherPenaltyOperations[i][wh] = 0.0;
+                        weatherPenaltySpeed[i][wh] = 3;
+                    }
+                }
+                else{
+                    if (weatherValues[wh] <= 0.5) {
+                        weatherPenaltyOperations[i][wh] = 1.0;
+                        weatherPenaltySpeed[i][wh] = 0;
+                    } else if (weatherValues[wh] > 0.5 && weatherValues[wh] <= 1) {
+                        weatherPenaltyOperations[i][wh] = 0.8;
+                        weatherPenaltySpeed[i][wh] = 0;
+                    } else if (weatherValues[wh] > 1 && weatherValues[wh] <= 1.5) {
+                        weatherPenaltyOperations[i][wh] = 0.7;
+                        weatherPenaltySpeed[i][wh] = 2;
+                    }
+                    //here we need to change time vessel use on operation, not time window
+                    else {
+                        weatherPenaltyOperations[i][wh] = 0.0;
+                        weatherPenaltySpeed[i][wh] = 3;
+                    }
+                }
             }
         }
         //for (int d=0;d<weatherValues.length;d++){
@@ -511,10 +530,10 @@ public class DataGenerator {
                             double penalty = Math.max(maxV1, maxV2);
                             timeOpVessel[vessel.getNum() - 1][op.getNumber() - 1][t] = (int) Math.round(penalty * op.getDuration()*weatherPenaltyOperations[t]);*/
                         }
-                        double opTime = 1*weatherPenaltyOperations[t];
+                        double opTime = 1*weatherPenaltyOperations[vessel.getNum()-1][t];
                         int k = 1;
                         while(opTime < opDuration){
-                            opTime = opTime+weatherPenaltyOperations[Math.min(this.weatherPenaltySpeed.length-1,t+k)];
+                            opTime = opTime+weatherPenaltyOperations[vessel.getNum()-1][Math.min(this.weatherPenaltySpeed.length-1,t+k)];
                             k++;
                             if(t+k > (this.weatherPenaltySpeed.length + (2*opDuration))){
                                 k = 10000;
@@ -655,7 +674,7 @@ public class DataGenerator {
                         double coveredDist = 0;
                         int k=0;
                         while(coveredDist<sailingDist){
-                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[Math.min(weatherPenaltySpeed.length-1,t+k)]);
+                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[v.getNum()-1][Math.min(weatherPenaltySpeed.length-1,t+k)]);
                             k++;
                         }
                         sailingTimes[v.getNum() - 1][t][o1.getNumber() + nStartNodes - 1][o2.getNumber() + nStartNodes - 1] = k;
@@ -674,7 +693,7 @@ public class DataGenerator {
                         double coveredDist = 0;
                         int k=0;
                         while(coveredDist<sailingDist){
-                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[Math.min(weatherPenaltySpeed.length-1,t+k)]);
+                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[v.getNum()-1][Math.min(weatherPenaltySpeed.length-1,t+k)]);
                             k++;
                         }
                         sailingTimes[v.getNum() - 1][t][n][o.getNumber() + nStartNodes - 1] = k;
