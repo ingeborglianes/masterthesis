@@ -96,8 +96,8 @@ public class DataGenerator {
                 weatherPenaltySpeed[wh]=3;
             }
         }*/
-        for (int wh=0;wh<weatherValues.length;wh++){
-            for(int i=0;i<vesselsInput.length;i++) {
+        for(int i=0;i<vesselsInput.length;i++) {
+            for (int wh=0;wh<weatherValues.length;wh++){
                 if(vesselsInput[i]<5) {
                     if (weatherValues[wh] <= 0.25) {
                         weatherPenaltyOperations[i][wh] = 1.0;
@@ -503,10 +503,10 @@ public class DataGenerator {
             }
         }
         this.operationsForVessel=opForVessel;
-        int [][][] timeOpVessel=new int [this.vessels.length][this.operations.length][this.weatherPenaltySpeed.length];
+        int [][][] timeOpVessel=new int [this.vessels.length][this.operations.length][this.weatherPenaltySpeed[0].length];
         for (Vessel vessel : this.vessels){
             for (Operation op : this.operations){
-                for(int t=0;t<weatherPenaltySpeed.length;t++) {
+                for(int t=0;t<weatherPenaltySpeed[0].length;t++) {
                     if (containsElement(op.getNumber() + nStartNodes, this.operationsForVessel[vessel.getNum() - 1])) {
                         double opDuration;
                         if (op.getSimultaneous() == 0) {
@@ -533,9 +533,9 @@ public class DataGenerator {
                         double opTime = 1*weatherPenaltyOperations[vessel.getNum()-1][t];
                         int k = 1;
                         while(opTime < opDuration){
-                            opTime = opTime+weatherPenaltyOperations[vessel.getNum()-1][Math.min(this.weatherPenaltySpeed.length-1,t+k)];
+                            opTime = opTime+weatherPenaltyOperations[vessel.getNum()-1][Math.min(this.weatherPenaltySpeed[0].length-1,t+k)];
                             k++;
-                            if(t+k > (this.weatherPenaltySpeed.length + (2*opDuration))){
+                            if(t+k > (this.weatherPenaltySpeed[0].length + (2*opDuration))){
                                 k = 10000;
                                 break;
                             }
@@ -665,16 +665,16 @@ public class DataGenerator {
     }
 
     public void createSailingTimes(){
-        int[][][][] sailingTimes = new int[nStartNodes][weatherPenaltySpeed.length][operations.length+nStartNodes+nEndNodes][operations.length+nStartNodes+nEndNodes];
+        int[][][][] sailingTimes = new int[nStartNodes][weatherPenaltySpeed[0].length][operations.length+nStartNodes+nEndNodes][operations.length+nStartNodes+nEndNodes];
         for(Vessel v:this.vessels) {
-            for (int t = 0; t < weatherPenaltySpeed.length; t++) {
+            for (int t = 0; t < weatherPenaltySpeed[0].length; t++) {
                 for (Operation o1 : this.operations) {
                     for (Operation o2 : this.operations) {
                         double sailingDist = distanceArray[o1.getLocation() - 1][o2.getLocation() - 1];
                         double coveredDist = 0;
                         int k=0;
                         while(coveredDist<sailingDist){
-                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[v.getNum()-1][Math.min(weatherPenaltySpeed.length-1,t+k)]);
+                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[v.getNum()-1][Math.min(weatherPenaltySpeed[0].length-1,t+k)]);
                             k++;
                         }
                         sailingTimes[v.getNum() - 1][t][o1.getNumber() + nStartNodes - 1][o2.getNumber() + nStartNodes - 1] = k;
@@ -693,7 +693,7 @@ public class DataGenerator {
                         double coveredDist = 0;
                         int k=0;
                         while(coveredDist<sailingDist){
-                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[v.getNum()-1][Math.min(weatherPenaltySpeed.length-1,t+k)]);
+                            coveredDist = coveredDist+(v.getSpeed()-weatherPenaltySpeed[v.getNum()-1][Math.min(weatherPenaltySpeed[0].length-1,t+k)]);
                             k++;
                         }
                         sailingTimes[v.getNum() - 1][t][n][o.getNumber() + nStartNodes - 1] = k;

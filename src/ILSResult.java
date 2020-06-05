@@ -27,7 +27,7 @@ public class ILSResult {
     public int heuristicObjective;
     public String instanceName;
     public String weatherfile;
-    public String filename = "ILS_results";
+    public String filename = "ALNS_LS _results";
 
     //solution info
     public List<Integer> operationsNotCompleted;

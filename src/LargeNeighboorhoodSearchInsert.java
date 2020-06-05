@@ -423,6 +423,7 @@ public class LargeNeighboorhoodSearchInsert {
                             }
                             if(prevID==simA){
                                 prevRegretValue=-100000;
+                                prevID=-1;
                             }
                         }
                         else{

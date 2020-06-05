@@ -27,7 +27,7 @@ public class ALNSresult {
         public int heuristicObjective;
         public String instanceName;
         public String weatherfile;
-        public String filename = "ALNS_tuning_results";
+        public String filename = "ALNS_weather_results_september";
 
         //solution info
         public List<Integer> operationsNotCompleted;

@@ -77,7 +77,7 @@ public class LargeNeighboorhoodSearchRemoval {
         this.EarliestStartingTimeForVessel=EarliestStartingTimeForVessel;
         this.operationGain=operationGain;
         this.numberOfRemoval=(int) numberOfRemoval;
-        this.numberOfRemoval= (int) Math.floor(numberOfRemoval* TimeVesselUseOnOperation[0].length);
+        this.numberOfRemoval= (int) Math.floor(numberOfRemoval*(TimeVesselUseOnOperation[0].length-unroutedTasks.size()));
         this.routeSailingCost=new int[vesselRoutes.size()];
         this.routeOperationGain=new int[vesselRoutes.size()];
         this.objValue=0;
@@ -628,7 +628,7 @@ public class LargeNeighboorhoodSearchRemoval {
         }
         else{
             int bigTaskID=bigTasksALNS[selectedTaskID-1-startNodes.length][0];
-            System.out.println("big "+bigTaskID);
+            //System.out.println("big "+bigTaskID);
             OperationInRoute bigOP=null;
             for(OperationInRoute oir: unroutedTasks){
                 if (oir.getID()==bigTaskID){

@@ -6,7 +6,8 @@ public class ParameterFile {
 
     //Insert the filepath of the weatherfile, if you want no weather impact, use the file path for the
     //normal weather file
-    public static String weatherFile= "weather_files/weather_normal.txt";
+    public static String weatherFile= "weather_files/weather_september_scaled.txt";
+    public static String weatherFile2= "weather_files/weather_januar_scaled.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
     public static String testInstance ="tuning_instances/60_1_locations(81_140)_.txt";
@@ -14,9 +15,10 @@ public class ParameterFile {
     // Insert the name of your result-routing-file. In this file the different variables are printed for the results
     // for each test instance you run on one of the models
     // Choose which name you prefer, the file will be generated automatically
-    public static String nameResultFile ="results/ILSroutes/";//+testInstance;
+    public static String nameResultFile ="results/ALNSroutes/weather_september/";//+testInstance;
 
-    public  static String nameResultFileGurobi = "results/GurobiRoutes/";//+testInstance;
+    public  static String nameResultFileGurobi = "results/GurobiRoutes/weather_september/";//+testInstance;
+    public  static String nameResultFileGurobi2 = "results/GurobiRoutes/weather_january/";//+testInstance;
 
     //Insert the  number of days in the planning horizon
     public static int days=5;
