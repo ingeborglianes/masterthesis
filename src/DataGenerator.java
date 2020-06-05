@@ -49,6 +49,8 @@ public class DataGenerator {
     private int[][] bigTasksALNS;
     private int simNumber;
     private int presNumber;
+    private String fileTasktypes ="tasktypes.txt";
+
     public DataGenerator(int[] vessels, int days, int[] locationsStartNodes, String filePath, String fileNameRouting, String weatherFile){
         this.vesselsInput=vessels;
         this.days=days;
@@ -283,32 +285,42 @@ public class DataGenerator {
         return t;
     }
 
-    public void generateOperations(){
-        List<int[]> bigTasksALNSTemp= new ArrayList<>();
-        List<Operation> operations=new ArrayList<Operation>();
-        int opNumber=1;
-        int[] tw= IntStream.rangeClosed(1, this.days*12).toArray();
+    public void generateOperations() {
+        List<int[]> bigTasksALNSTemp = new ArrayList<>();
+        List<Operation> operations = new ArrayList<Operation>();
+        int opNumber = 1;
+        int[] tw = IntStream.rangeClosed(1, this.days * 12).toArray();
         List<String> routing = new ArrayList<>();
+        int numberOfS = 0;
+        int numberOfC = 0;
+        int numberOfP = 0;
+        ArrayList<List<Integer>> consolidatedTasksNumber = new ArrayList<List<Integer>>();
+        ArrayList<List<Integer>> simultaneousTasksNumber = new ArrayList<List<Integer>>();
         for (Integer location : this.logOperations.keySet()) {
-            for (OperationType opType : this.logOperations.get(location)){
-                if (opType.getVessel2()==null && opType.getVesselBigTask()==null){
-                    Operation op=new Operation(opNumber, opType.getVessel1(), location, 0, null,
+            for (OperationType opType : this.logOperations.get(location)) {
+                if (opType.getVessel2() == null && opType.getVesselBigTask() == null) {
+                    Operation op = new Operation(opNumber, opType.getVessel1(), location, 0, null,
                             opType.getPrecedenceOver(), tw, opType.getDuration(),
                             opType.getNumber(), opType.getOperationGain(), opType.getName());
-                    if (opType.getTimewindowInterval()!=0){
-                        int[] keyTime=new int[]{location,opType.getNumber()};
-                        int t=returnTimeOfOperation(keyTime);
-                        int startIndex=Math.max(1,t-opType.getTimewindowInterval());
-                        int endIndex=Math.min(this.days*12-1,t);
-                        if(startIndex==1){
-                            endIndex=opType.getTimewindowInterval();
+                    if (opType.getPrecedenceOver() != 0) {
+                        numberOfP += 1;
+                    } else if (opType.getPrecedenceOf() != 0) {
+                        numberOfP += 1;
+                    }
+                    if (opType.getTimewindowInterval() != 0) {
+                        int[] keyTime = new int[]{location, opType.getNumber()};
+                        int t = returnTimeOfOperation(keyTime);
+                        int startIndex = Math.max(1, t - opType.getTimewindowInterval());
+                        int endIndex = Math.min(this.days * 12 - 1, t);
+                        if (startIndex == 1) {
+                            endIndex = opType.getTimewindowInterval();
                         }
-                        if(endIndex==this.days*12-1){
-                            startIndex=this.days*12-opType.getTimewindowInterval();
+                        if (endIndex == this.days * 12 - 1) {
+                            startIndex = this.days * 12 - opType.getTimewindowInterval();
                         }
-                        int[] twOp= new int[this.days*12];
-                        for(int i=startIndex;i<endIndex;i++){
-                            twOp[i-1]=i;
+                        int[] twOp = new int[this.days * 12];
+                        for (int i = startIndex; i < endIndex; i++) {
+                            twOp[i - 1] = i;
                         }
                         op = new Operation(opNumber, opType.getVessel1(), location, 0, null,
                                 opType.getPrecedenceOver(), twOp, opType.getDuration(),
@@ -316,99 +328,152 @@ public class DataGenerator {
                     }
                     operations.add(op);
                     bigTasksALNSTemp.add(null);
-                    this.consolidatedTasks.put(op.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
-                    this.bigTasks.add(op.getNumber()+nStartNodes);
-                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
-                            " Precedence: "+String.valueOf(op.getPrecedence())+" Location: "+ String.valueOf(op.getLocation())+
-                            " optype: "+String.valueOf(op.getType())+" bigTaskSet: "+String.valueOf(op.getBigTaskSet())+
-                            "Sim: "+String.valueOf(op.getSimultaneous())+" Vessels: "+Arrays.toString(op.getVessels())
-                            +" Duration: "+op.getDuration()+" Task description: "+op.getName());
-                    opNumber+=1;
-                }
-                else if(opType.getVessel2()!=null && opType.getVesselBigTask() ==null){
-                    Operation op1= new Operation(opNumber, opType.getVessel1(), location, opNumber+1, null,
-                            opType.getPrecedenceOver(),tw, opType.getDuration(),
-                            opType.getNumber(),opType.getOperationGain(),opType.getName()+" Part 1");
+                    this.consolidatedTasks.put(op.getNumber() + nStartNodes, new ArrayList<Integer>() {{
+                    }});
+                    this.bigTasks.add(op.getNumber() + nStartNodes);
+                    routing.add("Operation: " + String.valueOf(opNumber + nStartNodes) +
+                            " Precedence: " + String.valueOf(op.getPrecedence()) + " Location: " + String.valueOf(op.getLocation()) +
+                            " optype: " + String.valueOf(op.getType()) + " bigTaskSet: " + String.valueOf(op.getBigTaskSet()) +
+                            "Sim: " + String.valueOf(op.getSimultaneous()) + " Vessels: " + Arrays.toString(op.getVessels())
+                            + " Duration: " + op.getDuration() + " Task description: " + op.getName());
+                    opNumber += 1;
+                } else if (opType.getVessel2() != null && opType.getVesselBigTask() == null) {
+                    Operation op1 = new Operation(opNumber, opType.getVessel1(), location, opNumber + 1, null,
+                            opType.getPrecedenceOver(), tw, opType.getDuration(),
+                            opType.getNumber(), opType.getOperationGain(), opType.getName() + " Part 1");
                     operations.add(op1);
+                    if (opType.getPrecedenceOver() != 0) {
+                        numberOfP += 2;
+                    } else if (opType.getPrecedenceOf() != 0) {
+                        numberOfP += 2;
+                    }
+                    numberOfS += 2;
                     bigTasksALNSTemp.add(null);
-                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
-                            " Precedence: "+String.valueOf(op1.getPrecedence())+" Location: "+ String.valueOf(op1.getLocation())+
-                            " optype: "+String.valueOf(op1.getType())+" bigTaskSet: "+String.valueOf(op1.getBigTaskSet())+
-                            "Sim: "+String.valueOf(op1.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(op1.getVessels())+" Duration: "+op1.getDuration()+" Task description: "+op1.getName());
-                    this.consolidatedTasks.put(op1.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
-                    this.bigTasks.add(op1.getNumber()+nStartNodes);
-                    opNumber+=1;
-                    Operation op2=new Operation(opNumber, opType.getVessel2(), location, opNumber-1, null,
-                            opType.getPrecedenceOver(),tw, opType.getDuration(),
-                            opType.getNumber(),opType.getOperationGain(),opType.getName()+" Part 2");
+                    routing.add("Operation: " + String.valueOf(opNumber + nStartNodes) +
+                            " Precedence: " + String.valueOf(op1.getPrecedence()) + " Location: " + String.valueOf(op1.getLocation()) +
+                            " optype: " + String.valueOf(op1.getType()) + " bigTaskSet: " + String.valueOf(op1.getBigTaskSet()) +
+                            "Sim: " + String.valueOf(op1.getSimultaneous() + nStartNodes) + " Vessels: " + Arrays.toString(op1.getVessels()) + " Duration: " + op1.getDuration() + " Task description: " + op1.getName());
+                    this.consolidatedTasks.put(op1.getNumber() + nStartNodes, new ArrayList<Integer>() {{
+                    }});
+                    this.bigTasks.add(op1.getNumber() + nStartNodes);
+                    opNumber += 1;
+                    Operation op2 = new Operation(opNumber, opType.getVessel2(), location, opNumber - 1, null,
+                            opType.getPrecedenceOver(), tw, opType.getDuration(),
+                            opType.getNumber(), opType.getOperationGain(), opType.getName() + " Part 2");
                     operations.add(op2);
                     bigTasksALNSTemp.add(null);
-                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
-                            " Precedence: "+String.valueOf(op2.getPrecedence())+" Location: "+ String.valueOf(op2.getLocation())+
-                            " optype: "+String.valueOf(op2.getType())+" bigTaskSet: "+String.valueOf(op2.getBigTaskSet())+
-                            "Sim: "+String.valueOf(op2.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(op2.getVessels())+" Duration: "+op2.getDuration()+" Task description: "+op2.getName());
-                    this.consolidatedTasks.put(op2.getNumber()+nStartNodes, new ArrayList<Integer>(){{}});
-                    this.bigTasks.add(op2.getNumber()+nStartNodes);
-                    opNumber+=1;
-                }
-                else if(opType.getVesselBigTask()!=null && opType.getVessel2()!=null){
-                    Operation opSmall1=new Operation(opNumber, opType.getVessel1(), location, opNumber+1, null,
-                            opType.getPrecedenceOver(),tw, opType.getDuration(),
-                            opType.getNumber(),opType.getOperationGain()/2,opType.getName()+" Part 1 of big task operation");
+                    routing.add("Operation: " + String.valueOf(opNumber + nStartNodes) +
+                            " Precedence: " + String.valueOf(op2.getPrecedence()) + " Location: " + String.valueOf(op2.getLocation()) +
+                            " optype: " + String.valueOf(op2.getType()) + " bigTaskSet: " + String.valueOf(op2.getBigTaskSet()) +
+                            "Sim: " + String.valueOf(op2.getSimultaneous() + nStartNodes) + " Vessels: " + Arrays.toString(op2.getVessels()) + " Duration: " + op2.getDuration() + " Task description: " + op2.getName());
+                    this.consolidatedTasks.put(op2.getNumber() + nStartNodes, new ArrayList<Integer>() {{
+                    }});
+                    this.bigTasks.add(op2.getNumber() + nStartNodes);
+                    opNumber += 1;
+                    ArrayList<String> list = new ArrayList<String>() {{
+                        add("A");
+                        add("B");
+                        add("C");
+                    }};
+                    simultaneousTasksNumber.add(new ArrayList<Integer>() {{
+                        add(op1.getNumber());
+                        add(op2.getNumber());
+                    }});
+                } else if (opType.getVesselBigTask() != null && opType.getVessel2() != null) {
+                    numberOfC += 1;
+                    Operation opSmall1 = new Operation(opNumber, opType.getVessel1(), location, opNumber + 1, null,
+                            opType.getPrecedenceOver(), tw, opType.getDuration(),
+                            opType.getNumber(), opType.getOperationGain() / 2, opType.getName() + " Part 1 of big task operation");
                     operations.add(opSmall1);
-                    bigTasksALNSTemp.add(new int[]{opNumber+nStartNodes+2,opNumber+nStartNodes,opNumber+nStartNodes+1});
-                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
-                            " Precedence: "+String.valueOf(opSmall1.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
-                            " optype: "+String.valueOf(opSmall1.getType())+" bigTaskSet: "+String.valueOf(opSmall1.getBigTaskSet())+
-                            "Sim: "+String.valueOf(opSmall1.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(opSmall1.getVessels())+" Duration: "+opSmall1.getDuration()+" Task description: "+opSmall1.getName());
-                    opNumber+=1;
-                    Operation opSmall2=new Operation(opNumber, opType.getVessel2(), location, opNumber-1, null,
-                            opType.getPrecedenceOver(),tw, opType.getDuration(),
-                            opType.getNumber(),opType.getOperationGain()/2,opType.getName()+" Part 2 of big task operation");
+                    bigTasksALNSTemp.add(new int[]{opNumber + nStartNodes + 2, opNumber + nStartNodes, opNumber + nStartNodes + 1});
+                    routing.add("Operation: " + String.valueOf(opNumber + nStartNodes) +
+                            " Precedence: " + String.valueOf(opSmall1.getPrecedence()) + " Location: " + String.valueOf(opSmall1.getLocation()) +
+                            " optype: " + String.valueOf(opSmall1.getType()) + " bigTaskSet: " + String.valueOf(opSmall1.getBigTaskSet()) +
+                            "Sim: " + String.valueOf(opSmall1.getSimultaneous() + nStartNodes) + " Vessels: " + Arrays.toString(opSmall1.getVessels()) + " Duration: " + opSmall1.getDuration() + " Task description: " + opSmall1.getName());
+                    opNumber += 1;
+                    Operation opSmall2 = new Operation(opNumber, opType.getVessel2(), location, opNumber - 1, null,
+                            opType.getPrecedenceOver(), tw, opType.getDuration(),
+                            opType.getNumber(), opType.getOperationGain() / 2, opType.getName() + " Part 2 of big task operation");
                     operations.add(opSmall2);
-                    bigTasksALNSTemp.add(new int[]{opNumber+1+nStartNodes,opNumber-1+nStartNodes,opNumber+nStartNodes});
-                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
-                            " Precedence: "+String.valueOf(opSmall2.getPrecedence())+" Location: "+ String.valueOf(opSmall1.getLocation())+
-                            " optype: "+String.valueOf(opSmall2.getType())+" bigTaskSet: "+ Arrays.toString(opSmall2.getBigTaskSet()) +
-                            " Sim: "+String.valueOf(opSmall2.getSimultaneous()+nStartNodes)+" Vessels: "+Arrays.toString(opSmall2.getVessels())+" Duration: "+opSmall2.getDuration()+" Task description: "+opSmall2.getName());
-                    opNumber+=1;
-                    int [] bigTasksArray= new int[]{opSmall1.getNumber(),opSmall2.getNumber()};
-                    Operation opBig=new Operation(opNumber, opType.getVesselBigTask(), location, 0, bigTasksArray,
-                            opType.getPrecedenceOver(),tw, opType.getDuration(),
-                            opType.getNumber(),opType.getOperationGain(),opType.getName()+" Big task operation");
+                    bigTasksALNSTemp.add(new int[]{opNumber + 1 + nStartNodes, opNumber - 1 + nStartNodes, opNumber + nStartNodes});
+                    routing.add("Operation: " + String.valueOf(opNumber + nStartNodes) +
+                            " Precedence: " + String.valueOf(opSmall2.getPrecedence()) + " Location: " + String.valueOf(opSmall1.getLocation()) +
+                            " optype: " + String.valueOf(opSmall2.getType()) + " bigTaskSet: " + Arrays.toString(opSmall2.getBigTaskSet()) +
+                            " Sim: " + String.valueOf(opSmall2.getSimultaneous() + nStartNodes) + " Vessels: " + Arrays.toString(opSmall2.getVessels()) + " Duration: " + opSmall2.getDuration() + " Task description: " + opSmall2.getName());
+                    opNumber += 1;
+                    int[] bigTasksArray = new int[]{opSmall1.getNumber(), opSmall2.getNumber()};
+                    Operation opBig = new Operation(opNumber, opType.getVesselBigTask(), location, 0, bigTasksArray,
+                            opType.getPrecedenceOver(), tw, opType.getDuration(),
+                            opType.getNumber(), opType.getOperationGain(), opType.getName() + " Big task operation");
                     operations.add(opBig);
-                    bigTasksALNSTemp.add(new int[]{opNumber+nStartNodes,opNumber-2+nStartNodes,opNumber-1+nStartNodes});
-                    routing.add("Operation: "+String.valueOf(opNumber+nStartNodes)+
-                            " Precedence: "+String.valueOf(opBig.getPrecedence())+" Location: "+ String.valueOf(opBig.getLocation())+
-                            " optype: "+String.valueOf(opBig.getType())+" bigTaskSet: "+ Arrays.toString(opBig.getBigTaskSet()) +
-                            "Sim: "+String.valueOf(opBig.getSimultaneous())+" Vessels: "+Arrays.toString(opBig.getVessels())+" Duration: "+opBig.getDuration()+" Task description: "+opBig.getName());
-                    this.consolidatedTasks.put(opBig.getNumber()+nStartNodes, new ArrayList<Integer>(){{add(opSmall1.getNumber()+nStartNodes); add(opSmall2.getNumber()+nStartNodes);}});
-                    this.bigTasks.add(opBig.getNumber()+nStartNodes);
-                    opNumber+=1;
+                    bigTasksALNSTemp.add(new int[]{opNumber + nStartNodes, opNumber - 2 + nStartNodes, opNumber - 1 + nStartNodes});
+                    routing.add("Operation: " + String.valueOf(opNumber + nStartNodes) +
+                            " Precedence: " + String.valueOf(opBig.getPrecedence()) + " Location: " + String.valueOf(opBig.getLocation()) +
+                            " optype: " + String.valueOf(opBig.getType()) + " bigTaskSet: " + Arrays.toString(opBig.getBigTaskSet()) +
+                            "Sim: " + String.valueOf(opBig.getSimultaneous()) + " Vessels: " + Arrays.toString(opBig.getVessels()) + " Duration: " + opBig.getDuration() + " Task description: " + opBig.getName());
+                    this.consolidatedTasks.put(opBig.getNumber() + nStartNodes, new ArrayList<Integer>() {{
+                        add(opSmall1.getNumber() + nStartNodes);
+                        add(opSmall2.getNumber() + nStartNodes);
+                    }});
+                    this.bigTasks.add(opBig.getNumber() + nStartNodes);
+                    opNumber += 1;
+                    consolidatedTasksNumber.add(new ArrayList<Integer>() {{
+                        add(opSmall1.getNumber());
+                        add(opSmall2.getNumber());
+                        add(opBig.getNumber());
+                    }});
                 }
             }
         }
-        Operation[] operations2=new Operation[operations.size()];
-        bigTasksALNS=new int[bigTasksALNSTemp.size()][3];
-        for (int b=0;b<bigTasksALNSTemp.size();b++){
-            if(bigTasksALNSTemp.get(b)!=null) {
+        Operation[] operations2 = new Operation[operations.size()];
+        bigTasksALNS = new int[bigTasksALNSTemp.size()][3];
+        for (int b = 0; b < bigTasksALNSTemp.size(); b++) {
+            if (bigTasksALNSTemp.get(b) != null) {
                 bigTasksALNS[b] = new int[]{bigTasksALNSTemp.get(b)[0], bigTasksALNSTemp.get(b)[1], bigTasksALNSTemp.get(b)[2]};
-            }
-            else{
-                bigTasksALNS[b] =null;
+            } else {
+                bigTasksALNS[b] = null;
             }
         }
-        int addIndex=0;
-        for (Operation op : operations){
-            operations2[addIndex]=op;
-            addIndex+=1;
+        int addIndex = 0;
+        for (Operation op : operations) {
+            operations2[addIndex] = op;
+            addIndex += 1;
         }
         routing.add(" ");
-        for (Vessel v:vessels){
+        for (Vessel v : vessels) {
             //System.out.println("Vessel "+ v.getNum()+" is vessel type "+v.getVesselType());
-            routing.add("Vessel "+ v.getNum()+" is vessel type "+v.getVesselType());
+            routing.add("Vessel " + v.getNum() + " is vessel type " + v.getVesselType());
         }
         routing.add(" ");
+
+        String taskTypes = filePath+" " +String.valueOf(numberOfS)+" "+String.valueOf(numberOfC)+" "+String.valueOf(numberOfP)+" ";
+
+        for (List<Integer> sim : simultaneousTasksNumber){
+            int[] simTasks =new int[2];
+            simTasks[0]=sim.get(0);
+            simTasks[1]=sim.get(1);
+            taskTypes+= Arrays.toString(simTasks);
+            taskTypes+=" ";
+        }
+
+        for (List<Integer> con : consolidatedTasksNumber){
+            int[] conTasks =new int[3];
+            conTasks[0]=con.get(0);
+            conTasks[1]=con.get(1);
+            conTasks[2]=con.get(2);
+            taskTypes+= Arrays.toString(conTasks);
+            taskTypes+=" ";
+        }
+
+        try(FileWriter fw = new FileWriter(fileTasktypes, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw))
+        {
+            out.println(taskTypes);
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+
         try(FileWriter fw = new FileWriter(fileNameRouting, true);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter out = new PrintWriter(bw))
@@ -764,19 +829,46 @@ public class DataGenerator {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vessels = new int[]{1, 3,4,5,6};
-        int[] locStart = new int[]{1, 3,4,5,6};
-        DataGenerator dg=new DataGenerator(vessels,5,locStart,
-                "test_instances/30_1_locations_normalOpGenerator.txt",
-                "routing","weather_files/weather_normal.txt");
-        dg.generateData();
-        //dg.printAllData();
-        //PrintData.printSailingTimes(dg.getSailingTimes(),5,32,vessels.length);
-        //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),locStart.length);
-        PrintData.printOperationGain(dg.getOperationGain(),locStart.length);
-        PrintData.printSailingCostForVessel(dg.getSailingCostForVessel());
+        int[] vessels20 = new int[]{3, 5,6};
+        int[] locStart20 = new int[]{94, 95, 96};
+
+        int[] vessels40 = new int[]{1,3,4,5,6};
+        int[] locStart40 = new int[]{94,94,96,97,98};
+
+        int[] vessels60 =  new int[]{1,2,3,4,5,6,3,4};
+        int[] locStart60 =new int[]{94,95,96,97,98,99,100,101};
+
+        String[] seasons = new String[]{"low", "high"};
+        for (String season : seasons) {
+            for (int i = 1; i < 6; i++) {
+                String instance = "20_" + i + "_" + season + "_locations(94_113)_";
+                String testInstance = "technical_test_instances/" + instance + ".txt";
+                DataGenerator dg = new DataGenerator(vessels20, 5, locStart20,
+                        testInstance,
+                        "routing", "weather_files/weather_normal.txt");
+                dg.generateData();
+            }
+            for (int i = 1; i < 6; i++) {
+                String instance = "40_" + i + "_" + season + "_locations(94_133)_";
+                String testInstance = "technical_test_instances/" + instance + ".txt";
+                DataGenerator dg = new DataGenerator(vessels40, 5, locStart40,
+                        testInstance,
+                        "routing", "weather_files/weather_normal.txt");
+                dg.generateData();
+
+            }
+            for (int i = 1; i < 6; i++) {
+                String instance = "60_" + i + "_" + season + "_locations(81_140)_";
+                String testInstance = "technical_test_instances/" + instance + ".txt";
+                DataGenerator dg = new DataGenerator(vessels60, 5, locStart60,
+                        testInstance,
+                        "routing", "weather_files/weather_normal.txt");
+                dg.generateData();
+            }
+        }
 
     }
+
 
     public int getSimNumber() {
         return simNumber;
