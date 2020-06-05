@@ -22,7 +22,7 @@ public class OperationGenerator {
         int[] op5v2 = new int[]{2, 3, 4};
         int[] op5BT = new int[]{6};
         OperationType op5 = new OperationType(5, op5v1, op5v2, op5BT,
-                0, 0, 8760, 360, 40, DataGenerator.costPenalty * DataGenerator.maxSailingTime*2,0, "Large inspection of the facility");
+                0, 0, 8760, 360, 20, DataGenerator.costPenalty * DataGenerator.maxSailingTime*2,0, "Large inspection of the facility");
         int[] op6v1 = new int[]{2};
         OperationType op6 = new OperationType(6, op6v1, null, null,
                 0, 0, 5110, 730, 5, DataGenerator.costPenalty * DataGenerator.maxSailingTime * 4,0, "Wash the net");
