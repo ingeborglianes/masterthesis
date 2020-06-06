@@ -947,10 +947,14 @@ public class LargeNeighboorhoodSearchInsert {
             if (DataGenerator.containsElement(o, OperationsForVessel[v]) && v!= routeConnectedSimultaneous) {
                 //ConstructionHeuristic.printVessels(vesselRoutes,vesseltypes,SailingTimes,TimeVesselUseOnOperation,startNodes);
                 //System.out.println("Try vessel "+v);
+                int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
+                if(EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO+1>60){
+                    continue;
+                }
                 if (vesselRoutes.get(v) == null || vesselRoutes.get(v).isEmpty()) {
                     //System.out.println("Empty route");
                     //insertion into empty route
-                    int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
+                    sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                     int sailingCost=sailingTimeStartNodeToO*SailingCostForVessel[v];
                     int earliestTemp=Math.max(EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO+1,twIntervals[o-startNodes.length-1][0]);
                     int latestTemp=Math.min(nTimePeriods,twIntervals[o-startNodes.length-1][1]);
@@ -999,7 +1003,7 @@ public class LargeNeighboorhoodSearchInsert {
                         //System.out.println("On index "+n);
                         if(n==0) {
                             //check insertion in first position
-                            int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
+                            sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                             int earliestTemp = Math.max(EarliestStartingTimeForVessel[v] + sailingTimeStartNodeToO + 1, twIntervals[o - startNodes.length - 1][0]);
                             int opTime=TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO];
                             int precedenceOfValuesEarliest=checkprecedenceOfEarliestLNS(o,earliestTemp,earliestPO,routeConnectedPrecedence,precedenceALNS,

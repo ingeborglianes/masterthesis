@@ -148,6 +148,7 @@ public class ConstructionHeuristic {
             int latest=nTimePeriods-1;
             int timeAdded=0;
             Boolean isActionTime = false;
+            inner:
             for (int v = 0; v < nVessels; v++) {
                 //List<ConnectedValues> simOps = checkSimultaneous(v);
                 Boolean notThisVessel = checkSimOpInRoute(simOpRoutes.get(v),o,simALNS,startNodes);
@@ -165,10 +166,14 @@ public class ConstructionHeuristic {
                 boolean simultaneousFeasible=true;
                 if (DataGenerator.containsElement(o, OperationsForVessel[v]) && notThisVessel) {
                     //System.out.println("Try vessel "+v);
+                    int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
+                    if(EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO+1>60){
+                        continue inner;
+                    }
                     if (vesselroutes.get(v) == null) {
                         //System.out.println("Empty route");
                         //insertion into empty route
-                        int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
+                        sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                         int timeIncrease=sailingTimeStartNodeToO;
                         int sailingCost=sailingTimeStartNodeToO*SailingCostForVessel[v];
                         int earliestTemp=Math.max(EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO+1,twIntervals[o-startNodes.length-1][0]);
@@ -218,7 +223,7 @@ public class ConstructionHeuristic {
                             //System.out.println("On index "+n);
                             if(n==0) {
                                 //check insertion in first position
-                                int sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
+                                sailingTimeStartNodeToO=SailingTimes[v][EarliestStartingTimeForVessel[v]][v][o - 1];
                                 int earliestTemp = Math.max(EarliestStartingTimeForVessel[v] + sailingTimeStartNodeToO + 1, twIntervals[o - startNodes.length - 1][0]);
                                 int opTime=TimeVesselUseOnOperation[v][o - 1 - startNodes.length][EarliestStartingTimeForVessel[v]+sailingTimeStartNodeToO];
                                 int[] precedenceOfValuesEarliest=checkprecedenceOfEarliest(o,v,earliestTemp,precedenceALNS,startNodes,precedenceOverOperations
