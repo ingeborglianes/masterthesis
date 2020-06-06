@@ -26,6 +26,7 @@ public class DataGenerator {
     private int[][] operationsForVessel;
     private int[][] timeWindowsForOperations;
     private int[][][]timeVesselUseOnOperation;
+    private int[][][]timeVesselUseOnOperationGurobi;
     private int[][] distanceArray;
     private int nStartNodes;
     private int nEndNodes;
@@ -569,6 +570,7 @@ public class DataGenerator {
         }
         this.operationsForVessel=opForVessel;
         int [][][] timeOpVessel=new int [this.vessels.length][this.operations.length][this.weatherPenaltySpeed[0].length];
+        int [][][] timeOpVesselGurobi=new int [this.vessels.length][this.operations.length][this.weatherPenaltySpeed[0].length];
         for (Vessel vessel : this.vessels){
             for (Operation op : this.operations){
                 for(int t=0;t<weatherPenaltySpeed[0].length;t++) {
@@ -606,10 +608,23 @@ public class DataGenerator {
                             }
                         }
                         timeOpVessel[vessel.getNum() - 1][op.getNumber() - 1][t] = k;
+
+                        k = 0;
+                        double opTimeGurobi = 0;
+                        while(opTimeGurobi < opDuration){
+                            k++;
+                            opTimeGurobi = opTimeGurobi+weatherPenaltyOperations[vessel.getNum()-1][Math.max(0,t-k)];
+                            if(t-k < 0){
+                                k = this.weatherPenaltySpeed[0].length;
+                                break;
+                            }
+                        }
+                        timeOpVesselGurobi[vessel.getNum()-1][op.getNumber() - 1][t] = k;
                     }
                 }
             }
         }
+        this.timeVesselUseOnOperationGurobi = timeOpVesselGurobi;
         this.timeVesselUseOnOperation=timeOpVessel;
 
     }
@@ -845,8 +860,9 @@ public class DataGenerator {
                 String testInstance = "technical_test_instances/" + instance + ".txt";
                 DataGenerator dg = new DataGenerator(vessels20, 5, locStart20,
                         testInstance,
-                        "routing", "weather_files/weather_september_scaled.txt");
+                        "routing", "weather_files/weather_januar_scaled.txt");
                 dg.generateData();
+                PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperationGurobi(),locStart20.length);
             }
         }
 
@@ -923,6 +939,10 @@ public class DataGenerator {
 
     public int[][][] getTimeVesselUseOnOperation() {
         return timeVesselUseOnOperation;
+    }
+
+    public int[][][] getTimeVesselUseOnOperationGurobi() {
+        return timeVesselUseOnOperationGurobi;
     }
 
     public Operation[] getOperations() {

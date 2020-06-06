@@ -12,6 +12,7 @@ public class BasicModel {
     private int [][][] Edges;
     private int [][][][] SailingTimes;
     private int [][][] TimeVesselUseOnOperation;
+    private int [][][] TimeVesselUseOnOperationGurobi;
     private int [] EarliestStartingTimeForVessel;
     private int [] SailingCostForVessel;
     private int [][][] OperationGain;
@@ -28,7 +29,7 @@ public class BasicModel {
     private String logName;
 
     public BasicModel(int [][] OperationsForVessel, int [][] TimeWindowsForOperations, int [][][] Edges, int [][][][] SailingTimes,
-                      int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
+                      int [][][] TimeVesselUseOnOperation, int[][][] TimeVesselUseOnOperationGurobi,int [] EarliestStartingTimeForVessel,
                       int [] SailingCostForVessel, int [][][] OperationGain, int [][] Precedence, int [][] Simultaneous,
                       int [] BigTasks, Map<Integer, List<Integer>> ConsolidatedTasks, int[] endNodes, int[] startNodes,
                       double[] endPenaltyforVessel, String testInstance, String logNameAddition){
@@ -37,6 +38,7 @@ public class BasicModel {
         this.Edges=Edges;
         this.SailingTimes=SailingTimes;
         this.TimeVesselUseOnOperation=TimeVesselUseOnOperation;
+        this.TimeVesselUseOnOperationGurobi = TimeVesselUseOnOperationGurobi;
         this.EarliestStartingTimeForVessel=EarliestStartingTimeForVessel;
         this.SailingCostForVessel=SailingCostForVessel;
         this.OperationGain=OperationGain;
@@ -190,13 +192,13 @@ public class BasicModel {
                         for (int t = EarliestStartingTimeForVessel[v]; t < nTimePeriods + TimeVesselUseOnOperation[v][i-nVessels][Math.min(t,nTimePeriods-1)]; ++t) {
                             GRBLinExpr operation = new GRBLinExpr();
                             GRBLinExpr next_sail = new GRBLinExpr();
-                            if (containsElement((t-TimeVesselUseOnOperation[v][i - nVessels][Math.min(nTimePeriods-1,t)]+1),
-                                    TimeWindowsForOperations[i]) & (t-TimeVesselUseOnOperation[v][i - nVessels][Math.min(nTimePeriods-1,t)])>=EarliestStartingTimeForVessel[v]
-                                    && !control.contains(t-TimeVesselUseOnOperation[v][i - nVessels][Math.min(nTimePeriods-1,t)])) {
-                                operation.addTerm(1, y[v][i][t-TimeVesselUseOnOperation[v][i - nVessels][Math.min(nTimePeriods-1,t)]]);
-                                control.add(t-TimeVesselUseOnOperation[v][i - nVessels][Math.min(nTimePeriods-1,t)]);
+                            if (containsElement((t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]+1),
+                                    TimeWindowsForOperations[i]) & (t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)])>=EarliestStartingTimeForVessel[v]
+                                    && !control.contains(t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)])) {
+                                operation.addTerm(1, y[v][i][t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]]);
+                                control.add(t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]);
                                 System.out.println("add y with v= " + (v+1) + " operation= " + (i+1) + " timeperiod= " +
-                                        (t-TimeVesselUseOnOperation[v][i - nVessels][Math.min(nTimePeriods-1,t)]+1));
+                                        (t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]+1));
                             }
                             for (int j = nVessels; j < nOperations; ++j) {
                                 if (Edges[v][i][j] == 1) {
@@ -395,7 +397,7 @@ public class BasicModel {
                                 GRBLinExpr second = new GRBLinExpr();
                                 for (int v = 0; v < nVessels; ++v) {
                                     if (containsElement(i+1, OperationsForVessel[v])) {
-                                        for (int tau = 0; tau < t-TimeVesselUseOnOperation[v][j-nVessels][t]+1; ++tau) {
+                                        for (int tau = 0; tau < t-TimeVesselUseOnOperation[v][j-nVessels][tau]+1; ++tau) {
                                             if (containsElement(tau + 1, TimeWindowsForOperations[i])) {
                                                 first.addTerm(1, y[v][i][tau]);
                                                 //System.out.println("add y1 with v= " + (v + 1) + " perform operation= " + (i + 1) + " in timeperiod= " + (tau + 1));
@@ -692,7 +694,7 @@ public class BasicModel {
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel()
                     ,testInstance,"september");
@@ -708,7 +710,7 @@ public class BasicModel {
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
                     dg.getEndPenaltyForVessel(),testInstance,"september");
@@ -724,7 +726,7 @@ public class BasicModel {
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
                     dg.getEndPenaltyForVessel(),testInstance,"september");
@@ -741,7 +743,7 @@ public class BasicModel {
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile2);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
                     dg.getEndPenaltyForVessel(),testInstance,"januar");
@@ -757,7 +759,7 @@ public class BasicModel {
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile2);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
                     dg.getEndPenaltyForVessel(),testInstance,"januar");
@@ -773,7 +775,7 @@ public class BasicModel {
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile2);
             dg.generateData();
             BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
+                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
                     dg.getEndPenaltyForVessel(),testInstance,"januar");
