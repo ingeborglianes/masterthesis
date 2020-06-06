@@ -97,7 +97,28 @@ public class ALNS {
 
 
         int[] locStart = new int[]{};
-        if (loc == 20) {
+        if (loc == 27) {
+            vessels = new int[]{3, 5,6};
+            locStart = new int[]{79, 80, 81};
+        }
+        else if (loc == 56) {
+            vessels = new int[]{1,2,3,4,5,6,3};
+            locStart = new int[]{120,121,122,123,124,125,126};
+        }
+        else if (loc == 41) {
+            vessels = new int[]{1,3,4,5,6};
+            locStart = new int[]{40,41,42,43,44};
+        }
+        else if (loc == 124) {
+            vessels = new int[]{1,3,4,5,6,3, 5,6,1,2,3,4,5,6,3};
+            locStart = new int[]{40,41,42,43,44,79, 80, 81,120,121,122,123,124,125,126};
+        }
+        else if (loc == 191) {
+            vessels = new int[]{1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4};
+            locStart = new int[]{1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153,161,169,177,185};
+        }
+
+        else if (loc == 20) {
             vessels = new int[]{3, 5,6};
             locStart = new int[]{94, 95, 96};
         } else if (loc == 25) {
@@ -961,7 +982,7 @@ public class ALNS {
                 String instance = "all_MOWI_locations(1_191)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(20, testInstance);
+                ALNS alns = new ALNS(191, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1025,7 +1046,7 @@ public class ALNS {
                     String instance = "all_three_areas_together_(23_140)_"+i+".txt";
                     String testInstance = "large_test_instances/" + instance;
                     long startTime = System.nanoTime();
-                    ALNS alns = new ALNS(40, testInstance);
+                    ALNS alns = new ALNS(124, testInstance);
                     int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                     List<Integer> unroutedList = new ArrayList<>();
                     for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1086,7 +1107,7 @@ public class ALNS {
                 String instance = "møre_romsdal_locations(66_93)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(60, testInstance);
+                ALNS alns = new ALNS(27, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1147,7 +1168,7 @@ public class ALNS {
                 String instance = "trøndelag_locations(94_140)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(40, testInstance);
+                ALNS alns = new ALNS(56, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1208,7 +1229,7 @@ public class ALNS {
                 String instance = "vestland_locations(23_65)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(60, testInstance);
+                ALNS alns = new ALNS(41, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
