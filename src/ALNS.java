@@ -97,7 +97,28 @@ public class ALNS {
 
 
         int[] locStart = new int[]{};
-        if (loc == 20) {
+        if (loc == 27) {
+            vessels = new int[]{3, 5,6};
+            locStart = new int[]{79, 80, 81};
+        }
+        else if (loc == 56) {
+            vessels = new int[]{1,2,3,4,5,6,3};
+            locStart = new int[]{120,121,122,123,124,125,126};
+        }
+        else if (loc == 41) {
+            vessels = new int[]{1,3,4,5,6};
+            locStart = new int[]{40,41,42,43,44};
+        }
+        else if (loc == 124) {
+            vessels = new int[]{1,3,4,5,6,3, 5,6,1,2,3,4,5,6,3};
+            locStart = new int[]{40,41,42,43,44,79, 80, 81,120,121,122,123,124,125,126};
+        }
+        else if (loc == 191) {
+            vessels = new int[]{1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4};
+            locStart = new int[]{1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153,161,169,177,185};
+        }
+
+        else if (loc == 20) {
             vessels = new int[]{3, 5,6};
             locStart = new int[]{94, 95, 96};
         } else if (loc == 25) {
