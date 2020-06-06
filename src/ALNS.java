@@ -982,7 +982,7 @@ public class ALNS {
                 String instance = "all_MOWI_locations(1_191)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(20, testInstance);
+                ALNS alns = new ALNS(191, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1046,7 +1046,7 @@ public class ALNS {
                     String instance = "all_three_areas_together_(23_140)_"+i+".txt";
                     String testInstance = "large_test_instances/" + instance;
                     long startTime = System.nanoTime();
-                    ALNS alns = new ALNS(40, testInstance);
+                    ALNS alns = new ALNS(124, testInstance);
                     int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                     List<Integer> unroutedList = new ArrayList<>();
                     for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1107,7 +1107,7 @@ public class ALNS {
                 String instance = "møre_romsdal_locations(66_93)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(60, testInstance);
+                ALNS alns = new ALNS(27, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1168,7 +1168,7 @@ public class ALNS {
                 String instance = "trøndelag_locations(94_140)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(40, testInstance);
+                ALNS alns = new ALNS(56, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1229,7 +1229,7 @@ public class ALNS {
                 String instance = "vestland_locations(23_65)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(60, testInstance);
+                ALNS alns = new ALNS(41, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
