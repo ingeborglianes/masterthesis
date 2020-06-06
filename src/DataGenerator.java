@@ -840,29 +840,12 @@ public class DataGenerator {
 
         String[] seasons = new String[]{"low", "high"};
         for (String season : seasons) {
-            for (int i = 1; i < 6; i++) {
+            for (int i = 3; i < 4; i++) {
                 String instance = "20_" + i + "_" + season + "_locations(94_113)_";
                 String testInstance = "technical_test_instances/" + instance + ".txt";
                 DataGenerator dg = new DataGenerator(vessels20, 5, locStart20,
                         testInstance,
-                        "routing", "weather_files/weather_normal.txt");
-                dg.generateData();
-            }
-            for (int i = 1; i < 6; i++) {
-                String instance = "40_" + i + "_" + season + "_locations(94_133)_";
-                String testInstance = "technical_test_instances/" + instance + ".txt";
-                DataGenerator dg = new DataGenerator(vessels40, 5, locStart40,
-                        testInstance,
-                        "routing", "weather_files/weather_normal.txt");
-                dg.generateData();
-
-            }
-            for (int i = 1; i < 6; i++) {
-                String instance = "60_" + i + "_" + season + "_locations(81_140)_";
-                String testInstance = "technical_test_instances/" + instance + ".txt";
-                DataGenerator dg = new DataGenerator(vessels60, 5, locStart60,
-                        testInstance,
-                        "routing", "weather_files/weather_normal.txt");
+                        "routing", "weather_files/weather_september_scaled.txt");
                 dg.generateData();
             }
         }
