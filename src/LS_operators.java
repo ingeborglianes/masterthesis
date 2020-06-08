@@ -3142,14 +3142,6 @@ public class LS_operators {
             for (OperationInRoute un : unroutedTasks) {
                 System.out.println(un.getID());
             }
-            SwitchConsolidated sc = new SwitchConsolidated(precedenceOverOperations, precedenceOfOperations,
-                    simultaneousOp, simOpRoutes, precedenceOfRoutes, precedenceOverRoutes,
-                    consolidatedOperations, unroutedTasks, vesselroutes, twIntervals,
-                    precedenceALNS, simALNS, startNodes, SailingTimes,
-                    TimeVesselUseOnOperation, SailingCostForVessel, EarliestStartingTimeForVessel,
-                    operationGain, bigTasksALNS, OperationsForVessel, operationGainGurobi, vesseltypes);
-            System.out.println("run consolidated");
-            sc.runSwitchConsolidated();
 
         }
     }

@@ -262,7 +262,6 @@ public class ConstructionHeuristic {
                                         earliestTemp = startingTimes[0];
                                         latestTemp = startingTimes[1];
                                     }
-
                                     earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                     if (earliestTemp <= latestTemp && pPlacementFeasible && startingTimes != null) {
                                         OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
