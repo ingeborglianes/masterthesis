@@ -853,8 +853,7 @@ public class DataGenerator {
 
         int[] vessels60 =  new int[]{1,2,3,4,5,6,3,4};
         int[] locStart60 =new int[]{94,95,96,97,98,99,100,101};
-
-        String[] seasons = new String[]{"low", "high"};
+        String[] seasons = new String[]{"low"};
         for (String season : seasons) {
             for (int i = 3; i < 4; i++) {
                 String instance = "20_" + i + "_" + season + "_locations(94_113)_";
@@ -863,9 +862,16 @@ public class DataGenerator {
                         testInstance,
                         "routing", "weather_files/weather_januar_scaled.txt");
                 dg.generateData();
-                PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperationGurobi(),locStart20.length);
+                for (int n =0;n<vessels20.length;n++){
+                    System.out.println("VESSEL "+(n+1));
+                    for(Double w_val :dg.getWeatherPenaltyOperations()[n]){
+                        System.out.println(w_val);
+                    }
+                }
+                PrintData.printTimeWindowsIntervals(dg.getTwIntervals());
             }
         }
+
 
     }
 

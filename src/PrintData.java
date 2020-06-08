@@ -165,4 +165,16 @@ public class PrintData {
         }
     }
 
+    public static void printGrid2Double(int dim1,int dim2, Double[][] matrix)
+    {
+        for(int i = 0; i < dim2; i++)
+        {
+            for(int j = 0; j < dim1; j++)
+            {
+                System.out.printf("%5d ", matrix[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
 }

@@ -978,7 +978,11 @@ public class LargeNeighboorhoodSearchInsert {
                         earliestTemp = startingTimes[0];
                         latestTemp = startingTimes[1];
                     }
-                    if(ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp<=latestTemp) {
+                    Boolean weatherTWFeasible=true;
+                    if(twIntervals[o-startNodes.length-1][0]>0){
+                        weatherTWFeasible=ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp);
+                    }
+                    if(weatherTWFeasible && earliestTemp<=latestTemp) {
                         //System.out.println("Feasible for empty route");
                         int benefitIncreaseTemp=operationGain[v][o-startNodes.length-1][earliestTemp-1]-sailingCost;
                         if(precedenceALNS[o-1-startNodes.length][0]!=0){
@@ -1038,7 +1042,11 @@ public class LargeNeighboorhoodSearchInsert {
                                     earliestTemp = startingTimes[0];
                                     latestTemp = startingTimes[1];
                                 }
-                                if (ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp <= latestTemp && pPlacementFeasible) {
+                                Boolean weatherTWFeasible=true;
+                                if(twIntervals[o-startNodes.length-1][0]>0){
+                                    weatherTWFeasible=ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp);
+                                }
+                                if (weatherTWFeasible && earliestTemp <= latestTemp && pPlacementFeasible) {
                                     OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
                                     int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
                                     int changedTime = ConstructionHeuristic.checkChangeEarliestLastOperation(earliestTemp, earliestTimeLastOperationInRoute, 0, v, o,vesselRoutes,
@@ -1114,7 +1122,11 @@ public class LargeNeighboorhoodSearchInsert {
                                     earliestTemp = startingTimes[0];
                                     latestTemp = startingTimes[1];
                                 }
-                                if (ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp <= latestTemp) {
+                                Boolean weatherTWFeasible=true;
+                                if(twIntervals[o-startNodes.length-1][0]>0){
+                                    weatherTWFeasible=ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp);
+                                }
+                                if (weatherTWFeasible && earliestTemp <= latestTemp) {
                                     //System.out.println("p placement feasible and time feasible");
                                     OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
                                     int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
@@ -1200,7 +1212,11 @@ public class LargeNeighboorhoodSearchInsert {
                                         earliestTemp = startingTimes[0];
                                         latestTemp = startingTimes[1];
                                     }
-                                    if (ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp <= latestTemp && pPlacementFeasible) {
+                                    Boolean weatherTWFeasible=true;
+                                    if(twIntervals[o-startNodes.length-1][0]>0){
+                                        weatherTWFeasible=ConstructionHeuristic.feasibleLatest(v,weatherPenaltyOperations,latestTemp);
+                                    }
+                                    if (weatherTWFeasible && earliestTemp <= latestTemp && pPlacementFeasible) {
                                         OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
                                         /*
