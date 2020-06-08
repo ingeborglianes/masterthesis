@@ -50,12 +50,14 @@ public class ConstructionHeuristic {
     private List<Map<Integer,PrecedenceValues>> precedenceOfRoutes=new ArrayList<Map<Integer, PrecedenceValues>>();
     private List<Map<Integer,PrecedenceValues>> precedenceOverRoutes=new ArrayList<Map<Integer, PrecedenceValues>>();
     private Map<Integer, ConsolidatedValues> consolidatedOperations = new HashMap<>();
+    private Double[][] weatherPenaltyOperations;
 
     public ConstructionHeuristic(int [][] OperationsForVessel, int [][] TimeWindowsForOperations, int [][][] Edges, int [][][][] SailingTimes,
                                  int [][][] TimeVesselUseOnOperation, int [] EarliestStartingTimeForVessel,
                                  int [] SailingCostForVessel, int [][][] operationGain, int [][] Precedence, int [][] Simultaneous,
                                  int [] BigTasks, Map<Integer, List<Integer>> ConsolidatedTasks, int[] endNodes, int[] startNodes, double[] endPenaltyforVessel,
-                                 int[][] twIntervals, int[][] precedenceALNS, int[][] simALNS, int[][] bigTasksALNS, int[][] timeWindowsForOperations, int[][][] operationgaingurobi){
+                                 int[][] twIntervals, int[][] precedenceALNS, int[][] simALNS, int[][] bigTasksALNS,
+                                 int[][] timeWindowsForOperations, int[][][] operationgaingurobi,Double[][] weatherPenaltyOperations){
         this.OperationsForVessel=OperationsForVessel;
         this.TimeWindowsForOperations=TimeWindowsForOperations;
         this.Edges=Edges;
@@ -90,6 +92,7 @@ public class ConstructionHeuristic {
         this.actionTime=new int[startNodes.length];
         this.timeWindowsForOperations=timeWindowsForOperations;
         this.operationGainGurobi=operationgaingurobi;
+        this.weatherPenaltyOperations=weatherPenaltyOperations;
         //System.out.println("Number of operations: "+(nOperations-startNodes.length*2));
         //System.out.println("START NODES: "+Arrays.toString(this.startNodes));
         //System.out.println("END NODES: "+Arrays.toString(this.endNodes));
@@ -193,16 +196,12 @@ public class ConstructionHeuristic {
                         }
                         earliestTemp=simultaneousTimesValues[0];
                         latestTemp=simultaneousTimesValues[1];
-
-
-
                         int[] startingTimes = weatherFeasible(TimeVesselUseOnOperation,v,earliestTemp,latestTemp,o,nTimePeriods,startNodes);
                         if(startingTimes != null){
                             earliestTemp = startingTimes[0];
                             latestTemp = startingTimes[1];
                         }
-
-
+                        earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                         if(earliestTemp<=latestTemp && startingTimes != null) {
                             int benefitIncreaseTemp=operationGain[v][o-startNodes.length-1][earliestTemp-1]-sailingCost;
                             if(precedenceALNS[o-1-startNodes.length][0]!=0){
@@ -264,7 +263,7 @@ public class ConstructionHeuristic {
                                         latestTemp = startingTimes[1];
                                     }
 
-
+                                    earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                     if (earliestTemp <= latestTemp && pPlacementFeasible && startingTimes != null) {
                                         OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
@@ -347,7 +346,7 @@ public class ConstructionHeuristic {
                                         latestTemp = startingTimes[1];
                                     }
 
-
+                                    earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                     if (earliestTemp <= latestTemp && startingTimes != null) {
                                         OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
@@ -434,7 +433,7 @@ public class ConstructionHeuristic {
                                             latestTemp = startingTimes[1];
                                         }
 
-
+                                        earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                         if (earliestTemp <= latestTemp && pPlacementFeasible && startingTimes!=null) {
                                             OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
                                             int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
@@ -2344,6 +2343,16 @@ public class ConstructionHeuristic {
         return true;
     }
 
+    public static int findFirstFeasibleWeatherPeriod(int vesseltype, Double[][] weatherPenaltyOperations, int earliestStartingTime){
+        for (int i=earliestStartingTime;i<weatherPenaltyOperations[vesseltype].length;i++){
+            if(weatherPenaltyOperations[vesseltype][i]!=0){
+                return i;
+            }
+            earliestStartingTime=i;
+        }
+        return earliestStartingTime;
+    }
+
 
     public static void main(String[] args) throws FileNotFoundException {
         int[] vesseltypes = new int[]{3, 4, 5, 6};
@@ -2356,7 +2365,7 @@ public class ConstructionHeuristic {
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(), dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi(),dg.getWeatherPenaltyOperations());
         PrintData.printSimALNS(dg.getSimultaneousALNS());
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),4);

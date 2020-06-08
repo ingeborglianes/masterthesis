@@ -970,6 +970,10 @@ public class DataGenerator {
         return bigTasksALNS;
     }
 
+    public Double[][] getWeatherPenaltyOperations() {
+        return weatherPenaltyOperations;
+    }
+
     public int[][] getDistOperationsInInstance() {
         return distOperationsInInstance;
     }

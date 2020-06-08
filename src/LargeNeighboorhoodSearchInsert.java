@@ -40,6 +40,7 @@ public class LargeNeighboorhoodSearchInsert {
     Random generator;
     ArrayList<Integer> removedOperations;
     Map<Integer,List<InsertionValues>> allFeasibleInsertions = new HashMap<>();
+    private Double[][] weatherPenaltyOperations;
 
     public LargeNeighboorhoodSearchInsert(Map<Integer, PrecedenceValues> precedenceOverOperations, Map<Integer, PrecedenceValues> precedenceOfOperations,
                                           Map<Integer, ConnectedValues> simultaneousOp, List<Map<Integer, ConnectedValues>> simOpRoutes,
@@ -49,7 +50,7 @@ public class LargeNeighboorhoodSearchInsert {
                                           int[][] precedenceALNS, int[][] simALNS, int[] startNodes, int[][][][] SailingTimes,
                                           int[][][] TimeVesselUseOnOperation, int[] SailingCostForVessel, int[] EarliestStartingTimeForVessel,
                                           int[][][] operationGain, int[][] bigTasksALNS, int[][] OperationsForVessel, int[][][] operationGainGurobi,
-                                          int maxDistance, int[] vesseltypes, Boolean noise) {
+                                          int maxDistance, int[] vesseltypes, Boolean noise, Double[][] weatherPenaltyOperations) {
         this.precedenceOverOperations = precedenceOverOperations;
         this.precedenceOfOperations = precedenceOfOperations;
         this.simultaneousOp = simultaneousOp;
@@ -83,6 +84,7 @@ public class LargeNeighboorhoodSearchInsert {
         unroutedTasks.sort(Comparator.comparing(OperationInRoute::getID));
         generator=new Random(ParameterFile.randomSeed);
         this.noise=noise;
+        this.weatherPenaltyOperations=weatherPenaltyOperations;
     }
 
     public Boolean checkIfPrecedenceOverOpInUnrouted(int presOfOp){
@@ -148,7 +150,8 @@ public class LargeNeighboorhoodSearchInsert {
                                 precedenceIndex,option.getIndexInRoute(),nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,
+                                vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                         int size=allFeasibleInsertions.get(ourID).size();
                         InsertionValues ourValues=allFeasibleInsertions.get(ourID).get(size-1);
                         int ourBenefitIncrease=ourValues.getBenenefitIncrease();
@@ -249,7 +252,8 @@ public class LargeNeighboorhoodSearchInsert {
                         ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                         SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                         operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,
+                        noise,generator,nMax,weatherPenaltyOperations);
                 int regretValueTemp1;
                 if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
                     regretValueTemp1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
@@ -302,7 +306,8 @@ public class LargeNeighboorhoodSearchInsert {
                         ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                         SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                         operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,
+                        generator,nMax,weatherPenaltyOperations);
                 int regretValueTemp1;
                 if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
                     regretValueTemp1=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
@@ -411,7 +416,8 @@ public class LargeNeighboorhoodSearchInsert {
                                 precedenceIndex,option.getIndexInRoute(),nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,
+                                vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                         int size=allFeasibleInsertions.get(ourID).size();
                         InsertionValues ourValues=allFeasibleInsertions.get(ourID).get(size-1);
                         int ourBenefitIncrease=ourValues.getBenenefitIncrease();
@@ -488,7 +494,7 @@ public class LargeNeighboorhoodSearchInsert {
                         ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                         SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                         operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                 int regretValueTemp;
                 if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
                     regretValueTemp=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
@@ -516,7 +522,7 @@ public class LargeNeighboorhoodSearchInsert {
                         ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                         SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                         operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                 int regretValueTemp;
                 if(allFeasibleInsertions.get(ourID).size()==1 && allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease()!=-100000){
                     regretValueTemp=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
@@ -601,7 +607,7 @@ public class LargeNeighboorhoodSearchInsert {
                                 ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                                 SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                                 operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                                simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                         int size=allFeasibleInsertions.get(ourID).size();
                         InsertionValues ourValues=allFeasibleInsertions.get(ourID).get(size-1);
                         //System.out.println("ROUTE OUR VALUES "+ourValues.getRouteIndex());
@@ -674,7 +680,7 @@ public class LargeNeighboorhoodSearchInsert {
                         ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                         SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                         operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                 int ourValue = allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                 if (ourValue > currentBestValue) {
                     prevBestValue = currentBestValue;
@@ -688,7 +694,7 @@ public class LargeNeighboorhoodSearchInsert {
                         ,nTimePeriods,nVessels,OperationsForVessel,vesselRoutes,
                         SailingTimes,EarliestStartingTimeForVessel,SailingCostForVessel,twIntervals,startNodes,simALNS,
                         operationGain,precedenceALNS,TimeVesselUseOnOperation,allFeasibleInsertions,precedenceOverOperations,precedenceOfOperations,
-                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax);
+                        simultaneousOp,precedenceOverRoutes,precedenceOfRoutes,simOpRoutes,unroutedTasks,vesseltypes,noise,generator,nMax,weatherPenaltyOperations);
                 int ourValue=allFeasibleInsertions.get(ourID).get(0).getBenenefitIncrease();
                 if(ourValue>currentBestValue){
                     prevBestValue=currentBestValue;
@@ -930,7 +936,8 @@ public class LargeNeighboorhoodSearchInsert {
                                           Map<Integer,PrecedenceValues> precedenceOfOperations, Map<Integer,ConnectedValues> simultaneousOp,
                                           List<Map<Integer,PrecedenceValues>> precedenceOverRoutes,
                                           List<Map<Integer,PrecedenceValues>> precedenceOfRoutes, List<Map<Integer,ConnectedValues>> simOpRoutes,
-                                          List<OperationInRoute> unroutedTasks,int[]vesseltypes, Boolean noise, Random generator, int nMax){
+                                          List<OperationInRoute> unroutedTasks,int[]vesseltypes, Boolean noise, Random generator,
+                                          int nMax, Double[][] weatherPenaltyOperations){
         int o=operationToInsert.getID();
         int benefitIncrease=-100000;
         int indexInRoute=-1;
@@ -971,7 +978,7 @@ public class LargeNeighboorhoodSearchInsert {
                         earliestTemp = startingTimes[0];
                         latestTemp = startingTimes[1];
                     }
-
+                    earliestTemp=ConstructionHeuristic.findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                     if(earliestTemp<=latestTemp) {
                         //System.out.println("Feasible for empty route");
                         int benefitIncreaseTemp=operationGain[v][o-startNodes.length-1][earliestTemp-1]-sailingCost;
@@ -1032,6 +1039,7 @@ public class LargeNeighboorhoodSearchInsert {
                                     earliestTemp = startingTimes[0];
                                     latestTemp = startingTimes[1];
                                 }
+                                earliestTemp=ConstructionHeuristic.findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                 if (earliestTemp <= latestTemp && pPlacementFeasible) {
                                     OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
                                     int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
@@ -1108,6 +1116,7 @@ public class LargeNeighboorhoodSearchInsert {
                                     earliestTemp = startingTimes[0];
                                     latestTemp = startingTimes[1];
                                 }
+                                earliestTemp=ConstructionHeuristic.findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                 if (earliestTemp <= latestTemp) {
                                     //System.out.println("p placement feasible and time feasible");
                                     OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
@@ -1194,7 +1203,7 @@ public class LargeNeighboorhoodSearchInsert {
                                         earliestTemp = startingTimes[0];
                                         latestTemp = startingTimes[1];
                                     }
-
+                                    earliestTemp=ConstructionHeuristic.findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
                                     if (earliestTemp <= latestTemp && pPlacementFeasible) {
                                         OperationInRoute lastOperation = vesselRoutes.get(v).get(vesselRoutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
@@ -1707,7 +1716,7 @@ public class LargeNeighboorhoodSearchInsert {
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(),dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi(),dg.getWeatherPenaltyOperations());
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
@@ -1729,7 +1738,8 @@ public class LargeNeighboorhoodSearchInsert {
                 LNSR.getConsolidatedOperations(),LNSR.getUnroutedTasks(),LNSR.getVesselRoutes(),LNSR.getRemovedOperations(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vesseltypes,true);
+                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi()
+                ,dg.getMaxDistance(),vesseltypes,true,dg.getWeatherPenaltyOperations());
         System.out.println("-----------------");
         PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         PrintData.printSimALNS(dg.getSimultaneousALNS());

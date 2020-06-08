@@ -119,7 +119,7 @@ public class ALNS_ILS {
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(),dg.getTwIntervals(),
-                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi());
+                dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi(),dg.getWeatherPenaltyOperations());
         ch.createSortedOperations();
         ch.constructionHeuristic();
         //ch.printInitialSolution(vessels);
@@ -794,7 +794,7 @@ public class ALNS_ILS {
                     simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,unroutedTasks,vesselroutes,
                     LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
                     dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vessels, noise);
+                    dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vessels, noise,dg.getWeatherPenaltyOperations());
             //for run insertion, insert method, alternatives: best, regret
             String insertionMethod = chooseInsertionMethod();
             //System.out.println("-------Insertion method " + insertionMethod + " ----------");
@@ -844,7 +844,8 @@ public class ALNS_ILS {
                 simultaneousOp,simOpRoutes,precedenceOfRoutes,precedenceOverRoutes, consolidatedOperations,unroutedTasks,vesselroutes,
                 LNSR.getRemovedOperations(), dg.getTwIntervals(), dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getStartNodes(),
                 dg.getSailingTimes(),dg.getTimeVesselUseOnOperation(),dg.getSailingCostForVessel(),dg.getEarliestStartingTimeForVessel(),
-                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),vessels, noise);
+                dg.getOperationGain(),dg.getBigTasksALNS(),dg.getOperationsForVessel(),dg.getOperationGainGurobi(),dg.getMaxDistance(),
+                vessels, noise,dg.getWeatherPenaltyOperations());
         //for run insertion, insert method, alternatives: best, regret
         String insertionMethod = chooseInsertionMethod();
         //System.out.println("-------Insertion method " + insertionMethod + " ----------");
@@ -1101,7 +1102,7 @@ public class ALNS_ILS {
                     consolidatedOperations, unroutedTasks, vesselroutes, dg.getTwIntervals(),
                     dg.getPrecedenceALNS(), dg.getSimultaneousALNS(), dg.getStartNodes(), dg.getSailingTimes(),
                     dg.getTimeVesselUseOnOperation(), dg.getSailingCostForVessel(), dg.getEarliestStartingTimeForVessel(),
-                    dg.getOperationGain(), dg.getBigTasksALNS(), dg.getOperationsForVessel(), dg.getOperationGainGurobi(), vessels);
+                    dg.getOperationGain(), dg.getBigTasksALNS(), dg.getOperationsForVessel(), dg.getOperationGainGurobi(), vessels,dg.getWeatherPenaltyOperations());
             System.out.println("run consolidated");
 
             /*
