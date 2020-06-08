@@ -201,8 +201,7 @@ public class ConstructionHeuristic {
                             earliestTemp = startingTimes[0];
                             latestTemp = startingTimes[1];
                         }
-                        earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
-                        if(earliestTemp<=latestTemp && startingTimes != null) {
+                        if(feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp<=latestTemp && startingTimes != null) {
                             int benefitIncreaseTemp=operationGain[v][o-startNodes.length-1][earliestTemp-1]-sailingCost;
                             if(precedenceALNS[o-1-startNodes.length][0]!=0){
                                 benefitIncreaseTemp+=(nTimePeriods-earliestTemp)*ParameterFile.earlyPrecedenceFactor;
@@ -262,8 +261,7 @@ public class ConstructionHeuristic {
                                         earliestTemp = startingTimes[0];
                                         latestTemp = startingTimes[1];
                                     }
-                                    earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
-                                    if (earliestTemp <= latestTemp && pPlacementFeasible && startingTimes != null) {
+                                    if (feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp <= latestTemp && pPlacementFeasible && startingTimes != null) {
                                         OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
                                         int changedTime = checkChangeEarliestLastOperation(earliestTemp, earliestTimeLastOperationInRoute, 0, v, o,vesselroutes,
@@ -344,9 +342,7 @@ public class ConstructionHeuristic {
                                         earliestTemp = startingTimes[0];
                                         latestTemp = startingTimes[1];
                                     }
-
-                                    earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
-                                    if (earliestTemp <= latestTemp && startingTimes != null) {
+                                    if (feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp <= latestTemp && startingTimes != null) {
                                         OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
                                         int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
                                         int changedTime = checkChangeEarliestLastOperation(earliestTemp, earliestTimeLastOperationInRoute, n + 1, v, o,vesselroutes,
@@ -431,9 +427,7 @@ public class ConstructionHeuristic {
                                             earliestTemp = startingTimes[0];
                                             latestTemp = startingTimes[1];
                                         }
-
-                                        earliestTemp=findFirstFeasibleWeatherPeriod(v,weatherPenaltyOperations,earliestTemp);
-                                        if (earliestTemp <= latestTemp && pPlacementFeasible && startingTimes!=null) {
+                                        if (feasibleLatest(v,weatherPenaltyOperations,latestTemp) && earliestTemp <= latestTemp && pPlacementFeasible && startingTimes!=null) {
                                             OperationInRoute lastOperation = vesselroutes.get(v).get(vesselroutes.get(v).size() - 1);
                                             int earliestTimeLastOperationInRoute = lastOperation.getEarliestTime();
                                             int changedTime = checkChangeEarliestLastOperation(earliestTemp, earliestTimeLastOperationInRoute, n + 1, v, o,vesselroutes,
@@ -2342,14 +2336,8 @@ public class ConstructionHeuristic {
         return true;
     }
 
-    public static int findFirstFeasibleWeatherPeriod(int vesseltype, Double[][] weatherPenaltyOperations, int earliestStartingTime){
-        for (int i=earliestStartingTime;i<weatherPenaltyOperations[vesseltype].length;i++){
-            if(weatherPenaltyOperations[vesseltype][i]!=0){
-                return i;
-            }
-            earliestStartingTime=i;
-        }
-        return earliestStartingTime;
+    public static Boolean feasibleLatest(int vesseltype, Double[][] weatherPenaltyOperations, int latestStartingTime){
+        return weatherPenaltyOperations[vesseltype][latestStartingTime] != 0;
     }
 
 
