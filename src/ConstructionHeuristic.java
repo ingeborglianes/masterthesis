@@ -2091,6 +2091,9 @@ public class ConstructionHeuristic {
             thisOp=0;
         }
         else{
+            if(latestTemp + thisOp - 1>59){
+                return -1000;
+            }
             sailingOpToNext = SailingTimes[v][Math.min(twIntervals[o-1-startnodes.length][1],latestTemp + thisOp - 1)][o - 1][vesselroutes.get(v).get(insertIndex+1).getID() - 1];
             nextLatest = vesselroutes.get(v).get(insertIndex+1).getLatestTime();
         }

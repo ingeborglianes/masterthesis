@@ -190,6 +190,7 @@ public class DataGenerator {
 
     public void readInstance() throws FileNotFoundException {
         Scanner s = new Scanner(new File(this.filePath));
+        int ind=0;
         while (s.hasNextLine()){
             List<String> loc = new ArrayList<String>();
             loc.add(s.nextLine());

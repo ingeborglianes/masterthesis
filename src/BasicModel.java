@@ -684,7 +684,7 @@ public class BasicModel {
             locStart = new int[]{1, 2, 3,4};
         }*/
         //dg.printAllData();
-
+/*
         for(int i =1;i<6;i++){
             int[] vessels = new int[]{3, 5,6};
             int []  locStart = new int[]{94, 95, 96};
@@ -718,7 +718,9 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
-        for(int i =1;i<6;i++){
+
+ */
+        for(int i =2;i<4;i++){
             int []vessels = new int[]{1,2, 3,4, 5,6,3,4};
             int []locStart = new int[]{94,95,96,97,98,99,100,101};
             String testInstance = "technical_test_instances//60_"+i+"_low_locations(81_140)_.txt";
@@ -734,7 +736,7 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
-        for(int i =1;i<6;i++){
+        for(int i =1;i<4;i++){
             int[] vessels = new int[]{3, 5,6};
             int []  locStart = new int[]{94, 95, 96};
             //testInstance="test_instances/30" + "_"+i+"_locations_normalOpGenerator.txt";
@@ -751,7 +753,7 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
-        for(int i =1;i<6;i++){
+        for(int i =1;i<4;i++){
             int[] vessels = new int[]{1,3,4,5,6};
             int [] locStart = new int[]{94,95,96,97,98};
             String testInstance = "technical_test_instances//40_"+i+"_low_locations(94_133)_.txt";
@@ -767,7 +769,7 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
-        for(int i =1;i<6;i++){
+        for(int i =1;i<4;i++){
             int []vessels = new int[]{1,2, 3,4, 5,6,3,4};
             int []locStart = new int[]{94,95,96,97,98,99,100,101};
             String testInstance = "technical_test_instances//60_"+i+"_low_locations(81_140)_.txt";

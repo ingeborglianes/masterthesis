@@ -6,7 +6,7 @@ public class ParameterFile {
 
     //Insert the filepath of the weatherfile, if you want no weather impact, use the file path for the
     //normal weather file
-    public static String weatherFile= "weather_files/weather_normal.txt";
+    public static String weatherFile= "weather_files/weather_september_scaled.txt";
     public static String weatherFile2= "weather_files/weather_januar_scaled.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
@@ -39,7 +39,7 @@ public class ParameterFile {
     public static double relatednessWeightPrecedenceOver=0.1;   //Brukes ikke
     public static double relatednessWeightPrecedenceOf=0.1;     //Brukes ikke
     public static double relatednessWeightSimultaneous=0.1;     //Brukes ikke
-    public static int numberOfIterations = 100000;
+    public static int numberOfIterations = 25000;
     public static int numberOfSegmentIterations=100;
     public static double controlParameter=0.5;                  // reaction parameter
     public static int reward1=33;                               // sigma1
