@@ -140,6 +140,8 @@ public class ConstructionHeuristic {
         }
         ArrayList<Integer> removeConsolidatedSmallTasks=new ArrayList<>();
         outer: for (Integer o : sortedOperations){
+            System.out.println("On operatio "+o);
+            printInitialSolution(new int[]{1,3, 4, 5, 6});
             if(removeConsolidatedSmallTasks.contains(o)){
                 continue;
             }
@@ -591,7 +593,10 @@ public class ConstructionHeuristic {
                 allOperations.remove(Integer.valueOf(o));
                 updateIndexesInsertion(routeIndex,indexInRoute, vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
                 //Update all earliest starting times forward
+                System.out.println("print before updates");
+                printInitialSolution(new int[]{1,3, 4, 5, 6});
                 Boolean feasible= updateLatest(latest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal", simultaneousOp, precedenceOfOperations,precedenceOverOperations,twIntervals);
+                System.out.println("feasible? "+feasible);
                 if(feasible) {
                     updateEarliest(earliest, indexInRoute, routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes, "notLocal");
                     updatePrecedenceOver(precedenceOverRoutes.get(routeIndex), indexInRoute, simOpRoutes, precedenceOfOperations, precedenceOverOperations,
@@ -1021,62 +1026,74 @@ public class ConstructionHeuristic {
     public static Boolean updateLatest(int latest, int indexInRoute, int routeIndex, int [][][] TimeVesselUseOnOperation,
                                     int [] startNodes, int [][][][] SailingTimes, List<List<OperationInRoute>> vesselroutes, String local, Map<Integer, ConnectedValues> simultaneousOp,
                                        Map<Integer, PrecedenceValues> precedenceOfOperations,Map<Integer, PrecedenceValues> precedenceOverOperations,int [][] twIntervals){
-        int lastLatest=latest;
-        //System.out.println("WITHIN UPDATE LATEST");
-        //System.out.println("Last latest time: " + lastLatest);
-        for(int k=indexInRoute-1;k>-1;k--) {
-            /*
-            System.out.println("K: "+k);
-            System.out.println("SIZE route: "+String.valueOf(vesselroutes.get(routeIndex).size()-2));
-            System.out.println("Index up dating: "+k);
+        int[] originalLatest=new int[vesselroutes.get(routeIndex).size()];
+        for (int it=0;it<vesselroutes.get(routeIndex).size();it++){
+            originalLatest[it]=(vesselroutes.get(routeIndex).get(it).getLatestTime());
+        }
+        try {
+            int lastLatest = latest;
+            //System.out.println("WITHIN UPDATE LATEST");
+            //System.out.println("Last latest time: " + lastLatest);
+            for (int k = indexInRoute - 1; k > -1; k--) {
+                /*
+                System.out.println("K: "+k);
+                System.out.println("SIZE route: "+String.valueOf(vesselroutes.get(routeIndex).size()-2));
+                System.out.println("Index up dating: "+k);
 
-             */
-            OperationInRoute objectK = vesselroutes.get(routeIndex).get(k);
-            if (local.equals("local")){
-                //System.out.println("Infeasible in Construction.UpdateLatestTime");
-                if (objectK.getLatestTime() - 1 < 0) {
-                    return false;
+                 */
+                OperationInRoute objectK = vesselroutes.get(routeIndex).get(k);
+                if (local.equals("local")) {
+                    //System.out.println("Infeasible in Construction.UpdateLatestTime");
+                    if (objectK.getLatestTime() - 1 < 0) {
+                        return false;
+                    }
                 }
-            }
-            int opTimeK = TimeVesselUseOnOperation[routeIndex][objectK.getID() - startNodes.length - 1]
-                    [objectK.getLatestTime() - 1];
-            int updateSailingTime = 0;
-            //System.out.println("ID operation "+ vesselroutes.get(routeIndex).get(k).getID() + " , " +"Route: "+ routeIndex);
+                int opTimeK = TimeVesselUseOnOperation[routeIndex][objectK.getID() - startNodes.length - 1]
+                        [objectK.getLatestTime() - 1];
+                int updateSailingTime = 0;
+                //System.out.println("ID operation "+ vesselroutes.get(routeIndex).get(k).getID() + " , " +"Route: "+ routeIndex);
 
-            if (k == vesselroutes.get(routeIndex).size() - 2) {
-                updateSailingTime = objectK.getLatestTime() ;
-            }
-            if (k < vesselroutes.get(routeIndex).size() - 2) {
-                updateSailingTime = objectK.getLatestTime() + opTimeK;
-            }
-            //System.out.println("Latest already assigned K: "+ objectK.getLatestTime() + " , " + "Potential update latest K: "+
-            //(lastLatest- SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
-                  //[vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK)) ;
-            //System.out.println(updateSailingTime);
-            if (local.equals("local")){
-                //System.out.println("Infeasible in Construction.UpdateLatestTime");
-                if (updateSailingTime - 1 < 0) {
-                    return false;
+                if (k == vesselroutes.get(routeIndex).size() - 2) {
+                    updateSailingTime = objectK.getLatestTime();
                 }
-            }
-            int newTime=Math.min(objectK.getLatestTime(),lastLatest-
-                    SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
-                            [vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK);
-            //System.out.println("New time: "+ newTime + " , " + "ID K: " +objectK.getID());
-            if(newTime==objectK.getLatestTime()){
-                break;
-            }
-            //Oppdatert latest-tid
-            try {
+                if (k < vesselroutes.get(routeIndex).size() - 2) {
+                    updateSailingTime = objectK.getLatestTime() + opTimeK;
+                }
+                //System.out.println("Latest already assigned K: "+ objectK.getLatestTime() + " , " + "Potential update latest K: "+
+                //(lastLatest- SailingTimes[routeIndex][updateSailingTime-1][objectK.getID()-1]
+                //[vesselroutes.get(routeIndex).get(k+1).getID()-1] -opTimeK)) ;
+                //System.out.println(updateSailingTime);
+                if (local.equals("local")) {
+                    //System.out.println("Infeasible in Construction.UpdateLatestTime");
+                    if (updateSailingTime - 1 < 0) {
+                        return false;
+                    }
+                }
+                int newTime = Math.min(objectK.getLatestTime(), lastLatest -
+                        SailingTimes[routeIndex][updateSailingTime - 1][objectK.getID() - 1]
+                                [vesselroutes.get(routeIndex).get(k + 1).getID() - 1] - opTimeK);
+                //System.out.println("New time: "+ newTime + " , " + "ID K: " +objectK.getID());
+                if (newTime == objectK.getLatestTime()) {
+                    break;
+                }
+                //Oppdatert latest-tid
                 newTime = weatherLatestTimeSimPostInsert(newTime, objectK.getEarliestTime(), TimeVesselUseOnOperation, routeIndex, objectK.getID(), startNodes, SailingTimes, k, vesselroutes, simultaneousOp,
                         precedenceOfOperations, precedenceOverOperations, -1, 0, twIntervals);
+                objectK.setLatestTime(newTime);
+                //System.out.println(objectK.getLatestTime());
+                lastLatest = newTime;
             }
-            catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error) {
+        }
+        catch(StackOverflowError | NullPointerException | IndexOutOfBoundsException error){
+            return false;
+        }
+        for (OperationInRoute routedTask : vesselroutes.get(routeIndex)){
+            if(routedTask.getLatestTime()==-1000){
+                for (int it=0;it<vesselroutes.get(routeIndex).size();it++){
+                    vesselroutes.get(routeIndex).get(it).setLatestTime(originalLatest[it]);
+                }
                 return false;
             }
-            objectK.setLatestTime(newTime);
-            //System.out.println(objectK.getLatestTime());
-            lastLatest=newTime;
         }
         return true;
     }
@@ -2300,10 +2317,10 @@ public class ConstructionHeuristic {
         //PrintData.timeVesselUseOnOperations(TimeVesselUseOnOperation,startNodes.length);
         //PrintData.printSailingTimes(SailingTimes,3,nOperations-2*startNodes.length,startNodes.length);
         //PrintData.printOperationsForVessel(OperationsForVessel);
-        PrintData.printPrecedenceALNS(precedenceALNS);
-        PrintData.printSimALNS(simALNS);
-        PrintData.printTimeWindows(timeWindowsForOperations);
-        PrintData.printTimeWindowsIntervals(twIntervals);
+        //PrintData.printPrecedenceALNS(precedenceALNS);
+        //PrintData.printSimALNS(simALNS);
+        //PrintData.printTimeWindows(timeWindowsForOperations);
+        //PrintData.printTimeWindowsIntervals(twIntervals);
 
         System.out.println("Sailing cost per route: "+Arrays.toString(routeSailingCost));
         System.out.println("Operation gain per route: "+Arrays.toString(routeOperationGain));
@@ -2426,28 +2443,28 @@ public class ConstructionHeuristic {
 
 
     public static void main(String[] args) throws FileNotFoundException {
-        int[] vesseltypes = new int[]{3, 4, 5, 6};
-        int[] startnodes = new int[]{3, 4, 5, 6};
+        int[] vesseltypes = new int[]{1,3, 4, 5, 6};
+        int[] startnodes = new int[]{94,95,96,97,98};
         DataGenerator dg = new DataGenerator(vesseltypes, 5,startnodes,
-                "test_instances/25_3_locations_normalOpGenerator.txt",
-                "results.txt", "weather_files/weather_normal.txt");
+                "technical_test_instances/40_1_low_locations(94_133)_.txt",
+                "results.txt", "weather_files/weather_januar_scaled.txt");
         dg.generateData();
         ConstructionHeuristic a = new ConstructionHeuristic(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
                 dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getEarliestStartingTimeForVessel(),
                 dg.getSailingCostForVessel(), dg.getOperationGain(), dg.getPrecedence(), dg.getSimultaneous(),
                 dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel(), dg.getTwIntervals(),
                 dg.getPrecedenceALNS(),dg.getSimultaneousALNS(),dg.getBigTasksALNS(),dg.getTimeWindowsForOperations(),dg.getOperationGainGurobi(),dg.getWeatherPenaltyOperations());
-        PrintData.printSimALNS(dg.getSimultaneousALNS());
-        PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
+        //PrintData.printSimALNS(dg.getSimultaneousALNS());
+        //PrintData.printPrecedenceALNS(dg.getPrecedenceALNS());
         //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),4);
         //PrintData.printTimeWindowsIntervals(dg.getTwIntervals());
-        PrintData.printOperationsForVessel(dg.getOperationsForVessel());
+        //PrintData.printOperationsForVessel(dg.getOperationsForVessel());
         a.createSortedOperations();
         a.constructionHeuristic();
         a.printInitialSolution(vesseltypes);
         System.out.println("Is solution feasible? "+a.checkSolution(a.getVesselroutes()));
-        PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
-        PrintData.printSailingTimes(dg.getSailingTimes(),2,dg.getOperationGain()[0].length,vesseltypes.length);
+        //PrintData.timeVesselUseOnOperations(dg.getTimeVesselUseOnOperation(),startnodes.length);
+        //PrintData.printSailingTimes(dg.getSailingTimes(),2,dg.getOperationGain()[0].length,vesseltypes.length);
 
     }
 
