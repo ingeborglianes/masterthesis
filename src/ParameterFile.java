@@ -6,7 +6,7 @@ public class ParameterFile {
 
     //Insert the filepath of the weatherfile, if you want no weather impact, use the file path for the
     //normal weather file
-    public static String weatherFile= "weather_files/weather_januar_scaled.txt";
+    public static String weatherFile= "weather_files/weather_normal.txt";
     public static String weatherFile2= "weather_files/weather_januar_scaled.txt";
 
     //Insert the filepath of the testInstance. If you want to create a new test instance, use the OperationGenerator class
@@ -17,7 +17,7 @@ public class ParameterFile {
     // Choose which name you prefer, the file will be generated automatically
     public static String nameResultFile ="results/ALNSroutes/weather_januar/";//+testInstance;
 
-    public  static String nameResultFileGurobi = "results/GurobiRoutes/weather_september/";//+testInstance;
+    public  static String nameResultFileGurobi = "results/GurobiRoutes/";//+testInstance;
     public  static String nameResultFileGurobi2 = "results/GurobiRoutes/weather_january/";//+testInstance;
 
     //Insert the  number of days in the planning horizon
@@ -31,7 +31,8 @@ public class ParameterFile {
     public static double noiseControlParameter=0.125;
     public static double randomnessParameterRemoval=5;
     public static int numberOfRemoval=15;
-    public static double[] removalInterval = new double[]{0.15,0.5};
+    //large instances: 0.05-0.15
+    public static double[] removalInterval = new double[]{0.15,0.50};
     public static int randomSeed=50;
     public static double relatednessWeightDistance=0.2;        // a0
     public static double relatednessWeightDuration=1;        // a1

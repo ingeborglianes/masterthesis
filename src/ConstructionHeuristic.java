@@ -140,8 +140,6 @@ public class ConstructionHeuristic {
         }
         ArrayList<Integer> removeConsolidatedSmallTasks=new ArrayList<>();
         outer: for (Integer o : sortedOperations){
-            System.out.println("On operatio "+o);
-            printInitialSolution(new int[]{1,3, 4, 5, 6});
             if(removeConsolidatedSmallTasks.contains(o)){
                 continue;
             }
@@ -594,7 +592,6 @@ public class ConstructionHeuristic {
                 updateIndexesInsertion(routeIndex,indexInRoute, vesselroutes,simultaneousOp,precedenceOverOperations,precedenceOfOperations);
                 //Update all earliest starting times forward
                 System.out.println("print before updates");
-                printInitialSolution(new int[]{1,3, 4, 5, 6});
                 Boolean feasible= updateLatest(latest,indexInRoute,routeIndex, TimeVesselUseOnOperation, startNodes, SailingTimes, vesselroutes,"notLocal", simultaneousOp, precedenceOfOperations,precedenceOverOperations,twIntervals);
                 System.out.println("feasible? "+feasible);
                 if(feasible) {

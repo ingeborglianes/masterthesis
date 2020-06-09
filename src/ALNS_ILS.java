@@ -94,8 +94,8 @@ public class ALNS_ILS {
             locStart = new int[]{1, 3, 4, 5, 6};
         }
         else if (loc == 40) {
-            vessels = new int[]{1,2,3,4,5,6};
-            locStart = new int[]{94,94,96,97,98,99};
+            vessels = new int[]{1,3,4,5,6};
+            locStart = new int[]{94,94,96,97,98};
         }
         else if (loc == 10) {
             vessels = new int[]{2, 3, 5};
@@ -106,8 +106,8 @@ public class ALNS_ILS {
             locStart = new int[]{1, 2, 3,4};
         }
         else if (loc == 60) {
-            vessels = new int[]{1,2,3,4,5,6,1,2,3,4,5,6};
-            locStart = new int[]{94,95,96,97,98,99,100,101,102,103,104,105};
+            vessels = new int[]{1,2,3,4,5,6,3,4};
+            locStart = new int[]{94,95,96,97,98,99,100,101};
         }
         dg= new DataGenerator(vessels, days, locStart, testInstance, "routing", weatherFile);
         try {
@@ -1203,15 +1203,15 @@ public class ALNS_ILS {
             unroutedList.add(ur.getID());
         }
 
-        //alns.runDestroyRepair();
+        alns.runDestroyRepair();
 
         int afterLarge=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();
         List<Integer> unroutedList2=new ArrayList<>();
         for (OperationInRoute ur:alns.bestUnrouted){
             unroutedList2.add(ur.getID());
         }
-        //alns.runLocalSearchFullEnumeration();
-        alns.runILS();
+        alns.runLocalSearchFullEnumeration();
+        //alns.runILS();
         alns.retainCurrentBestSolution("best");
         long endTime   = System.nanoTime();
         int localObjective=IntStream.of(alns.bestRouteOperationGain).sum()-IntStream.of(alns.bestRouteSailingCost).sum();

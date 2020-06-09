@@ -99,28 +99,44 @@ public class ALNS {
         int[] locStart = new int[]{};
         if (loc == 27) {
             vessels = new int[]{3, 5,6};
-            locStart = new int[]{79, 80, 81};
+            locStart = new int[]{70,80, 90};
         }
         else if (loc == 56) {
             vessels = new int[]{2,3,4,5,6};
-            locStart = new int[]{121,122,123,124,125};
+            locStart = new int[]{100,110,120,130,139};
         }
         else if (loc == 41) {
             vessels = new int[]{1,3,4,5,6};
-            locStart = new int[]{40,41,42,43,44};
+            locStart = new int[]{25,35,45,55,64};
         }
+
+        else if (loc == 1243) {
+            vessels = new int[]{1,3,4,5,6,2,3,5,6,1,2,3,4,5,6};
+            locStart = new int[]{25,35,45,55,64,70,80, 85, 90,100,105,110,120,130,139};
+        }
+
+        else if (loc == 1244) {
+            vessels = new int[]{1,2,3,4,5,6,2,3,5,6,1,2,2,3,4,5,6};
+            locStart = new int[]{25,30,35,45,55,64,70,80, 85,90,100,105,105,110,120,130,139};
+        }
+
         else if (loc == 124) {
             vessels = new int[]{1,3,4,5,6,3,5,6,2,3,4,5,6};
-            locStart = new int[]{40,41,42,43,44,79,80,81,121,122,123,124,125};
+            locStart = new int[]{25,35,45,55,64,70,80,90,100,110,120,130,139};
         }
+        //new 1241
         else if (loc == 1241) {
-            vessels = new int[]{1,3,4,3,6,3,4,5,6,2,3,4,4,5,6};
-            locStart = new int[]{40,41,42,43,44,79,80,81,82,121,122,123,124,125,126};
+            vessels = new int[]{1,3,4,5,6,3,5,6,2,3,4,5,6};
+            locStart = new int[]{40,41,42,43,44,80,81,82,121,122,123,124,125};
         }
+
         else if (loc == 1242) {
             vessels = new int[]{1,3,4,6,3,5,6,2,3,5,6};
             locStart = new int[]{40,41,42,44,79,80,81,121,122,124,125};
         }
+
+
+
         else if (loc == 191) {
             vessels = new int[]{1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4};
             locStart = new int[]{1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153,161,169,177,185};
@@ -985,6 +1001,7 @@ public class ALNS {
         String[] sync = new String[]{"high", "low"};
 
         String season="low";
+
         for (int j = 1; j < 4; j++) {
             for (int i = 1; i < 4; i++) {
                 String instance = "20_"+i+"_low_locations(94_113)_.txt";
@@ -1047,6 +1064,8 @@ public class ALNS {
                         ParameterFile.IterationsWithoutAcceptance);
                 ALNSresult.store();
             }
+
+
             for (int i = 1; i <4; i++) {
                 String instance = "40_"+i+"_low_locations(94_133)_.txt";
                 String testInstance = "technical_test_instances/" + instance;
@@ -1108,6 +1127,7 @@ public class ALNS {
                         ParameterFile.IterationsWithoutAcceptance);
                 ALNSresult.store();
             }
+
             for (int i = 1; i < 4; i++) {
                 String instance = "60_"+i+"_low_locations(81_140)_.txt";
                 String testInstance = "technical_test_instances/" + instance;
@@ -1170,12 +1190,13 @@ public class ALNS {
                 ALNSresult.store();
             }
 
+        //for (int j = 1; j < 4; j++) {
             /*
-            for (int i = 3; i < 4; i++) {
-                String instance = "all_MOWI_locations(1_191)_"+i+".txt";
+            for (int i = 1; i < 4; i++) {
+                String instance = "møre_romsdal_locations(66_93)_"+i+".txt";
                 String testInstance = "large_test_instances/" + instance;
                 long startTime = System.nanoTime();
-                ALNS alns = new ALNS(191, testInstance);
+                ALNS alns = new ALNS(27, testInstance);
                 int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
                 List<Integer> unroutedList = new ArrayList<>();
                 for (OperationInRoute ur : alns.bestUnrouted) {
@@ -1231,13 +1252,201 @@ public class ALNS {
                         alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc,
                         ParameterFile.IterationsWithoutAcceptance);
                 ALNSresult.store();
+            }
+            for (int i = 1; i <4; i++) {
+                String instance = "vestland_locations(23_65)_"+i+".txt";
+                String testInstance = "large_test_instances/" + instance;
+                long startTime = System.nanoTime();
+                ALNS alns = new ALNS(41, testInstance);
+                int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                List<Integer> unroutedList = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    unroutedList.add(ur.getID());
+                }
+                alns.runDestroyRepair();
+                alns.retainCurrentBestSolution("best");
+                List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
+                        alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                        alns.precedenceOverOperations, alns.consolidatedOperations,
+                        alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+                int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                System.out.println("Construction Objective " + constructionObjective);
+                route.add("\nConstruction Objective " + constructionObjective);
+                route.add("\nafterALNS " + afterLarge);
+                System.out.println("afterALNS " + afterLarge);
+                long endTime = System.nanoTime();
+                long totalTime = endTime - startTime;
+                System.out.println("Time " + totalTime / 1000000000);
+                //System.out.println(alns.generator.doubles());
+                route.add("\nTime " + totalTime / 1000000000);
+                System.out.println("Unrouted construction");
+                for (Integer urInt : unroutedList) {
+                    System.out.println(urInt);
+                }
 
+                System.out.println("Unrouted after all search");
+                List<Integer> final_unrouted = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    final_unrouted.add(ur.getID());
+                    System.out.println(ur.getID());
+                }
+                alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
+
+                alns.writeToFile(alns.bestObjValues, "results/ALNS_tracking_values/september_weather/bestObjValues_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.objValues, "results/ALNS_tracking_values/september_weather/objValues_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.insertionWeight1, "results/ALNS_tracking_values/september_weather/insertionWeight1_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.insertionWeight2, "results/ALNS_tracking_values/september_weather/insertionWeight2_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.insertionWeight3, "results/ALNS_tracking_values/september_weather/insertionWeight3_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight1, "results/ALNS_tracking_values/september_weather/removalWeight1_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight2, "results/ALNS_tracking_values/september_weather/removalWeight2_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight3, "results/ALNS_tracking_values/september_weather/removalWeight3_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight4, "results/ALNS_tracking_values/september_weather/removalWeight4_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight5, "results/ALNS_tracking_values/september_weather/removalWeight5_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight6, "results/ALNS_tracking_values/september_weather/removalWeight6_" + instance + "_" + j + ".txt");
+
+                ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
+                        final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
+                        ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
+                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance, ParameterFile.relatednessWeightDuration,
+                        ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc,
+                        ParameterFile.IterationsWithoutAcceptance);
+                ALNSresult.store();
+            }
+            for (int i = 1; i < 4; i++) {
+                String instance = "trøndelag_locations(94_140)_"+i+".txt";
+                String testInstance = "large_test_instances/" + instance;
+                long startTime = System.nanoTime();
+                ALNS alns = new ALNS(56, testInstance);
+                int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                List<Integer> unroutedList = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    unroutedList.add(ur.getID());
+                }
+                alns.runDestroyRepair();
+                alns.retainCurrentBestSolution("best");
+                List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
+                        alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                        alns.precedenceOverOperations, alns.consolidatedOperations,
+                        alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+                int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                System.out.println("Construction Objective " + constructionObjective);
+                route.add("\nConstruction Objective " + constructionObjective);
+                route.add("\nafterALNS " + afterLarge);
+                System.out.println("afterALNS " + afterLarge);
+                long endTime = System.nanoTime();
+                long totalTime = endTime - startTime;
+                System.out.println("Time " + totalTime / 1000000000);
+                //System.out.println(alns.generator.doubles());
+                route.add("\nTime " + totalTime / 1000000000);
+                System.out.println("Unrouted construction");
+                for (Integer urInt : unroutedList) {
+                    System.out.println(urInt);
+                }
+
+                System.out.println("Unrouted after all search");
+                List<Integer> final_unrouted = new ArrayList<>();
+                for (OperationInRoute ur : alns.bestUnrouted) {
+                    final_unrouted.add(ur.getID());
+                    System.out.println(ur.getID());
+                }
+                alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
+
+                alns.writeToFile(alns.bestObjValues, "results/ALNS_tracking_values/september_weather/bestObjValues_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.objValues, "results/ALNS_tracking_values/september_weather/objValues_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.insertionWeight1, "results/ALNS_tracking_values/september_weather/insertionWeight1_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.insertionWeight2, "results/ALNS_tracking_values/september_weather/insertionWeight2_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.insertionWeight3, "results/ALNS_tracking_values/september_weather/insertionWeight3_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight1, "results/ALNS_tracking_values/september_weather/removalWeight1_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight2, "results/ALNS_tracking_values/september_weather/removalWeight2_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight3, "results/ALNS_tracking_values/september_weather/removalWeight3_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight4, "results/ALNS_tracking_values/september_weather/removalWeight4_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight5, "results/ALNS_tracking_values/september_weather/removalWeight5_" + instance + "_" + j + ".txt");
+                alns.writeToFile(alns.removalWeight6, "results/ALNS_tracking_values/september_weather/removalWeight6_" + instance + "_" + j + ".txt");
+
+                ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
+                        final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
+                        ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
+                        ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance, ParameterFile.relatednessWeightDuration,
+                        ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                        ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                        alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc,
+                        ParameterFile.IterationsWithoutAcceptance);
+                ALNSresult.store();
             }
 
-
-            int[] locs=new int[]{1242};
-            for (int loc :locs) {
+            */
+        /*
+            for(int j =1;j<3;j++){
                 for (int i = 1; i < 2; i++) {
+                    String instance = "all_MOWI_locations(1_191)_"+i+".txt";
+                    String testInstance = "large_test_instances/" + instance;
+                    long startTime = System.nanoTime();
+                    ALNS alns = new ALNS(191, testInstance);
+                    int constructionObjective = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                    List<Integer> unroutedList = new ArrayList<>();
+                    for (OperationInRoute ur : alns.bestUnrouted) {
+                        unroutedList.add(ur.getID());
+                    }
+                    alns.runDestroyRepair();
+                    alns.retainCurrentBestSolution("best");
+                    List<String> route = alns.printLNSInsertSolution(alns.vessels, alns.bestRouteSailingCost, alns.bestRouteOperationGain, alns.bestRoutes,
+                            alns.dg.getStartNodes(), alns.dg.getSailingTimes(), alns.dg.getTimeVesselUseOnOperation(), alns.unroutedTasks,
+                            alns.precedenceOverOperations, alns.consolidatedOperations,
+                            alns.precedenceOfOperations, alns.simultaneousOp, alns.simOpRoutes);
+                    int afterLarge = IntStream.of(alns.bestRouteOperationGain).sum() - IntStream.of(alns.bestRouteSailingCost).sum();
+                    System.out.println("Construction Objective " + constructionObjective);
+                    route.add("\nConstruction Objective " + constructionObjective);
+                    route.add("\nafterALNS " + afterLarge);
+                    System.out.println("afterALNS " + afterLarge);
+                    long endTime = System.nanoTime();
+                    long totalTime = endTime - startTime;
+                    System.out.println("Time " + totalTime / 1000000000);
+                    //System.out.println(alns.generator.doubles());
+                    route.add("\nTime " + totalTime / 1000000000);
+                    System.out.println("Unrouted construction");
+                    for (Integer urInt : unroutedList) {
+                        System.out.println(urInt);
+                    }
+
+                    System.out.println("Unrouted after all search");
+                    List<Integer> final_unrouted = new ArrayList<>();
+                    for (OperationInRoute ur : alns.bestUnrouted) {
+                        final_unrouted.add(ur.getID());
+                        System.out.println(ur.getID());
+                    }
+                    alns.writeToFile(route, ParameterFile.nameResultFile + testInstance);
+
+                    alns.writeToFile(alns.bestObjValues, "results/ALNS_tracking_values/september_weather/bestObjValues_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.objValues, "results/ALNS_tracking_values/september_weather/objValues_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.insertionWeight1, "results/ALNS_tracking_values/september_weather/insertionWeight1_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.insertionWeight2, "results/ALNS_tracking_values/september_weather/insertionWeight2_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.insertionWeight3, "results/ALNS_tracking_values/september_weather/insertionWeight3_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.removalWeight1, "results/ALNS_tracking_values/september_weather/removalWeight1_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.removalWeight2, "results/ALNS_tracking_values/september_weather/removalWeight2_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.removalWeight3, "results/ALNS_tracking_values/september_weather/removalWeight3_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.removalWeight4, "results/ALNS_tracking_values/september_weather/removalWeight4_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.removalWeight5, "results/ALNS_tracking_values/september_weather/removalWeight5_" + instance + "_" + j + ".txt");
+                    alns.writeToFile(alns.removalWeight6, "results/ALNS_tracking_values/september_weather/removalWeight6_" + instance + "_" + j + ".txt");
+
+                    ALNSresult ALNSresult = new ALNSresult(totalTime, totalTime / 1000000000, afterLarge, constructionObjective, alns.testInstance, ParameterFile.weatherFile,
+                            final_unrouted, unroutedList, ParameterFile.noiseControlParameter,
+                            ParameterFile.randomnessParameterRemoval, ParameterFile.removalInterval,
+                            ParameterFile.randomSeed, ParameterFile.relatednessWeightDistance, ParameterFile.relatednessWeightDuration,
+                            ParameterFile.numberOfIterations, ParameterFile.numberOfSegmentIterations, ParameterFile.controlParameter,
+                            ParameterFile.reward1, ParameterFile.reward2, ParameterFile.reward3, ParameterFile.lowerThresholdWeights, ParameterFile.earlyPrecedenceFactor, ParameterFile.localOptimumIterations,
+                            alns.dg.getTimeVesselUseOnOperation()[0].length, alns.vessels.length, alns.dg.getSailingTimes()[0].length, alns.loc,
+                            ParameterFile.IterationsWithoutAcceptance);
+                    ALNSresult.store();
+
+                }
+            }
+
+        for (int j=1;j<4;j++){
+            int[] locs=new int[]{124};
+            for (int loc :locs) {
+                for (int i = 1; i < 4; i++) {
                     String instance = "all_three_areas_together_(23_140)_" + i + ".txt";
                     String testInstance = "large_test_instances/" + instance;
                     long startTime = System.nanoTime();
@@ -1299,8 +1508,11 @@ public class ALNS {
                     ALNSresult.store();
                 }
             }
+        }
 
-             */
+
+*/
+
         }
     }
 }

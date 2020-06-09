@@ -52,9 +52,9 @@ public class BasicModel {
         this.endNodes=endNodes;
         this.startNodes=startNodes;
         this.endPenaltyforVessel=endPenaltyforVessel;
-        System.out.println(nOperations-startNodes.length*2);
-        System.out.println(Arrays.toString(this.endNodes));
-        System.out.println(Arrays.toString(this.startNodes));
+        //System.out.println(nOperations-startNodes.length*2);
+        //System.out.println(Arrays.toString(this.endNodes));
+        //System.out.println(Arrays.toString(this.startNodes));
         logName = testInstance.substring(0,testInstance.length()-4)+logNameAddition;
     }
 
@@ -81,7 +81,7 @@ public class BasicModel {
             GRBModel model = new GRBModel(env);
             //model.getEnv().set(GRB.StringParam.LogFile,1);
             model.set(GRB.StringAttr.ModelName, filepath);
-            model.set(GRB.DoubleParam.TimeLimit, 3600);
+            model.set(GRB.DoubleParam.TimeLimit, 18000);
             //model.get(GRB.params.LogFile=filepath+"_LOG");
 
             // Sailing decision variable, x[vijt]=1 if vessel v sails from i to j in time period t
@@ -197,8 +197,8 @@ public class BasicModel {
                                     && !control.contains(t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)])) {
                                 operation.addTerm(1, y[v][i][t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]]);
                                 control.add(t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]);
-                                System.out.println("add y with v= " + (v+1) + " operation= " + (i+1) + " timeperiod= " +
-                                        (t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]+1));
+                                //System.out.println("add y with v= " + (v+1) + " operation= " + (i+1) + " timeperiod= " +
+                                  //      (t-TimeVesselUseOnOperationGurobi[v][i - nVessels][Math.min(nTimePeriods-1,t)]+1));
                             }
                             for (int j = nVessels; j < nOperations; ++j) {
                                 if (Edges[v][i][j] == 1) {
@@ -720,10 +720,10 @@ public class BasicModel {
         }
 
  */
-        for(int i =2;i<4;i++){
-            int []vessels = new int[]{1,2, 3,4, 5,6,3,4};
-            int []locStart = new int[]{94,95,96,97,98,99,100,101};
-            String testInstance = "technical_test_instances//60_"+i+"_low_locations(81_140)_.txt";
+        for(int i =1;i<4;i++){
+            int []vessels = new int[]{1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4};
+            int []locStart = new int[]{1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153,161,169,177,185};
+            String testInstance = "large_test_instances/all_MOWI_locations(1_191)_"+i+".txt";
             String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
             DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
             dg.generateData();
@@ -731,11 +731,12 @@ public class BasicModel {
                     dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
                     dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
                     dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
-                    dg.getEndPenaltyForVessel(),testInstance,"september");
+                    dg.getEndPenaltyForVessel(),testInstance,"large_instances");
             List<String> routing = m.runModel(testInstance);
             m.writeToFile(routing, nameResultFile);
 
         }
+        /*
         for(int i =1;i<4;i++){
             int[] vessels = new int[]{3, 5,6};
             int []  locStart = new int[]{94, 95, 96};
@@ -785,6 +786,7 @@ public class BasicModel {
             m.writeToFile(routing, nameResultFile);
 
         }
+        */
     }
 }
 
