@@ -649,144 +649,35 @@ public class BasicModel {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        /*int[] vessels=new int[]{1,2,4,5,5,6,2,4};
-        int[] locStart = new int[]{1,2,3,4,5,6,7,8};
+        int[] vessels=new int[]{};
+        int[] locStart = new int[]{};
         int loc = ParameterFile.loc;
-        String testInstance=ParameterFile.testInstance;
-        String nameResultFile =ParameterFile.nameResultFileGurobi;
+        String testInstance = ParameterFile.testInstance;
+        String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
         int days = ParameterFile.days;
         String weatherFile = ParameterFile.weatherFile;
         if (loc == 20) {
             vessels = new int[]{3, 4, 5};
             locStart = new int[]{94, 95, 96};
-        } else if (loc == 25) {
-            vessels = new int[]{3, 4, 5, 6};
-            locStart = new int[]{3, 4, 5, 6};
-        }
-        else if (loc == 30) {
-            vessels = new int[]{1, 3, 4, 5, 6};
-            locStart = new int[]{1, 3, 4, 5, 6};
-        }
-        else if (loc == 35) {
-            vessels = new int[]{1, 3, 4, 5, 6};
-            locStart = new int[]{1, 3, 4, 5, 6};
         }
         else if (loc == 40) {
-            vessels = new int[]{1,2,3,4,5,6};
-            locStart = new int[]{94,95,96,97,98,99};
+            vessels = new int[]{1,3,4,5,6};
+            locStart = new int[]{94,94,96,97,98};
         }
         else if (loc == 60) {
-            vessels = new int[]{1,2, 3,4, 5,6,2,3,4};
-            locStart = new int[]{94,95,96,97,98,99,100,101,102};
+            vessels = new int[]{1,2,3,4,5,6,3,4};
+            locStart = new int[]{94,95,96,97,98,99,100,101};
         }
-        else if (loc == 15) {
-            vessels = new int[]{1 , 2 , 4,5};
-            locStart = new int[]{1, 2, 3,4};
-        }*/
         //dg.printAllData();
-/*
-        for(int i =1;i<6;i++){
-            int[] vessels = new int[]{3, 5,6};
-            int []  locStart = new int[]{94, 95, 96};
-            //testInstance="test_instances/30" + "_"+i+"_locations_normalOpGenerator.txt";
-            String testInstance = "technical_test_instances//20_"+i+"_low_locations(94_113)_.txt";
-            String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
-            DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
-            dg.generateData();
-            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
-                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel()
-                    ,testInstance,"september");
-            List<String> routing = m.runModel(testInstance);
-            m.writeToFile(routing, nameResultFile);
-
-        }
-        for(int i =1;i<6;i++){
-            int[] vessels = new int[]{1,3,4,5,6};
-            int [] locStart = new int[]{94,95,96,97,98};
-            String testInstance = "technical_test_instances//40_"+i+"_low_locations(94_133)_.txt";
-            String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
-            DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
-            dg.generateData();
-            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
-                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
-                    dg.getEndPenaltyForVessel(),testInstance,"september");
-            List<String> routing = m.runModel(testInstance);
-            m.writeToFile(routing, nameResultFile);
-
-        }
-
- */
-        for(int i =1;i<4;i++){
-            int []vessels = new int[]{1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4,1,2,3,4,5,6,3,4};
-            int []locStart = new int[]{1,9,17,25,33,41,49,57,65,73,81,89,97,105,113,121,129,137,145,153,161,169,177,185};
-            String testInstance = "large_test_instances/all_MOWI_locations(1_191)_"+i+".txt";
-            String nameResultFile = ParameterFile.nameResultFileGurobi+testInstance;
-            DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
-            dg.generateData();
-            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
-                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
-                    dg.getEndPenaltyForVessel(),testInstance,"large_instances");
-            List<String> routing = m.runModel(testInstance);
-            m.writeToFile(routing, nameResultFile);
-
-        }
-        /*
-        for(int i =1;i<4;i++){
-            int[] vessels = new int[]{3, 5,6};
-            int []  locStart = new int[]{94, 95, 96};
-            //testInstance="test_instances/30" + "_"+i+"_locations_normalOpGenerator.txt";
-            String testInstance = "technical_test_instances//20_"+i+"_low_locations(94_113)_.txt";
-            String nameResultFile = ParameterFile.nameResultFileGurobi2+testInstance;
-            DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile2);
-            dg.generateData();
-            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(), dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
-                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
-                    dg.getEndPenaltyForVessel(),testInstance,"januar");
-            List<String> routing = m.runModel(testInstance);
-            m.writeToFile(routing, nameResultFile);
-
-        }
-        for(int i =1;i<4;i++){
-            int[] vessels = new int[]{1,3,4,5,6};
-            int [] locStart = new int[]{94,95,96,97,98};
-            String testInstance = "technical_test_instances//40_"+i+"_low_locations(94_133)_.txt";
-            String nameResultFile = ParameterFile.nameResultFileGurobi2+testInstance;
-            DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile2);
-            dg.generateData();
-            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
-                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
-                    dg.getEndPenaltyForVessel(),testInstance,"januar");
-            List<String> routing = m.runModel(testInstance);
-            m.writeToFile(routing, nameResultFile);
-
-        }
-        for(int i =1;i<4;i++){
-            int []vessels = new int[]{1,2, 3,4, 5,6,3,4};
-            int []locStart = new int[]{94,95,96,97,98,99,100,101};
-            String testInstance = "technical_test_instances//60_"+i+"_low_locations(81_140)_.txt";
-            String nameResultFile = ParameterFile.nameResultFileGurobi2+testInstance;
-            DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile2);
-            dg.generateData();
-            BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
-                    dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
-                    dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
-                    dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(),
-                    dg.getEndPenaltyForVessel(),testInstance,"januar");
-            List<String> routing = m.runModel(testInstance);
-            m.writeToFile(routing, nameResultFile);
-
-        }
-        */
+        DataGenerator dg = new DataGenerator(vessels, ParameterFile.days, locStart, testInstance, nameResultFile, ParameterFile.weatherFile);
+        dg.generateData();
+        BasicModel m = new BasicModel(dg.getOperationsForVessel(), dg.getTimeWindowsForOperations(), dg.getEdges(),
+                dg.getSailingTimes(), dg.getTimeVesselUseOnOperation(), dg.getTimeVesselUseOnOperationGurobi(),dg.getEarliestStartingTimeForVessel(),
+                dg.getSailingCostForVessel(), dg.getOperationGainGurobi(), dg.getPrecedence(), dg.getSimultaneous(),
+                dg.getBigTasksArr(), dg.getConsolidatedTasks(), dg.getEndNodes(), dg.getStartNodes(), dg.getEndPenaltyForVessel()
+                ,testInstance,ParameterFile.logNameAdd);
+        List<String> routing = m.runModel(testInstance);
+        m.writeToFile(routing, nameResultFile);
     }
 }
 

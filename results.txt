@@ -1,0 +1,142 @@
+Operation: 5 Precedence: 0 Location: 1 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 6 Precedence: 0 Location: 1 optype: 13 bigTaskSet: nullSim: 0 Vessels: [1, 3] Duration: 4 Task description: Inspect net diver
+Operation: 7 Precedence: 0 Location: 1 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 8 Precedence: 0 Location: 2 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 9 Precedence: 0 Location: 3 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 10 Precedence: 0 Location: 4 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 11 Precedence: 0 Location: 5 optype: 5 bigTaskSet: nullSim: 12 Vessels: [2, 3, 4] Duration: 20 Task description: Large inspection of the facility Part 1 of big task operation
+Operation: 12 Precedence: 0 Location: 5 optype: 5 bigTaskSet: null Sim: 11 Vessels: [2, 3, 4] Duration: 20 Task description: Large inspection of the facility Part 2 of big task operation
+Operation: 13 Precedence: 0 Location: 5 optype: 5 bigTaskSet: [7, 8]Sim: 0 Vessels: [6] Duration: 20 Task description: Large inspection of the facility Big task operation
+Operation: 14 Precedence: 0 Location: 5 optype: 14 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 4 Task description: Wash bottom ring and floating collar
+Operation: 15 Precedence: 0 Location: 5 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 16 Precedence: 0 Location: 6 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 17 Precedence: 0 Location: 6 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 18 Precedence: 0 Location: 7 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 19 Precedence: 0 Location: 8 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 20 Precedence: 0 Location: 9 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 21 Precedence: 0 Location: 11 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 22 Precedence: 0 Location: 12 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 23 Precedence: 0 Location: 12 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 24 Precedence: 0 Location: 13 optype: 4 bigTaskSet: nullSim: 25 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 25 Precedence: 0 Location: 13 optype: 4 bigTaskSet: nullSim: 24 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 26 Precedence: 0 Location: 13 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 27 Precedence: 0 Location: 14 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 28 Precedence: 0 Location: 14 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 29 Precedence: 0 Location: 15 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 30 Precedence: 0 Location: 16 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 31 Precedence: 0 Location: 17 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 32 Precedence: 0 Location: 18 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 33 Precedence: 0 Location: 20 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 34 Precedence: 0 Location: 21 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 35 Precedence: 0 Location: 22 optype: 4 bigTaskSet: nullSim: 36 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 36 Precedence: 0 Location: 22 optype: 4 bigTaskSet: nullSim: 35 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 37 Precedence: 0 Location: 23 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 38 Precedence: 0 Location: 23 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 39 Precedence: 0 Location: 24 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 40 Precedence: 0 Location: 25 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+ 
+Vessel 1 is vessel type 3
+Vessel 2 is vessel type 4
+Vessel 3 is vessel type 5
+Vessel 4 is vessel type 6
+ 
+Operation: 5 Precedence: 0 Location: 1 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 6 Precedence: 0 Location: 1 optype: 13 bigTaskSet: nullSim: 0 Vessels: [1, 3] Duration: 4 Task description: Inspect net diver
+Operation: 7 Precedence: 0 Location: 1 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 8 Precedence: 0 Location: 2 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 9 Precedence: 0 Location: 3 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 10 Precedence: 0 Location: 4 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 11 Precedence: 0 Location: 5 optype: 5 bigTaskSet: nullSim: 12 Vessels: [2, 3, 4] Duration: 20 Task description: Large inspection of the facility Part 1 of big task operation
+Operation: 12 Precedence: 0 Location: 5 optype: 5 bigTaskSet: null Sim: 11 Vessels: [2, 3, 4] Duration: 20 Task description: Large inspection of the facility Part 2 of big task operation
+Operation: 13 Precedence: 0 Location: 5 optype: 5 bigTaskSet: [7, 8]Sim: 0 Vessels: [6] Duration: 20 Task description: Large inspection of the facility Big task operation
+Operation: 14 Precedence: 0 Location: 5 optype: 14 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 4 Task description: Wash bottom ring and floating collar
+Operation: 15 Precedence: 0 Location: 5 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 16 Precedence: 0 Location: 6 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 17 Precedence: 0 Location: 6 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 18 Precedence: 0 Location: 7 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 19 Precedence: 0 Location: 8 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 20 Precedence: 0 Location: 9 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 21 Precedence: 0 Location: 11 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 22 Precedence: 0 Location: 12 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 23 Precedence: 0 Location: 12 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 24 Precedence: 0 Location: 13 optype: 4 bigTaskSet: nullSim: 25 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 25 Precedence: 0 Location: 13 optype: 4 bigTaskSet: nullSim: 24 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 26 Precedence: 0 Location: 13 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 27 Precedence: 0 Location: 14 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 28 Precedence: 0 Location: 14 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 29 Precedence: 0 Location: 15 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 30 Precedence: 0 Location: 16 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 31 Precedence: 0 Location: 17 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 32 Precedence: 0 Location: 18 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 33 Precedence: 0 Location: 20 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 34 Precedence: 0 Location: 21 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 35 Precedence: 0 Location: 22 optype: 4 bigTaskSet: nullSim: 36 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 36 Precedence: 0 Location: 22 optype: 4 bigTaskSet: nullSim: 35 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 37 Precedence: 0 Location: 23 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 38 Precedence: 0 Location: 23 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 39 Precedence: 0 Location: 24 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 40 Precedence: 0 Location: 25 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+ 
+Vessel 1 is vessel type 3
+Vessel 2 is vessel type 4
+Vessel 3 is vessel type 5
+Vessel 4 is vessel type 6
+ 
+Operation: 6 Precedence: 0 Location: 128 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 7 Precedence: 0 Location: 129 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 8 Precedence: 0 Location: 129 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 9 Precedence: 0 Location: 131 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 10 Precedence: 0 Location: 132 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 11 Precedence: 0 Location: 133 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 12 Precedence: 0 Location: 94 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 13 Precedence: 0 Location: 95 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 14 Precedence: 0 Location: 95 optype: 13 bigTaskSet: nullSim: 0 Vessels: [1, 3] Duration: 4 Task description: Inspect net diver
+Operation: 15 Precedence: 0 Location: 95 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 16 Precedence: 0 Location: 96 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 17 Precedence: 0 Location: 97 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 18 Precedence: 0 Location: 99 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 19 Precedence: 0 Location: 100 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 20 Precedence: 0 Location: 101 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 21 Precedence: 0 Location: 102 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 22 Precedence: 0 Location: 102 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 23 Precedence: 0 Location: 103 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 24 Precedence: 0 Location: 104 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 25 Precedence: 0 Location: 105 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 26 Precedence: 0 Location: 106 optype: 4 bigTaskSet: nullSim: 27 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 27 Precedence: 0 Location: 106 optype: 4 bigTaskSet: nullSim: 26 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 28 Precedence: 0 Location: 106 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 29 Precedence: 0 Location: 107 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 30 Precedence: 0 Location: 108 optype: 7 bigTaskSet: nullSim: 0 Vessels: [4, 6] Duration: 48 Task description: tightening anchor lines
+Operation: 31 Precedence: 0 Location: 108 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 32 Precedence: 0 Location: 109 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 33 Precedence: 0 Location: 110 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 34 Precedence: 0 Location: 110 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 35 Precedence: 0 Location: 111 optype: 14 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 4 Task description: Wash bottom ring and floating collar
+Operation: 36 Precedence: 0 Location: 111 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 37 Precedence: 0 Location: 112 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 38 Precedence: 0 Location: 115 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 39 Precedence: 0 Location: 116 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 40 Precedence: 0 Location: 117 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 41 Precedence: 0 Location: 118 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 42 Precedence: 0 Location: 119 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 43 Precedence: 0 Location: 120 optype: 4 bigTaskSet: nullSim: 44 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 44 Precedence: 0 Location: 120 optype: 4 bigTaskSet: nullSim: 43 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 45 Precedence: 0 Location: 120 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 46 Precedence: 0 Location: 121 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 47 Precedence: 0 Location: 121 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 48 Precedence: 0 Location: 122 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 49 Precedence: 0 Location: 124 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 50 Precedence: 0 Location: 125 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 51 Precedence: 0 Location: 126 optype: 5 bigTaskSet: nullSim: 52 Vessels: [2, 3, 4] Duration: 20 Task description: Large inspection of the facility Part 1 of big task operation
+Operation: 52 Precedence: 0 Location: 126 optype: 5 bigTaskSet: null Sim: 51 Vessels: [2, 3, 4] Duration: 20 Task description: Large inspection of the facility Part 2 of big task operation
+Operation: 53 Precedence: 0 Location: 126 optype: 5 bigTaskSet: [46, 47]Sim: 0 Vessels: [6] Duration: 20 Task description: Large inspection of the facility Big task operation
+Operation: 54 Precedence: 0 Location: 126 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 55 Precedence: 0 Location: 127 optype: 14 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 4 Task description: Wash bottom ring and floating collar
+Operation: 56 Precedence: 0 Location: 127 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+ 
+Vessel 1 is vessel type 1
+Vessel 2 is vessel type 3
+Vessel 3 is vessel type 4
+Vessel 4 is vessel type 5
+Vessel 5 is vessel type 6
+ 

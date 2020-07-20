@@ -1,0 +1,329 @@
+Results for test instance 30-1
+ 
+Operation: 6 Precedence: 0 Location: 1 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 7 Precedence: 0 Location: 3 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 8 Precedence: 0 Location: 4 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 9 Precedence: 0 Location: 5 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 10 Precedence: 0 Location: 7 optype: 4 bigTaskSet: nullSim: 11 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 11 Precedence: 0 Location: 7 optype: 4 bigTaskSet: nullSim: 10 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 12 Precedence: 0 Location: 7 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 13 Precedence: 0 Location: 8 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 14 Precedence: 0 Location: 9 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 15 Precedence: 0 Location: 10 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 16 Precedence: 0 Location: 11 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 17 Precedence: 0 Location: 13 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 18 Precedence: 0 Location: 14 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 19 Precedence: 0 Location: 15 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 20 Precedence: 0 Location: 16 optype: 5 bigTaskSet: nullSim: 21 Vessels: [2, 3, 4] Duration: 40 Task description: Large inspection of the facility Part 1 of big task operation
+Operation: 21 Precedence: 0 Location: 16 optype: 5 bigTaskSet: null Sim: 20 Vessels: [2, 3, 4] Duration: 40 Task description: Large inspection of the facility Part 2 of big task operation
+Operation: 22 Precedence: 0 Location: 16 optype: 5 bigTaskSet: [15, 16]Sim: 0 Vessels: [6] Duration: 40 Task description: Large inspection of the facility Big task operation
+Operation: 23 Precedence: 0 Location: 16 optype: 14 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 4 Task description: Wash bottom ring and floating collar
+Operation: 24 Precedence: 0 Location: 17 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 25 Precedence: 0 Location: 18 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 26 Precedence: 0 Location: 19 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 27 Precedence: 0 Location: 19 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 28 Precedence: 0 Location: 20 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 29 Precedence: 0 Location: 20 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 30 Precedence: 0 Location: 21 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 31 Precedence: 0 Location: 23 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 32 Precedence: 0 Location: 26 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 33 Precedence: 0 Location: 26 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 34 Precedence: 0 Location: 27 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 35 Precedence: 0 Location: 27 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 36 Precedence: 0 Location: 28 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 37 Precedence: 0 Location: 30 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+ 
+Vessel 1 is vessel type 1
+Vessel 2 is vessel type 3
+Vessel 3 is vessel type 4
+Vessel 4 is vessel type 5
+Vessel 5 is vessel type 6
+ 
+Vessel 1 is sailing between task 1 and task34 in time period 1
+Vessel 1 wait in task 34 in time period 10
+Vessel 1 wait in task 34 in time period 11
+Vessel 1 wait in task 34 in time period 12
+Vessel 1 wait in task 34 in time period 13
+Vessel 1 wait in task 34 in time period 14
+Vessel 1 wait in task 34 in time period 15
+Vessel 1 wait in task 34 in time period 16
+Vessel 1 wait in task 34 in time period 17
+Vessel 1 wait in task 34 in time period 18
+Vessel 1 wait in task 34 in time period 19
+Vessel 1 wait in task 34 in time period 20
+Vessel 1 wait in task 34 in time period 21
+Vessel 1 wait in task 34 in time period 22
+Vessel 1 wait in task 34 in time period 23
+Vessel 1 wait in task 34 in time period 24
+Vessel 1 wait in task 34 in time period 25
+Vessel 1 wait in task 34 in time period 26
+Task 34 is performed by vessel 1 in time period 27
+Vessel 1 is sailing between task 34 and task37 in time period 32
+Vessel 1 wait in task 37 in time period 35
+Vessel 1 wait in task 37 in time period 36
+Vessel 1 wait in task 37 in time period 37
+Vessel 1 wait in task 37 in time period 38
+Vessel 1 wait in task 37 in time period 39
+Vessel 1 wait in task 37 in time period 40
+Task 37 is performed by vessel 1 in time period 41
+Vessel 1 is sailing between task 37 and task42 in time period 46
+Vessel 2 is sailing between task 2 and task7 in time period 1
+Vessel 2 wait in task 7 in time period 1
+Task 7 is performed by vessel 2 in time period 2
+Vessel 2 is sailing between task 7 and task15 in time period 6
+Task 15 is performed by vessel 2 in time period 9
+Vessel 2 is sailing between task 15 and task16 in time period 13
+Task 16 is performed by vessel 2 in time period 14
+Vessel 2 is sailing between task 16 and task35 in time period 18
+Task 35 is performed by vessel 2 in time period 19
+Vessel 2 is sailing between task 35 and task32 in time period 23
+Task 32 is performed by vessel 2 in time period 27
+Vessel 2 is sailing between task 32 and task18 in time period 32
+Vessel 2 wait in task 18 in time period 37
+Task 18 is performed by vessel 2 in time period 38
+Vessel 2 is sailing between task 18 and task13 in time period 42
+Task 13 is performed by vessel 2 in time period 43
+Vessel 2 is sailing between task 13 and task19 in time period 47
+Task 19 is performed by vessel 2 in time period 56
+Vessel 2 is sailing between task 19 and task41 in time period 63
+Vessel 3 is sailing between task 3 and task25 in time period 1
+Task 25 is performed by vessel 3 in time period 2
+Vessel 3 is sailing between task 25 and task14 in time period 8
+Task 14 is performed by vessel 3 in time period 13
+Vessel 3 is sailing between task 14 and task31 in time period 17
+Task 31 is performed by vessel 3 in time period 19
+Vessel 3 is sailing between task 31 and task28 in time period 23
+Vessel 3 wait in task 28 in time period 29
+Vessel 3 wait in task 28 in time period 30
+Task 28 is performed by vessel 3 in time period 31
+Vessel 3 is sailing between task 28 and task29 in time period 36
+Vessel 3 wait in task 29 in time period 36
+Vessel 3 wait in task 29 in time period 37
+Vessel 3 wait in task 29 in time period 38
+Vessel 3 wait in task 29 in time period 39
+Task 29 is performed by vessel 3 in time period 40
+Vessel 3 is sailing between task 29 and task17 in time period 44
+Vessel 3 wait in task 17 in time period 45
+Task 17 is performed by vessel 3 in time period 46
+Vessel 3 is sailing between task 17 and task33 in time period 52
+Task 33 is performed by vessel 3 in time period 53
+Vessel 3 is sailing between task 33 and task40 in time period 57
+Vessel 4 is sailing between task 4 and task10 in time period 1
+Vessel 4 wait in task 10 in time period 3
+Vessel 4 wait in task 10 in time period 4
+Vessel 4 wait in task 10 in time period 5
+Vessel 4 wait in task 10 in time period 6
+Vessel 4 wait in task 10 in time period 7
+Vessel 4 wait in task 10 in time period 8
+Vessel 4 wait in task 10 in time period 9
+Vessel 4 wait in task 10 in time period 10
+Vessel 4 wait in task 10 in time period 11
+Task 10 is performed by vessel 4 in time period 12
+Vessel 4 is sailing between task 10 and task39 in time period 18
+Vessel 5 is sailing between task 5 and task36 in time period 1
+Task 36 is performed by vessel 5 in time period 2
+Vessel 5 is sailing between task 36 and task6 in time period 6
+Task 6 is performed by vessel 5 in time period 7
+Vessel 5 is sailing between task 6 and task11 in time period 11
+Task 11 is performed by vessel 5 in time period 12
+Vessel 5 is sailing between task 11 and task12 in time period 18
+Task 12 is performed by vessel 5 in time period 18
+Vessel 5 is sailing between task 12 and task24 in time period 22
+Task 24 is performed by vessel 5 in time period 24
+Vessel 5 is sailing between task 24 and task27 in time period 28
+Task 27 is performed by vessel 5 in time period 29
+Task 26 is performed by vessel 5 in time period 33
+Vessel 5 is sailing between task 27 and task26 in time period 33
+Vessel 5 is sailing between task 26 and task8 in time period 38
+Task 8 is performed by vessel 5 in time period 39
+Vessel 5 is sailing between task 8 and task9 in time period 43
+Task 9 is performed by vessel 5 in time period 45
+Vessel 5 is sailing between task 9 and task30 in time period 50
+Task 30 is performed by vessel 5 in time period 51
+Vessel 5 is sailing between task 30 and task38 in time period 55
+Task 22 is not performed
+Task 23 is not performed
+Operation: 6 Precedence: 0 Location: 1 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 7 Precedence: 0 Location: 3 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 8 Precedence: 0 Location: 4 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 9 Precedence: 0 Location: 5 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 10 Precedence: 0 Location: 7 optype: 4 bigTaskSet: nullSim: 11 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 11 Precedence: 0 Location: 7 optype: 4 bigTaskSet: nullSim: 10 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 12 Precedence: 0 Location: 7 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 13 Precedence: 0 Location: 8 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 14 Precedence: 0 Location: 9 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 15 Precedence: 0 Location: 10 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 16 Precedence: 0 Location: 11 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 17 Precedence: 0 Location: 13 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 18 Precedence: 0 Location: 14 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 19 Precedence: 0 Location: 15 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 20 Precedence: 0 Location: 16 optype: 5 bigTaskSet: nullSim: 21 Vessels: [2, 3, 4] Duration: 40 Task description: Large inspection of the facility Part 1 of big task operation
+Operation: 21 Precedence: 0 Location: 16 optype: 5 bigTaskSet: null Sim: 20 Vessels: [2, 3, 4] Duration: 40 Task description: Large inspection of the facility Part 2 of big task operation
+Operation: 22 Precedence: 0 Location: 16 optype: 5 bigTaskSet: [15, 16]Sim: 0 Vessels: [6] Duration: 40 Task description: Large inspection of the facility Big task operation
+Operation: 23 Precedence: 0 Location: 16 optype: 14 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 4 Task description: Wash bottom ring and floating collar
+Operation: 24 Precedence: 0 Location: 17 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 25 Precedence: 0 Location: 18 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 26 Precedence: 0 Location: 19 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 27 Precedence: 0 Location: 19 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 28 Precedence: 0 Location: 20 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 29 Precedence: 0 Location: 20 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 30 Precedence: 0 Location: 21 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 31 Precedence: 0 Location: 23 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 32 Precedence: 0 Location: 26 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 33 Precedence: 0 Location: 26 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 34 Precedence: 0 Location: 27 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 35 Precedence: 0 Location: 27 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 36 Precedence: 0 Location: 28 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 37 Precedence: 0 Location: 30 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+ 
+Vessel 1 is vessel type 1
+Vessel 2 is vessel type 3
+Vessel 3 is vessel type 4
+Vessel 4 is vessel type 5
+Vessel 5 is vessel type 6
+ 
+Vessel 1 is sailing between task 1 and task34 in time period 1
+Vessel 1 wait in task 34 in time period 10
+Vessel 1 wait in task 34 in time period 11
+Vessel 1 wait in task 34 in time period 12
+Vessel 1 wait in task 34 in time period 13
+Vessel 1 wait in task 34 in time period 14
+Vessel 1 wait in task 34 in time period 15
+Vessel 1 wait in task 34 in time period 16
+Vessel 1 wait in task 34 in time period 17
+Vessel 1 wait in task 34 in time period 18
+Vessel 1 wait in task 34 in time period 19
+Vessel 1 wait in task 34 in time period 20
+Vessel 1 wait in task 34 in time period 21
+Vessel 1 wait in task 34 in time period 22
+Vessel 1 wait in task 34 in time period 23
+Vessel 1 wait in task 34 in time period 24
+Vessel 1 wait in task 34 in time period 25
+Vessel 1 wait in task 34 in time period 26
+Task 34 is performed by vessel 1 in time period 27
+Vessel 1 is sailing between task 34 and task37 in time period 32
+Vessel 1 wait in task 37 in time period 35
+Vessel 1 wait in task 37 in time period 36
+Vessel 1 wait in task 37 in time period 37
+Vessel 1 wait in task 37 in time period 38
+Vessel 1 wait in task 37 in time period 39
+Vessel 1 wait in task 37 in time period 40
+Task 37 is performed by vessel 1 in time period 41
+Vessel 1 is sailing between task 37 and task42 in time period 46
+Vessel 2 is sailing between task 2 and task7 in time period 1
+Vessel 2 wait in task 7 in time period 1
+Task 7 is performed by vessel 2 in time period 2
+Vessel 2 is sailing between task 7 and task15 in time period 6
+Task 15 is performed by vessel 2 in time period 9
+Vessel 2 is sailing between task 15 and task16 in time period 13
+Task 16 is performed by vessel 2 in time period 14
+Vessel 2 is sailing between task 16 and task35 in time period 18
+Task 35 is performed by vessel 2 in time period 19
+Vessel 2 is sailing between task 35 and task32 in time period 23
+Task 32 is performed by vessel 2 in time period 27
+Vessel 2 is sailing between task 32 and task18 in time period 32
+Vessel 2 wait in task 18 in time period 37
+Task 18 is performed by vessel 2 in time period 38
+Vessel 2 is sailing between task 18 and task13 in time period 42
+Task 13 is performed by vessel 2 in time period 43
+Vessel 2 is sailing between task 13 and task19 in time period 47
+Task 19 is performed by vessel 2 in time period 56
+Vessel 2 is sailing between task 19 and task41 in time period 63
+Vessel 3 is sailing between task 3 and task25 in time period 1
+Task 25 is performed by vessel 3 in time period 2
+Vessel 3 is sailing between task 25 and task14 in time period 8
+Task 14 is performed by vessel 3 in time period 13
+Vessel 3 is sailing between task 14 and task31 in time period 17
+Task 31 is performed by vessel 3 in time period 19
+Vessel 3 is sailing between task 31 and task28 in time period 23
+Vessel 3 wait in task 28 in time period 29
+Vessel 3 wait in task 28 in time period 30
+Task 28 is performed by vessel 3 in time period 31
+Vessel 3 is sailing between task 28 and task29 in time period 36
+Vessel 3 wait in task 29 in time period 36
+Vessel 3 wait in task 29 in time period 37
+Vessel 3 wait in task 29 in time period 38
+Vessel 3 wait in task 29 in time period 39
+Task 29 is performed by vessel 3 in time period 40
+Vessel 3 is sailing between task 29 and task17 in time period 44
+Vessel 3 wait in task 17 in time period 45
+Task 17 is performed by vessel 3 in time period 46
+Vessel 3 is sailing between task 17 and task33 in time period 52
+Task 33 is performed by vessel 3 in time period 53
+Vessel 3 is sailing between task 33 and task40 in time period 57
+Vessel 4 is sailing between task 4 and task10 in time period 1
+Vessel 4 wait in task 10 in time period 3
+Vessel 4 wait in task 10 in time period 4
+Vessel 4 wait in task 10 in time period 5
+Vessel 4 wait in task 10 in time period 6
+Vessel 4 wait in task 10 in time period 7
+Vessel 4 wait in task 10 in time period 8
+Vessel 4 wait in task 10 in time period 9
+Vessel 4 wait in task 10 in time period 10
+Vessel 4 wait in task 10 in time period 11
+Task 10 is performed by vessel 4 in time period 12
+Vessel 4 is sailing between task 10 and task39 in time period 18
+Vessel 5 is sailing between task 5 and task36 in time period 1
+Task 36 is performed by vessel 5 in time period 2
+Vessel 5 is sailing between task 36 and task6 in time period 6
+Task 6 is performed by vessel 5 in time period 7
+Vessel 5 is sailing between task 6 and task11 in time period 11
+Task 11 is performed by vessel 5 in time period 12
+Vessel 5 is sailing between task 11 and task12 in time period 18
+Task 12 is performed by vessel 5 in time period 18
+Vessel 5 is sailing between task 12 and task24 in time period 22
+Task 24 is performed by vessel 5 in time period 24
+Vessel 5 is sailing between task 24 and task27 in time period 28
+Task 27 is performed by vessel 5 in time period 29
+Task 26 is performed by vessel 5 in time period 33
+Vessel 5 is sailing between task 27 and task26 in time period 33
+Vessel 5 is sailing between task 26 and task8 in time period 38
+Task 8 is performed by vessel 5 in time period 39
+Vessel 5 is sailing between task 8 and task9 in time period 43
+Task 9 is performed by vessel 5 in time period 45
+Vessel 5 is sailing between task 9 and task30 in time period 50
+Task 30 is performed by vessel 5 in time period 51
+Vessel 5 is sailing between task 30 and task38 in time period 55
+Task 22 is not performed
+Task 23 is not performed
+Operation: 6 Precedence: 0 Location: 4 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 7 Precedence: 0 Location: 5 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 8 Precedence: 0 Location: 7 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 9 Precedence: 0 Location: 8 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 10 Precedence: 0 Location: 9 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 11 Precedence: 0 Location: 10 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 12 Precedence: 0 Location: 12 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 13 Precedence: 0 Location: 13 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 14 Precedence: 0 Location: 14 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 15 Precedence: 0 Location: 14 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 16 Precedence: 0 Location: 15 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 17 Precedence: 0 Location: 16 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 18 Precedence: 0 Location: 17 optype: 4 bigTaskSet: nullSim: 19 Vessels: [5] Duration: 5 Task description: Delousing Part 1
+Operation: 19 Precedence: 0 Location: 17 optype: 4 bigTaskSet: nullSim: 18 Vessels: [2, 3, 4, 6] Duration: 5 Task description: Delousing Part 2
+Operation: 20 Precedence: 0 Location: 17 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 21 Precedence: 0 Location: 18 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 22 Precedence: 0 Location: 19 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 23 Precedence: 0 Location: 19 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 24 Precedence: 0 Location: 20 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 25 Precedence: 0 Location: 21 optype: 6 bigTaskSet: nullSim: 0 Vessels: [2] Duration: 5 Task description: Wash the net
+Operation: 26 Precedence: 0 Location: 21 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 27 Precedence: 0 Location: 22 optype: 11 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 4 Task description: Support wellboat
+Operation: 28 Precedence: 0 Location: 23 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 29 Precedence: 0 Location: 23 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 30 Precedence: 0 Location: 24 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 31 Precedence: 0 Location: 25 optype: 12 bigTaskSet: nullSim: 0 Vessels: [1, 2, 3, 4, 6] Duration: 5 Task description: Inspect net ROV
+Operation: 32 Precedence: 0 Location: 25 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 33 Precedence: 0 Location: 26 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 34 Precedence: 0 Location: 27 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 35 Precedence: 0 Location: 28 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 36 Precedence: 0 Location: 30 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 37 Precedence: 0 Location: 31 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 38 Precedence: 0 Location: 32 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+Operation: 39 Precedence: 0 Location: 35 optype: 15 bigTaskSet: nullSim: 0 Vessels: [2, 3, 4, 6] Duration: 3 Task description: Support working boat
+ 
+Vessel 1 is vessel type 1
+Vessel 2 is vessel type 3
+Vessel 3 is vessel type 4
+Vessel 4 is vessel type 5
+Vessel 5 is vessel type 6
+ 
